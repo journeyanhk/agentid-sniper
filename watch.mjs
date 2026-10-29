@@ -292,7 +292,7 @@ async function checkMinted(tok, m) {
   const sampleTx = txs.find((t) => t.to && t.to.toLowerCase() === target);
   for (const W of WALLETS) {
     let ff = await findFree(W.addr, target, code);
-    if (!ff && sampleTx && !sampleTx.input.toLowerCase().includes(sampleTx.from.slice(2).toLowerCase())) {
+    if (!ff && sampleTx && sampleTx.input.length >= 10 && !sampleTx.input.toLowerCase().includes(sampleTx.from.slice(2).toLowerCase())) {
       for (const v of NEAR_FREE) { try { await rpc('eth_call', [{ from: W.addr, to: target, data: sampleTx.input, value: '0x' + v.toString(16) }, 'latest']); const nm = '重播' + sampleTx.input.slice(0, 10); if (!CANDS.some((c) => c[0] === nm)) CANDS.push([nm, sampleTx.input]); ff = { n: nm, v }; break; } catch {} }
     }
     if (ff) minted += `[${W.name}] ` + queueMint(target, ff.n, W, ff.v) + '\n';
@@ -433,7 +433,7 @@ async function proxyScan(from, to) {
 // 「幾乎免費」：有些項目要付一點防女巫手續費（像奶寶龍 0.00022 BNB），最多接受 0.001 BNB
 const NEAR_FREE = [0n, 10n ** 14n, 22n * 10n ** 13n, 3n * 10n ** 14n, 5n * 10n ** 14n, 10n ** 15n];
 async function findFree(from, c, code) {
-  for (const [n, d] of CANDS) { if (!code.includes(d.slice(2, 10))) continue; for (const v of NEAR_FREE) { try { await rpc('eth_call', [{ from, to: c, data: d, value: '0x' + v.toString(16) }, 'latest']); return { n, v }; } catch {} } }
+  for (const [n, d] of CANDS) { if (d.length < 10 || !code.includes(d.slice(2, 10))) continue; /* 空呼叫（直接轉 0 BNB）不算鑄造 */ for (const v of NEAR_FREE) { try { await rpc('eth_call', [{ from, to: c, data: d, value: '0x' + v.toString(16) }, 'latest']); return { n, v }; } catch {} } }
   return null;
 }
 // 鑄造排隊：每個錢包一條隊伍在背景跑（交易要一筆一筆送），不卡住掃描
