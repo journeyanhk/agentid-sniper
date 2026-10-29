@@ -1,5 +1,5 @@
 // Agent ID Sniper — 幣安 Agentic Wallet（.ai Agent ID）專屬鑄造監控 + 自動鑄造 + 持倉自動止盈。
-// 全部在本地跑：掃 BSC 新合約 → 模擬 → 用 baw CLI 自動打 → 開池後照規則自動賣 → Telegram 通知。
+// 全部在本地跑：掃 BSC 新合約 → 模擬 → 用 baw CLI 自動打 → 開池後照規則自動賣 → Telegram 通知。不使用任何 AI。
 // 停止：在同資料夾放 WATCH_STOP 檔。設定見 config.example.json。
 import { execFile } from 'node:child_process';
 import { appendFileSync, writeFileSync, readFileSync, existsSync, statSync } from 'node:fs';
@@ -35,9 +35,11 @@ const RULE = {
 
 let TG = null;
 { const a = CONFIG.telegram?.botToken || process.env.TG_BOT_TOKEN, b = CONFIG.telegram?.chatId || process.env.TG_CHAT_ID; if (a && b) TG = { a, b }; }
-// 只有要買賣、要使用者決定的才響鈴；其他（自動鑄、收到幣、登入成功…）靜音送達
+// 使用者定：只有要買賣、要使用者決定的才響鈴；其他（自動鑄、收到幣、登入成功…）靜音送達
 const important = (t) => /^(⏰|⚠️|🔑|💰|🔥|🚀|🦋|🏗|🛒)/u.test(t) || t.includes('不是免費');
-async function tg(text) { log('TG: ' + text.replace(/\n/g, ' | ')); if (!TG) return; try { await fetch(`https://api.telegram.org/bot${TG.a}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: TG.b, text, disable_web_page_preview: true, disable_notification: !important(text) }), signal: AbortSignal.timeout(10000) }); } catch {} }
+
+const sendable = (t) => /^(💰|🛒|🔑|⏰|🦋)/u.test(t) || (/^🚀/u.test(t) && (t.includes('開池') || t.includes('平台幣'))) || (/^🔥/u.test(t) && /\d+ 倍/.test(t) && !t.includes('搶打')) || (/^⚠️/u.test(t) && /(想賣但失敗|回調|回落|登入|開發者模式)/.test(t));
+async function tg(text) { log('TG: ' + text.replace(/\n/g, ' | ')); if (!TG || (!CONFIG.notifyAll && !sendable(text))) return; try { await fetch(`https://api.telegram.org/bot${TG.a}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: TG.b, text, disable_web_page_preview: true, disable_notification: !important(text) }), signal: AbortSignal.timeout(10000) }); } catch {} }
 
 const RPCS = ['https://bsc.publicnode.com', 'https://bsc-rpc.publicnode.com', 'https://bsc-dataseed.bnbchain.org'];
 let ri = 0;
@@ -207,7 +209,8 @@ const HOT = new Map(), hotChecked = new Map();
 function countHot(txs) {
   const now = Date.now(); if (!SMART.size && S.smart?.length) SMART = new Set(S.smart);
   for (const t of txs) {
-    if (!t.to || (t.input || '').length > 2 + 8 + 64 * 4 || BigInt(t.value || '0x0') > 10n ** 15n) continue; // 只看短呼叫、≤0.001 BNB 的（鑄造的樣子）
+    if (!t.to || (t.input || '').length > 2 + 8 + 64 * 4 || BigInt(t.value || '0x0') > 10n ** 15n) continue;
+    if (/^0x(a9059cbb|095ea7b3|23b872dd|d0e30db0|2e1a7d4d|39509351|a457c2d7)/.test(t.input || '')) continue; // 轉帳、授權、存取這類不是鑄造 // 只看短呼叫、≤0.001 BNB 的（鑄造的樣子）
     const k = t.to.toLowerCase(); let h = HOT.get(k); if (!h) { h = { from: new Set(), at: now, sel: new Map() }; HOT.set(k, h); }
     if (now - h.at > 180e3) { h.from.clear(); h.at = now; h.sel.clear(); h.smart = new Set(); }
     if (SMART.has(t.from.toLowerCase())) (h.smart = h.smart || new Set()).add(t.from.toLowerCase());
@@ -221,7 +224,18 @@ async function hotScan() {
     hotChecked.set(c, Date.now()); if (hotChecked.size > 5000) hotChecked.delete(hotChecked.keys().next().value);
     let code = ((await rpc('eth_getCode', [c, 'latest']).catch(() => '')) || '').toLowerCase();
     if (code.length > 2 && code.length < 4000) { try { let impl = await rpc('eth_getStorageAt', [c, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc', 'latest']); if (impl && BigInt(impl) !== 0n) code += ((await rpc('eth_getCode', ['0x' + impl.slice(-40), 'latest'])) || '').toLowerCase(); } catch {} }
-    if (!code.includes(REGISTRY)) continue;
+    let viaAgents = 0;
+    if (!code.includes(REGISTRY)) {
+      // 合約碼裡沒有 Agent ID 登記合約（可能用後端簽名驗證，像灯笼镇、Silicon Dreamers）→ 改看「打它的人是不是大多持有 Agent ID」
+      if (code.length < 4) continue;
+      const head = parseInt(await rpc('eth_blockNumber', []), 16);
+      const old = (await rpc('eth_getCode', [c, '0x' + (head - 400000).toString(16)]).catch(() => '0x')) || '0x';
+      if (old.length > 2) continue; // 兩天前就存在的老合約不算新項目
+      const sample = [...h.from].slice(0, 16); let n = 0;
+      for (const a of sample) { const r = await call('0x' + REGISTRY, '0x70a08231' + wa(a)); if (r && BigInt(r.slice(0, 66)) > 0n) n++; }
+      if (n < 8 || n / sample.length < 0.6) continue;
+      viaAgents = n / sample.length;
+    }
     S.seenMints[c] = ts();
     const name = tokStr(await call(c, '0x06fdde03'));
     // 熱門呼叫的函式也加入候選（不在 CANDS 裡的鑄造函式名）
@@ -233,7 +247,7 @@ async function hotScan() {
       if (ff) minted += `[${W.name}] ` + (await autoMint(c, ff.n, W, ff.v)) + '\n';
     }
     if (!minted) { S.paid = S.paid || {}; S.paid[c] = { at: Date.now(), name, done: {} }; }
-    await tg(`🔥 發現正在被搶打的 Agent ID 項目${name ? '：' + name : ''}（3 分鐘內 ${h.from.size} 個錢包${h.smart?.size ? '，其中聰明錢包 ' + h.smart.size + ' 個' : ''}）\n${c}\n${minted || '⚪ 不是免費的 → 已加入追蹤：進度超過 80% 且每個錢包 ≤30U 會自動打'}\nhttps://bscscan.com/address/${c}`);
+    await tg(`🔥 發現正在被搶打的 Agent ID 項目${name ? '：' + name : ''}${viaAgents ? `（合約沒寫 Agent ID 檢查，但打它的錢包 ${Math.round(viaAgents * 100)}% 持有 .ai 身份，可能是後端簽名驗證）` : ''}（3 分鐘內 ${h.from.size} 個錢包${h.smart?.size ? '，其中聰明錢包 ' + h.smart.size + ' 個' : ''}）\n${c}\n${minted || '⚪ 不是免費的 → 已加入追蹤：進度超過 80% 且每個錢包 ≤30U 會自動打'}\nhttps://bscscan.com/address/${c}`);
   }
 }
 
@@ -429,8 +443,8 @@ async function flapAgentWatch() {
 // ---------- AI 錢包登入狀態 ----------
 // ---------- 使用者確認：Agent ID 專屬的「付費」鑄造也自動打（有預算上限＋過濾）----------
 const PAID = {
-  // 付費項目：鑄造進度 ≥ goPct 才打，每個錢包每個項目 ≤ maxUsd；進度讀不到就不打
-  goPct: CONFIG.paid?.goPct ?? 0.8, maxUsd: CONFIG.paid?.maxUsd ?? 30,
+  
+  goPct: CONFIG.paid?.goPct ?? 0.8, maxUsd: CONFIG.paid?.maxUsd ?? 30, // 使用者 00:43 補充：單一項目每個錢包不超過 30U
   maxBnbPerDay: CONFIG.paid?.maxBnbPerDay ?? 1e9,        // 使用者說不管怎樣就打 → 不設每日上限（只受錢包餘額限制）
   minSold: 30,              // 至少已經有 30 份被別人鑄過才跟（避開沒人理的／陷阱合約）
   maxAgeH: 48,              // 發現後 48 小時內還沒開就放棄
@@ -587,7 +601,7 @@ async function main() {
       if (!globalThis._smartBusy && Date.now() - (S.smartAt || 0) > 6 * 3600e3) { S.smartAt = Date.now(); globalThis._smartBusy = true; buildSmart().catch((e) => log('smart ' + e.message)).finally(() => { globalThis._smartBusy = false; }); }
       if (Date.now() - lastLogin > 600e3) { lastLogin = Date.now(); loginCheck().catch(() => {}); }
       save(); writeFileSync(join(DIR, 'data', 'watch_heartbeat.txt'), ts() + ' 掃描落後 ' + (S.scanLag ?? '?') + ' 塊');
-      if ((S.scanLag || 0) > 1500 && Date.now() - (S.lagAlert || 0) > 3600e3) { S.lagAlert = Date.now(); await tg(`⚠️ 新合約掃描落後 ${S.scanLag} 個區塊（約 ${Math.round(S.scanLag * 0.45 / 60)} 分鐘），可能是公用節點變慢`); }
+      if ((S.scanLag || 0) > 1500 && Date.now() - (S.lagAlert || 0) > 3600e3) { S.lagAlert = Date.now(); await tg(`⚠️ 新合約掃描落後 ${S.scanLag} 個區塊（約 ${Math.round(S.scanLag * 0.45 / 60)} 分鐘），可能是公用節點變慢，手動處理`); }
     } catch (e) { log('出错 ' + e.message); }
     await sleep(1000);
   }
