@@ -210,7 +210,7 @@ function countHot(txs) {
   const now = Date.now(); if (!SMART.size && S.smart?.length) SMART = new Set(S.smart);
   for (const t of txs) {
     const recv = (t.input || '0x') === '0x' && BigInt(t.value || '0x0') > 0n; // 直接轉 BNB 就鑄（像 BNBS）
-    if (!t.to || (t.input || '').length > 2 + 8 + 64 * 4 || BigInt(t.value || '0x0') > (recv ? 5n * 10n ** 16n : 10n ** 15n)) continue;
+    if (!t.to || (t.input || '').length > 2 + 8 + 64 * 4 || BigInt(t.value || '0x0') > 5n * 10n ** 16n) continue; // 鑄造常要付一點 BNB（像 QUOGENT 每份 0.0005），≤0.05 BNB 的呼叫都算
     if (/^0x(a9059cbb|095ea7b3|23b872dd|d0e30db0|2e1a7d4d|39509351|a457c2d7)/.test(t.input || '')) continue; // 轉帳、授權、存取這類不是鑄造 // 只看短呼叫、≤0.001 BNB 的（鑄造的樣子）
     const k = t.to.toLowerCase(); let h = HOT.get(k); if (!h) { h = { from: new Set(), at: now, sel: new Map() }; HOT.set(k, h); }
     if (now - h.at > 180e3) { h.from.clear(); h.at = now; h.sel.clear(); h.smart = new Set(); h.vals = new Map(); }
@@ -219,6 +219,78 @@ function countHot(txs) {
   }
   if (HOT.size > 20000) for (const [k, h] of HOT) if (now - h.at > 180e3) HOT.delete(k);
 }
+// ---------- 第三道保險：直接看「鑄造事件」（不管合約怎麼部署、付多少錢）----------
+// 每個區塊所有 Transfer(from=0x0) 都看：同一個代幣／NFT 3 分鐘內被鑄給 15 個以上不同錢包 → 找出大家呼叫的合約 → 判斷是不是 Agent ID 專屬 → 照規則打
+const MINTS = new Map(), mintChecked = new Map();
+const ZERO32 = '0x' + '0'.repeat(64);
+async function mintLogs(from, to) {
+  // 1) drpc 支援不帶地址的 getLogs（最省流量）
+  try { const r = await (await fetch('https://bsc.drpc.org', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_getLogs', params: [{ fromBlock: '0x' + from.toString(16), toBlock: '0x' + to.toString(16), topics: [T_TRANSFER, ZERO32] }] }), signal: AbortSignal.timeout(10000) })).json(); if (Array.isArray(r.result)) return r.result; } catch {}
+  // 2) 退而求其次：抓整個區塊的收據自己過濾
+  const out = [], nodes = ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-dataseed1.ninicoin.io', 'https://bsc-rpc.publicnode.com'];
+  await Promise.all(Array.from({ length: to - from + 1 }, (_, i) => from + i).map(async (b, i) => {
+    for (let k = 0; k < nodes.length; k++) { try { const r = await (await fetch(nodes[(i + k) % nodes.length], { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_getBlockReceipts', params: ['0x' + b.toString(16)] }), signal: AbortSignal.timeout(12000) })).json(); if (Array.isArray(r.result)) { for (const rc of r.result) for (const l of rc.logs || []) if (l.topics?.[0] === T_TRANSFER && l.topics[1] === ZERO32 && l.topics[2]) out.push(l); return; } } catch {} }
+  }));
+  return out;
+}
+async function mintScan(head) {
+  if (!S.mintBlock || head - S.mintBlock > 300) S.mintBlock = head - 5;
+  const to = Math.min(head, S.mintBlock + 60); if (to <= S.mintBlock) return;
+  const logs = await mintLogs(S.mintBlock + 1, to); S.mintBlock = to;
+  const now = Date.now();
+  for (const l of logs) {
+    const a = l.address.toLowerCase(); let m = MINTS.get(a); if (!m) { m = { at: now, to: new Set(), txs: [] }; MINTS.set(a, m); }
+    if (now - m.at > 1800e3) { m.at = now; m.to.clear(); m.txs = []; } // 30 分鐘內累計（慢熱的項目也抓得到）
+    m.to.add('0x' + l.topics[2].slice(26)); if (m.txs.length < 8) m.txs.push(l.transactionHash);
+  }
+  if (MINTS.size > 30000) for (const [k, m] of MINTS) if (now - m.at > 1800e3) MINTS.delete(k);
+  for (const [a, m] of MINTS) {
+    if (m.to.size < 6 || (mintChecked.has(a) && m.to.size < mintChecked.get(a) * 2) || S.seenMints[a]) continue; // 沒過的，等人數翻倍再看一次 // 6 個不同錢包被鑄到就檢查（QUOGENT 開打頭 15 分鐘只有十幾個錢包）
+    mintChecked.set(a, m.to.size); if (mintChecked.size > 20000) mintChecked.delete(mintChecked.keys().next().value);
+    await checkMinted(a, m).catch((e) => log('mintScan ' + a + ' ' + e.message));
+  }
+}
+async function checkMinted(tok, m) {
+  // 找出大家實際呼叫的合約（鑄造合約可能跟代幣合約不同）
+  const txs = (await Promise.all(m.txs.slice(0, 6).map((h) => rpc('eth_getTransactionByHash', [h]).catch(() => null)))).filter(Boolean);
+  const cnt = {}; for (const t of txs) if (t.to) cnt[t.to.toLowerCase()] = (cnt[t.to.toLowerCase()] || 0) + 1;
+  const target = Object.entries(cnt).sort((x, y) => y[1] - x[1])[0]?.[0]; if (!target) return;
+  if (S.seenMints[target] || S.seenMints[tok]) return;
+  // 是不是 Agent ID 專屬：合約碼有登記合約，或鑄到的錢包六成以上有 .ai 身份
+  let code = ((await rpc('eth_getCode', [target, 'latest']).catch(() => '')) || '').toLowerCase();
+  if (code.length > 2 && code.length < 4000) { try { const impl = await rpc('eth_getStorageAt', [target, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc', 'latest']); if (impl && BigInt(impl) !== 0n) code += ((await rpc('eth_getCode', ['0x' + impl.slice(-40), 'latest'])) || '').toLowerCase(); } catch {} }
+  const tcode = tok === target ? code : ((await rpc('eth_getCode', [tok, 'latest']).catch(() => '')) || '').toLowerCase();
+  let gated = code.includes(REGISTRY) || tcode.includes(REGISTRY), share = 0;
+  if (!gated) {
+    // 沒寫 Agent ID 檢查的：只看兩天內新部署的合約（排除 LP、老代幣這類每天都在鑄的）
+    const head = parseInt(await rpc('eth_blockNumber', []), 16);
+    const old = (await rpc('eth_getCode', [tok, '0x' + (head - 400000).toString(16)]).catch(() => '0x')) || '0x';
+    if (old.length > 2) return;
+    const sample = [...m.to].slice(0, 12); let n = 0;
+    for (const x of sample) { const r = await call('0x' + REGISTRY, '0x70a08231' + wa(x)); if (r && BigInt(r.slice(0, 66)) > 0n) n++; }
+    share = n / sample.length; if (n < 4 || share < 0.6) return;
+    gated = true;
+  }
+  S.seenMints[target] = ts(); S.seenMints[tok] = ts();
+  const name = tokStr(await call(tok, '0x06fdde03')) || tokStr(await call(target, '0x06fdde03'));
+  // 先試常見免費函式；不行就「照別人的呼叫內容重播」（不含別人地址的才重播）
+  let minted = '';
+  const sampleTx = txs.find((t) => t.to && t.to.toLowerCase() === target);
+  for (const W of WALLETS) {
+    let ff = await findFree(W.addr, target, code);
+    if (!ff && sampleTx && !sampleTx.input.toLowerCase().includes(sampleTx.from.slice(2).toLowerCase())) {
+      for (const v of NEAR_FREE) { try { await rpc('eth_call', [{ from: W.addr, to: target, data: sampleTx.input, value: '0x' + v.toString(16) }, 'latest']); const nm = '重播' + sampleTx.input.slice(0, 10); if (!CANDS.some((c) => c[0] === nm)) CANDS.push([nm, sampleTx.input]); ff = { n: nm, v }; break; } catch {} }
+    }
+    if (ff) minted += `[${W.name}] ` + (await autoMintMax(target, ff.n, W, ff.v)) + '\n';
+  }
+  if (!minted) {
+    S.paid = S.paid || {};
+    const val = sampleTx ? BigInt(sampleTx.value || '0x0') : 0n;
+    S.paid[target] = { at: Date.now(), name, done: {}, ...((sampleTx?.input || '0x') === '0x' && val > 0n ? { recvValue: val.toString(), recvSeen: m.to.size } : {}) };
+  }
+  await tg(`🔥 發現正在被鑄造的 Agent ID 項目${name ? '：' + name : ''}（3 分鐘內鑄給 ${m.to.size} 個錢包${share ? `，${Math.round(share * 100)}% 有 .ai 身份` : ''}）\n${target}\n${minted || '⚪ 不是免費的 → 已加入追蹤：進度超過 80% 且每個錢包 ≤30U 會自動打'}`);
+}
+
 async function hotScan() {
   for (const [c, h] of HOT) {
     if ((h.from.size < 25 && (h.smart?.size || 0) < 2) || S.seenMints[c] || hotChecked.has(c)) continue;
@@ -311,6 +383,7 @@ async function scanNew(head) {
     }
   }
   await hotScan().catch((e) => log('hotScan ' + e.message));
+  await mintScan(done).catch((e) => log('mintScan ' + e.message));
   await proxyScan(S.lastBlock + 1, done).catch((e) => log('proxyScan ' + e.message));
   S.lastBlock = done;
 }
@@ -354,8 +427,10 @@ async function autoMintMax(c, fname, W, val = 0n) {
   const d = Object.fromEntries(CANDS)[fname]; let first = await autoMint(c, fname, W, val), n = first.startsWith('🤖') ? 1 : 0;
   while (n > 0 && n < MAX_REPEAT) {
     await sleep(6000);
-    try { await rpc('eth_call', [{ from: W.addr, to: c, data: d, value: '0x' + val.toString(16) }, 'latest']); } catch { break; }
-    const m = await autoMint(c, fname, W, val); if (!m.startsWith('🤖')) break; n++;
+    // 第一份免費、之後要付一點的（像 QUOGENT）：每次重新找能過的金額（≤0.001 BNB）
+    let v2 = null; for (const v of NEAR_FREE) { try { await rpc('eth_call', [{ from: W.addr, to: c, data: d, value: '0x' + v.toString(16) }, 'latest']); v2 = v; break; } catch {} }
+    if (v2 == null) break;
+    const m = await autoMint(c, fname, W, v2); if (!m.startsWith('🤖')) break; n++;
   }
   return n > 1 ? first + `\n（同一個錢包共打了 ${n} 份）` : first;
 }
