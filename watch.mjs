@@ -39,7 +39,20 @@ let TG = null;
 const important = (t) => /^(⏰|⚠️|🔑|💰|🔥|🚀|🦋|🏗|🛒)/u.test(t) || t.includes('不是免費');
 
 const sendable = (t) => /^(💰|🛒|🔑|⏰|🦋)/u.test(t) || (/^🚀/u.test(t) && (t.includes('開池') || t.includes('平台幣'))) || (/^🔥/u.test(t) && /\d+ 倍/.test(t) && !t.includes('搶打')) || (/^⚠️/u.test(t) && /(想賣但失敗|回調|回落|登入|開發者模式)/.test(t));
-async function tg(text) { log('TG: ' + text.replace(/\n/g, ' | ')); if (!TG || (!CONFIG.notifyAll && !sendable(text))) return; try { await fetch(`https://api.telegram.org/bot${TG.a}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: TG.b, text, disable_web_page_preview: true, disable_notification: !important(text) }), signal: AbortSignal.timeout(10000) }); } catch {} }
+
+const GROUP_ID = CONFIG.telegram?.groupChatId || ''; // 可選：也發到 TG 群（買入、開池、倍數、賣出）
+const groupSent = new Map();
+async function toGroup(text) { 
+  if (!TG) return;
+  let msg = '', key = '';
+  const ca = (text.match(/0x[a-fA-F0-9]{40}/) || [])[0] || '';
+  if (/^🚀/u.test(text) && text.includes('開池')) { const sym = (text.match(/^🚀\s*(\S+)\s*開池/u) || [])[1] || ''; msg = `🚀 ${sym} 开盘了\n池子：${ca}`; key = 'open:' + (sym || ca); }
+  else if (/^(🆕|🔥)/u.test(text) && /(已自動鑄造|已排入自動鑄造)/.test(text)) { const name = (text.match(/項目[：:]?\s*([^\n（(|]+)/) || text.match(/合約[：:]\s*([^\n（(|]+)/) || [])[1]?.trim() || ''; msg = `🎯 打了：${name || '新项目'}\n合约：${ca}`; key = 'mint:' + ca.toLowerCase(); }
+  if (!msg || !ca) return;
+  const now = Date.now(); if (groupSent.has(key) && now - groupSent.get(key) < 6 * 3600e3) return; groupSent.set(key, now);
+  try { await fetch(`https://api.telegram.org/bot${TG.a}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: GROUP_ID, text: '📡 Agent ID 播报\n' + msg, disable_web_page_preview: true }), signal: AbortSignal.timeout(10000) }); } catch {}
+}
+async function tg(text) { log('TG: ' + text.replace(/\n/g, ' | ')); toGroup(text).catch(() => {}); if (!TG || (!CONFIG.notifyAll && !sendable(text))) return; try { await fetch(`https://api.telegram.org/bot${TG.a}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: TG.b, text, disable_web_page_preview: true, disable_notification: !important(text) }), signal: AbortSignal.timeout(10000) }); } catch {} }
 
 const RPCS = ['https://bsc.publicnode.com', 'https://bsc-rpc.publicnode.com', 'https://bsc-dataseed.bnbchain.org'];
 let ri = 0;
@@ -789,10 +802,60 @@ async function loginCheck() {
   }
 }
 
+// ── TG 指令：使用者直接在機器人打「賣 VARC」「賣 VARC 一半」「餘額」，幾秒內執行，不經過 Claude ──
+async function tgSay(text) { if (!TG) return; log('TG回覆: ' + text.replace(/\n/g, ' | ')); try { await fetch(`https://api.telegram.org/bot${TG.a}/sendMessage`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chat_id: TG.b, text, disable_web_page_preview: true }), signal: AbortSignal.timeout(10000) }); } catch {} }
+function findTok(q, W) {
+  q = q.toLowerCase();
+  return TOKENS.concat(S.dyn || []).find((t) => (!t.only || t.only === W.addr) && (t.sym.toLowerCase() === q || t.addr === q));
+}
+async function cmdSell(q, half) {
+  const head = parseInt(await rpc('eth_blockNumber', []), 16);
+  const jobs = WALLETS.map(async (W) => {
+    const t0 = findTok(q, W); if (!t0) return `[${W.name}] 找不到 ${q}`;
+    const bal = big(await call(t0.addr, '0x70a08231' + wa(W.addr))); if (bal === 0n) return `[${W.name}] 沒有 ${t0.sym}`;
+    const key = W.addr === ME ? t0.sym : W.name + ':' + t0.sym;
+    const st = (S.tokens[key] = S.tokens[key] || { hist: [], peak: 0, peakAt: 0, sold: 0 });
+    const ok = await sell(t0, st, half ? bal / 2n : bal, half ? '你在 TG 指示賣一半' : '你在 TG 指示全部賣出', W);
+    if (ok && !half) { st.stage = 9; st.done = true; }
+    return ok ? null : `[${W.name}] ${t0.sym} 賣出失敗`;
+  });
+  const errs = (await Promise.all(jobs)).filter(Boolean); save();
+  if (errs.length) await tgSay('⚠️ ' + errs.join('\n'));
+  void head;
+}
+async function cmdBalance() {
+  const lines = await Promise.all(WALLETS.map(async (W) => { const b = Number(BigInt(await rpc('eth_getBalance', [W.addr, 'latest']))) / 1e18; return `${W.name}：${b.toFixed(5)} BNB`; }));
+  await tgSay('💼 錢包餘額\n' + lines.join('\n'));
+}
+async function tgCmdLoop() {
+  if (!TG) return;
+  if (S.tgOff == null) { try { const r = await (await fetch(`https://api.telegram.org/bot${TG.a}/getUpdates?timeout=0`)).json(); const u = r.result || []; S.tgOff = u.length ? u[u.length - 1].update_id + 1 : 0; save(); } catch { S.tgOff = 0; } }
+  for (;;) {
+    try {
+      const r = await (await fetch(`https://api.telegram.org/bot${TG.a}/getUpdates?timeout=25&offset=${S.tgOff}`, { signal: AbortSignal.timeout(35000) })).json();
+      for (const u of r.result || []) {
+        S.tgOff = u.update_id + 1; save();
+        const m = u.message; if (!m || String(m.chat?.id) !== String(TG.b) || !m.text) continue; // 只聽使用者本人
+        if (Date.now() / 1000 - m.date > 120) continue; // 太舊的指令不執行
+        const txt = m.text.trim().replace(/^\//, '');
+        let mm;
+        if ((mm = txt.match(/^(?:賣|卖|sell)\s*(\S+?)\s*(一半|半|half)?$/i)) || (mm = txt.match(/^(\S+?)\s*(?:全出|全賣|全卖)$/i))) {
+          const half = !!mm[2]; await tgSay(`⚡ 收到，${mm[1]} 兩個錢包${half ? '各賣一半' : '全部賣出'}中…`);
+          cmdSell(mm[1], half).catch((e) => tgSay('⚠️ 賣出出錯：' + e.message));
+        } else if ((mm = txt.match(/^(\S+?)\s*(?:出一半|賣一半|卖一半)$/i))) {
+          await tgSay(`⚡ 收到，${mm[1]} 兩個錢包各賣一半中…`); cmdSell(mm[1], true).catch((e) => tgSay('⚠️ 賣出出錯：' + e.message));
+        } else if (/^(餘額|余额|錢包|钱包|balance)$/i.test(txt)) { cmdBalance().catch(() => {}); }
+        else if (/^(help|指令|說明|说明)$/i.test(txt)) await tgSay('可用指令：\n賣 VARC → 兩個錢包全賣\n賣 VARC 一半 → 各賣一半\n（也可打「VARC 全出」「VARC 出一半」）\n餘額 → 看兩個錢包 BNB');
+      }
+    } catch { await sleep(3000); }
+  }
+}
+
 let lastLoopAt = Date.now();
 setInterval(() => { if (Date.now() - lastLoopAt > 8 * 60e3) { log('看門狗：主迴圈卡住超過 8 分鐘，自動重啟'); try { save(); } catch {} process.exit(1); } }, 30e3).unref();
 async function main() {
   log('启动监测');
+  tgCmdLoop().catch((e) => log('tgCmd ' + e.message));
   let lastHold = 0, lastLogin = 0;
   for (;;) {
     try { if (statSync(SELF).mtimeMs !== SELF_MT) { log('程序更新，重启'); save(); process.exit(0); } } catch {}
