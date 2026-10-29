@@ -209,12 +209,13 @@ const HOT = new Map(), hotChecked = new Map();
 function countHot(txs) {
   const now = Date.now(); if (!SMART.size && S.smart?.length) SMART = new Set(S.smart);
   for (const t of txs) {
-    if (!t.to || (t.input || '').length > 2 + 8 + 64 * 4 || BigInt(t.value || '0x0') > 10n ** 15n) continue;
+    const recv = (t.input || '0x') === '0x' && BigInt(t.value || '0x0') > 0n; // 直接轉 BNB 就鑄（像 BNBS）
+    if (!t.to || (t.input || '').length > 2 + 8 + 64 * 4 || BigInt(t.value || '0x0') > (recv ? 5n * 10n ** 16n : 10n ** 15n)) continue;
     if (/^0x(a9059cbb|095ea7b3|23b872dd|d0e30db0|2e1a7d4d|39509351|a457c2d7)/.test(t.input || '')) continue; // 轉帳、授權、存取這類不是鑄造 // 只看短呼叫、≤0.001 BNB 的（鑄造的樣子）
     const k = t.to.toLowerCase(); let h = HOT.get(k); if (!h) { h = { from: new Set(), at: now, sel: new Map() }; HOT.set(k, h); }
-    if (now - h.at > 180e3) { h.from.clear(); h.at = now; h.sel.clear(); h.smart = new Set(); }
+    if (now - h.at > 180e3) { h.from.clear(); h.at = now; h.sel.clear(); h.smart = new Set(); h.vals = new Map(); }
     if (SMART.has(t.from.toLowerCase())) (h.smart = h.smart || new Set()).add(t.from.toLowerCase());
-    h.from.add(t.from.toLowerCase()); const sl = (t.input || '').slice(0, 10); h.sel.set(sl, (h.sel.get(sl) || 0) + 1);
+    h.from.add(t.from.toLowerCase()); const sl = (t.input || '').slice(0, 10); h.sel.set(sl, (h.sel.get(sl) || 0) + 1); if (recv) { h.vals = h.vals || new Map(); const vv = BigInt(t.value).toString(); h.vals.set(vv, (h.vals.get(vv) || 0) + 1); }
   }
   if (HOT.size > 20000) for (const [k, h] of HOT) if (now - h.at > 180e3) HOT.delete(k);
 }
@@ -246,7 +247,12 @@ async function hotScan() {
       if (!ff && topSel && topSel.length === 10) for (const v of NEAR_FREE) { try { await rpc('eth_call', [{ from: W.addr, to: c, data: topSel, value: '0x' + v.toString(16) }, 'latest']); CANDS.push(['熱門函式' + topSel, topSel]); ff = { n: '熱門函式' + topSel, v }; break; } catch {} }
       if (ff) minted += `[${W.name}] ` + (await autoMintMax(c, ff.n, W, ff.v)) + '\n';
     }
-    if (!minted) { S.paid = S.paid || {}; S.paid[c] = { at: Date.now(), name, done: {} }; }
+    if (!minted) {
+      S.paid = S.paid || {};
+      // 轉 BNB 就鑄的：取大家最常轉的金額當「一份的價格」（至少 10 筆一樣才算數）
+      const top = [...(h.vals || new Map()).entries()].sort((a, b) => b[1] - a[1])[0];
+      S.paid[c] = { at: Date.now(), name, done: {}, ...(top && top[1] >= 2 ? { recvValue: top[0], recvSeen: top[1] } : {}) };
+    }
     await tg(`🔥 發現正在被搶打的 Agent ID 項目${name ? '：' + name : ''}${viaAgents ? `（合約沒寫 Agent ID 檢查，但打它的錢包 ${Math.round(viaAgents * 100)}% 持有 .ai 身份，可能是後端簽名驗證）` : ''}（3 分鐘內 ${h.from.size} 個錢包${h.smart?.size ? '，其中聰明錢包 ' + h.smart.size + ' 個' : ''}）\n${c}\n${minted || '⚪ 不是免費的 → 已加入追蹤：進度超過 80% 且每個錢包 ≤30U 會自動打'}\nhttps://bscscan.com/address/${c}`);
   }
 }
@@ -457,7 +463,7 @@ async function flapAgentWatch() {
 // ---------- 使用者確認：Agent ID 專屬的「付費」鑄造也自動打（有預算上限＋過濾）----------
 const PAID = {
   
-  goPct: CONFIG.paid?.goPct ?? 0.8, maxUsd: CONFIG.paid?.maxUsd ?? 30, // 使用者 00:43 補充：單一項目每個錢包不超過 30U
+  goPct: CONFIG.paid?.goPct ?? 0.8, maxUsd: CONFIG.paid?.maxUsd ?? 30, // 第一原則：鑄造進度 ≥ 80% 就打（不看幾個錢包進場、不看是否比池子便宜）；每個錢包每個項目 ≤ 30U
   maxBnbPerDay: CONFIG.paid?.maxBnbPerDay ?? 1e9,        // 使用者說不管怎樣就打 → 不設每日上限（只受錢包餘額限制）
   minSold: 30,              // 至少已經有 30 份被別人鑄過才跟（避開沒人理的／陷阱合約）
   maxAgeH: 48,              // 發現後 48 小時內還沒開就放棄
@@ -483,6 +489,29 @@ async function poolOut(amtIn, from, to) { // 池子現在買得到多少（沒�
   const r = await call(ROUTER, '0xd06ca61f' + w(amtIn) + w(64) + w(2) + wa(from) + wa(to)); if (!r || r.length < 2 + 64 * 4) return 0n; return BigInt('0x' + r.slice(2 + 64 * 3, 2 + 64 * 4));
 }
 const gotTok = (sim, W) => (sim?.balanceChanges || []).filter((b) => String(b.owner).toLowerCase() === W.addr && Number(b.change) > 0).reduce((a, b) => a + Number(b.change), 0);
+// 鑄造進度：先找「已售／上限」這類函式；找不到就看「鑄造池剩多少幣」（合約剛部署時持有的幣 vs 現在）
+const SOLD_SELS = ['a2309ff8', 'f4514d2e', '505e05fd', 'cc84efea', '192fc516', '9106d7ba', '67153ab4', 'f3f8a4fd', '06ed0717', '9659867e', '4f02c420', '1f21bfbf'];
+const CAP_SELS = ['c65b61ca', '3a98ef39', 'b6b6f0c3', 'cce132d1', 'd5abeb01', '32cb6b0c', '06517a29', '2163837f', 'aa2d9a02', '76c71ca1', '98f1312e', '355274ea'];
+async function progressOf(c, code, tokAddr) {
+  let sold = null, cap = null;
+  for (const s of SOLD_SELS) { if (!code.includes(s)) continue; const r = await call(c, '0x' + s); if (r && r.length >= 66) { sold = Number(BigInt(r.slice(0, 66))); break; } }
+  if (sold != null) for (const s of CAP_SELS) { if (!code.includes(s)) continue; const r = await call(c, '0x' + s); if (r && r.length >= 66) { const x = Number(BigInt(r.slice(0, 66))); if (x > 10 && x >= sold && x < 1e12) { cap = x; break; } } }
+  if (sold != null && cap) return { progress: sold / cap, sold, cap, how: '已售／上限' };
+  S.prog = S.prog || {}; let pg = S.prog[c];
+  const tok = tokAddr || c;
+  if (!pg) {
+    const head = parseInt(await rpc('eth_blockNumber', []), 16);
+    const has = async (b) => (((await rpc('eth_getCode', [c, '0x' + b.toString(16)]).catch(() => '0x')) || '0x').length > 2);
+    let lo = head - 400000, hi = head; if (await has(lo)) { S.prog[c] = { none: 1 }; return { progress: 0, sold, cap }; }
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (await has(m)) hi = m; else lo = m; }
+    let init = 0n; for (const b of [hi, hi + 1, hi + 5, hi + 20]) { const r = await rpc('eth_call', [{ to: tok, data: '0x70a08231' + wa(c) }, '0x' + b.toString(16)]).catch(() => null); if (r && r.length >= 66 && BigInt(r.slice(0, 66)) > 0n) { init = BigInt(r.slice(0, 66)); break; } }
+    pg = S.prog[c] = init > 0n ? { init: init.toString(), tok } : { none: 1 };
+  }
+  if (pg.none) return { progress: 0, sold, cap };
+  const now = big(await call(pg.tok, '0x70a08231' + wa(c)));
+  const init = BigInt(pg.init); return { progress: Number(init - now) / Number(init), sold, cap, how: '鑄造池剩餘' };
+}
+
 async function paidLoop() {
   S.paid = S.paid || {}; S.dyn = S.dyn || []; S.paidSpend = S.paidSpend || {};
   const today = new Date().toDateString(); if (S.paidSpend.day !== today) S.paidSpend = { day: today };
@@ -497,14 +526,17 @@ async function paidLoop() {
     let kind = code.includes('e38fd349') && code.includes('68bce8cd') ? 'bnb' : code.includes('725c4058') && code.includes('94bf804d') ? 'usdt' : null;
     let unit = 0n; // 一般 NFT：mint(數量) 付「單價 × 數量」BNB（像 Sentient Syndicate 的 PRICE）
     if (!kind && code.includes('a0712d68')) for (const sel of ['8d859f3e', 'a035b1fe', '6817c76c', '13faede6', '817b1cd2']) { if (!code.includes(sel)) continue; const r = await call(c, '0x' + sel); if (r && r.length >= 66 && BigInt(r.slice(0, 66)) > 0n) { unit = BigInt(r.slice(0, 66)); kind = 'gen'; break; } }
+    if (!kind && P.recvValue) kind = 'recv';
     if (!kind) continue;
     const soldR = await call(c, kind === 'bnb' ? '0xa2309ff8' : kind === 'gen' ? '0x18160ddd' : '0x192fc516'); const sold = soldR && soldR.length >= 66 ? Number(BigInt(soldR.slice(0, 66))) : null;
     let cap = null; for (const sel of ['0xd5abeb01', '0x32cb6b0c', '0x355274ea', '0x3a1d8d3a', '0xf1aee5a2']) { const r = await call(c, sel); if (r && r.length >= 66) { const x = Number(BigInt(r.slice(0, 66))); if (x > 0 && sold != null && x >= sold && x < 1e12) { cap = x; break; } } }
-    const progress = cap && sold != null ? sold / cap : 0;
+    let tokAddr0 = ''; { const tr0 = await call(c, '0xfc0c546a'); if (tr0 && tr0.length >= 66 && BigInt(tr0.slice(0, 66)) > 0n) tokAddr0 = '0x' + tr0.slice(26, 66); }
+    let progress = cap && sold != null ? sold / cap : 0, how = '已售／上限';
+    if (!(progress > 0)) { const pr = await progressOf(c, code, tokAddr0); progress = pr.progress || 0; how = pr.how || ''; }
+    P.progress = progress;
     price = price || (await bnbUsd());
     if (progress < PAID.goPct) continue; // 還沒到 80%（或讀不到進度）→ 先不打，之後每分鐘再看
     const limitUsd = Infinity;
-    if (sold != null && sold < PAID.minSold) continue;
     let tokAddr = ''; const tr = await call(c, '0xfc0c546a'); if (tr && tr.length >= 66) tokAddr = '0x' + tr.slice(26, 66);
     const sym = tokAddr ? tokStr(await call(tokAddr, '0x95d89b41')) || P.name || c.slice(0, 8) : P.name || c.slice(0, 8);
     for (const W of WALLETS) {
@@ -514,6 +546,21 @@ async function paidLoop() {
         const spent = S.paidSpend[W.name] || 0;
         const bal = Number(BigInt((await rpc('eth_getBalance', [W.addr, 'latest'])) || '0x0')) / 1e18;
         let n = 10, costWei = 0n;
+        if (kind === 'recv') {
+          const v = BigInt(P.recvValue); const vb = Number(v) / 1e18;
+          if (!price || vb * price > PAID.maxUsd || vb * 1.005 > bal - PAID.keepBnb) continue;
+          try { await rpc('eth_call', [{ from: W.addr, to: c, value: '0x' + v.toString(16) }, 'latest']); } catch { continue; } // 不能鑄（沒資格、已打過、額度滿）
+          const r = await previewExec(W, c, '0x', v, (sim) => {
+            const mine = (sim?.balanceChanges || []).filter((b) => String(b.owner).toLowerCase() === W.addr);
+            if (sim?.allowanceChanges?.length || sim?.authorityChanges?.length) return '有授權變化';
+            const out = mine.filter((b) => Number(b.change) < 0); if (out.some((b) => !String(b.contractAddress).toLowerCase().startsWith('0xeeee')) || out.reduce((a, b) => a - Number(b.change), 0) > Number(v) * 1.01) return '會扣到 BNB 以外或超過金額';
+            if (!mine.some((b) => Number(b.change) > 0)) return '模擬沒拿到代幣'; return '';
+          });
+          S.paidSpend[W.name] = spent + vb; P.done[W.name] = 'minted';
+          const ta = tokAddr0 || c; if (!S.dyn.some((t) => t.addr === ta && t.only === W.addr)) S.dyn.push({ sym, addr: ta, cost: +(vb * price).toFixed(2), only: W.addr });
+          await tg(`🛒 [${W.name}] 自動打了「轉 BNB 鑄造」項目：${sym}\n轉 ${vb} BNB（約 ${(vb * price).toFixed(1)}U，${P.recvSeen} 個錢包都轉這個金額）· 進度約 ${Math.round(progress * 100)}%（${how}）\n${c}\n交易 ${r.tx}`);
+          continue;
+        }
         if (kind === 'gen') {
           let data = '';
           for (; n >= 1; n--) { costWei = unit * BigInt(n); if ((Number(costWei) / 1e18) * 1.005 > bal - PAID.keepBnb || !price || (Number(costWei) / 1e18) * price > PAID.maxUsd) continue; data = '0xa0712d68' + w(n); try { await rpc('eth_call', [{ from: W.addr, to: c, data, value: '0x' + costWei.toString(16) }, 'latest']); break; } catch {} }
@@ -537,7 +584,7 @@ async function paidLoop() {
           try { await rpc('eth_call', [{ from: W.addr, to: c, data, value: '0x' + v.toString(16) }, 'latest']); } catch { continue; } // 還沒開或沒資格
           const pool = tokAddr ? Number(await poolOut(v, WBNB, tokAddr)) : 0;
           const r = await previewExec(W, c, data, v, (sim) => {
-            if (pool > 0 && gotTok(sim, W) < pool * 1.1) return `已開池，鑄造拿到的幣沒有比池子便宜 10% 以上（鑄 ${(gotTok(sim, W) / 1e18).toExponential(2)} vs 池子 ${(pool / 1e18).toExponential(2)}）`;
+            if (pool > 0 && gotTok(sim, W) < pool * 1.1) log(`注意：${c} 已開池，鑄造沒有比池子便宜（第一原則：進度 ≥80% 照打）`);
             const mine = (sim?.balanceChanges || []).filter((b) => String(b.owner).toLowerCase() === W.addr);
             if (sim?.allowanceChanges?.length || sim?.authorityChanges?.length) return '有授權變化';
             const out = mine.filter((b) => Number(b.change) < 0); if (out.some((b) => !String(b.contractAddress).toLowerCase().startsWith('0xeeee')) || out.reduce((a, b) => a - Number(b.change), 0) > Number(v) * 1.01) return '會扣到 BNB 以外的資產或超過報價';
@@ -562,7 +609,7 @@ async function paidLoop() {
           await previewExec(W, USDT, '0x095ea7b3' + wa(c) + w(costWei), 0n, (sim) => ((sim?.allowanceChanges || []).some((a) => String(a.spender).toLowerCase() !== c) ? '授權對象不對' : ''));
           const pool = tokAddr ? Number(await poolOut(costWei, USDT, tokAddr)) : 0;
           const r = await previewExec(W, c, data, 0n, (sim) => {
-            if (pool > 0 && gotTok(sim, W) < pool * 1.1) return '已開池，鑄造沒有比池子便宜 10% 以上';
+            if (pool > 0 && gotTok(sim, W) < pool * 1.1) log(`注意：${c} 已開池，鑄造沒有比池子便宜（第一原則：進度 ≥80% 照打）`);
             const mine = (sim?.balanceChanges || []).filter((b) => String(b.owner).toLowerCase() === W.addr);
             const out = mine.filter((b) => Number(b.change) < 0); if (out.some((b) => String(b.contractAddress).toLowerCase() !== USDT) || out.reduce((a, b) => a - Number(b.change), 0) > Number(costWei) * 1.01) return '會扣到 USDT 以外或超過報價';
             if (!mine.some((b) => Number(b.change) > 0)) return '模擬沒拿到代幣'; return '';
