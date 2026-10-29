@@ -452,7 +452,7 @@ async function autoMint(c, fname, W = WALLETS[0], val = 0n) {
   if (val > 0n) { const dd = new Date().toDateString(); S.feeDay = S.feeDay || {}; if (S.feeDay.d !== dd) S.feeDay = { d: dd }; const used = S.feeDay[W.name] || 0; if (used + Number(val) / 1e18 > 0.005) return '⏸ 今天手續費型鑄造已達 0.005 BNB 上限，沒有鑄'; S.feeDay[W.name] = used + Number(val) / 1e18; }
   const d = Object.fromEntries(CANDS)[fname];
   const today = new Date().toDateString(); if (S.mintDay !== today) { S.mintDay = today; S.mintCount = 0; }
-  if (S.mintCount >= 300) return '⏸ 今天自動鑄已達 300 筆上限，沒有鑄';
+  S.mintCnt = S.mintCnt && S.mintCnt.d === today ? S.mintCnt : { d: today }; if ((S.mintCnt[W.name] || 0) >= 1000) return '⏸ 這個錢包今天自動鑄已達 1000 筆上限，沒有鑄';
   const bnb = BigInt((await rpc('eth_getBalance', [W.addr, 'latest']).catch(() => '0x0')) || '0x0');
   if (bnb < 5n * 10n ** 14n) return '⚠️ BNB 不夠付 gas（< 0.0005），沒有鑄';
   const p = await W.baw(['contract-call', 'preview', '--binanceChainId', '56', '--from', W.addr, '--to', c, '--value', val.toString(), '--inputData', d]);
@@ -462,7 +462,7 @@ async function autoMint(c, fname, W = WALLETS[0], val = 0n) {
   if (sim?.allowanceChanges?.length || sim?.authorityChanges?.length || losing.length) return '⚠️ 預演顯示有授權或會扣你的資產，安全起見沒有鑄';
   const x = await W.baw(['contract-call', 'execute', '--requestId', rid]);
   if (!x.j?.success) return '❌ 送出失敗：' + (x.j?.error?.message || x.t).slice(0, 120);
-  S.mintCount++;
+  S.mintCount++; S.mintCnt[W.name] = (S.mintCnt[W.name] || 0) + 1;
   // 免費鑄造拿到的代幣也加入持倉追蹤（成本 0 → 只通知 5／10 倍、回調，不自動賣）
   for (const b of sim?.balanceChanges || []) { if (String(b.owner).toLowerCase() !== W.addr || b.tokenType !== 'Erc20' || !(Number(b.change) > 0)) continue; const ta = String(b.contractAddress).toLowerCase(); S.dyn = S.dyn || []; if (!S.dyn.some((t) => t.addr === ta && t.only === W.addr)) { const sy = tokStr(await call(ta, '0x95d89b41')) || ta.slice(0, 8); S.dyn.push({ sym: sy, addr: ta, cost: 0, only: W.addr }); } }
   const got = (sim?.balanceChanges || []).filter((b) => String(b.owner).toLowerCase() === W.addr).map((b) => (b.tokenType === 'Erc721' ? 'NFT ×1' : b.tokenType + ' +' + b.change)).join('、');
@@ -551,6 +551,8 @@ async function flapAgentWatch() {
 
 // ---------- AI 錢包登入狀態 ----------
 // ---------- 使用者確認：Agent ID 專屬的「付費」鑄造也自動打（有預算上限＋過濾）----------
+// 使用者手動指定「直接打」的項目（不看 80% 與防釣魚，只受 30U 上限與模擬安全檢查）
+const FORCE = new Set((CONFIG.forceMint || []).map((a) => a.toLowerCase())); // config.json 的 forceMint：手動指定直接打的合約
 const PAID = {
   
   goPct: CONFIG.paid?.goPct ?? 0.8, maxUsd: CONFIG.paid?.maxUsd ?? 30, // 第一原則：鑄造進度 ≥ 80% 就打（不看幾個錢包進場、不看是否比池子便宜）；每個錢包每個項目 ≤ 30U
@@ -625,8 +627,9 @@ async function paidLoop() {
   S.paid = S.paid || {}; S.dyn = S.dyn || []; S.paidSpend = S.paidSpend || {};
   const today = new Date().toDateString(); if (S.paidSpend.day !== today) S.paidSpend = { day: today };
   let price = 0;
+  for (const c of FORCE) if (!S.paid[c]) S.paid[c] = { at: Date.now(), name: '', done: {} };
   if (!S.migrated2) { S.migrated2 = 1; for (const c of Object.keys(S.seenMints || {})) { if (S.paid[c]) continue; const cd = await codeOf(c); if ((cd.includes('e38fd349') && cd.includes('68bce8cd')) || (cd.includes('725c4058') && cd.includes('94bf804d'))) { S.paid[c] = { at: Date.now(), name: '', done: {} }; log('補登付費追蹤 ' + c); } } }
-  const ents = Object.entries(S.paid).sort((a, b) => (a[1].lastTry || 0) - (b[1].lastTry || 0)).slice(0, 12); // 每輪最多看 12 個，輪流
+  const ents = Object.entries(S.paid).sort((a, b) => (FORCE.has(b[0]) - FORCE.has(a[0])) || ((a[1].lastTry || 0) - (b[1].lastTry || 0))).slice(0, 12); // 每輪最多看 12 個，輪流
   for (const [c, P] of ents) {
     P.lastTry = Date.now(); if (WALLETS.every((W) => P.done[W.name])) { delete S.paid[c]; continue; }
     if (Date.now() - P.at > PAID.maxAgeH * 3600e3) { delete S.paid[c]; continue; }
@@ -646,9 +649,10 @@ async function paidLoop() {
     if (!(progress > 0)) { const pr = await progressOf(c, code, tokAddr0); progress = pr.progress || 0; how = pr.how || ''; }
     P.progress = progress;
     price = price || (await bnbUsd());
-    if (progress < PAID.goPct) continue;
+    const forced = FORCE.has(c);
+    if (!forced && progress < PAID.goPct) continue;
     // 防釣魚：① 同款合約 24 小時內被部署 3 次以上（批量發盤）不打 ② 進度要是很多人打出來的（至少 20 個不同錢包），不是項目方自己刷的
-    { const dep = await deployerOf(c); P.deployer = dep;
+    if (!forced) { const dep = await deployerOf(c); P.deployer = dep;
       if (dep && !(S.devs?.[dep] || []).some((x) => x.c === c)) noteDev(dep, c);
       if (isRepeatDev(dep)) { if (!P.devLogged) { P.devLogged = 1; log(`跳過 ${c}：重複 DEV ${dep}（24 小時內發了 ${(S.devs[dep] || []).length} 個項目）`); } continue; }
       if (dep && S.black?.[dep]) { if (!P.blackLogged) { P.blackLogged = 1; log(`跳過 ${c}：部署者 ${dep} 在黑名單（${S.black[dep].why}）`); } continue; }
@@ -657,8 +661,12 @@ async function paidLoop() {
       // 錢流：合約裡幾乎沒留 BNB、也還沒開池 → 錢多半直接流進項目方錢包，要求更多人打過（40 個）才算可信
       if (P.drain == null) { const cb = Number(BigInt((await rpc('eth_getBalance', [c, 'latest']).catch(() => '0x0')) || '0x0')) / 1e18; const pr = tokAddr0 || c; const pair = await call(FACTORY, '0xe6a43905' + wa(pr) + wa(WBNB)); P.drain = cb < 0.01 && !(pair && BigInt(pair) > 0n); }
     }
-    if (isSerial(code)) { if (!P.serialLogged) { P.serialLogged = 1; log(`跳過 ${c}：同款合約 24 小時內部署 3 次以上，疑似批量發盤`); } continue; }
-    { const need = P.drain ? 40 : 20; const seen = Math.max(P.wallets || 0, HOT.get(c)?.from.size || 0); if (seen < need) { const r = await rpc('eth_getLogs', [{ address: tokAddr0 || c, fromBlock: '0x' + (parseInt(await rpc('eth_blockNumber', []), 16) - 3000).toString(16), toBlock: 'latest', topics: [T_TRANSFER] }]).catch(() => []); const uniq = new Set((r || []).map((l) => l.topics[2])).size; P.wallets = Math.max(P.wallets || 0, uniq); if (uniq < need) continue; } } // 還沒到 80%（或讀不到進度）→ 先不打，之後每分鐘再看
+    // 使用者定：只打新的 → 兩天前就部署的老合約不打
+    if (!forced) { if (P.old == null) { const head = parseInt(await rpc('eth_blockNumber', []), 16); const o = await rpc('eth_getCode', [c, '0x' + (head - 400000).toString(16)]).catch(() => '0x'); P.old = !!o && o.length > 2; } if (P.old) { for (const W of WALLETS) P.done[W.name] = P.done[W.name] || 'old'; continue; } }
+    // 已經開池交易的項目不再自動鑄造（鑄造≈用市價買，不划算）
+    if (!forced) { const tk = tokAddr0 || c; let opened = false; for (const q of [WBNB, USDT]) { const pr = await call(FACTORY, '0xe6a43905' + wa(tk) + wa(q)); if (pr && BigInt(pr) > 0n) { const rs = await call('0x' + pr.slice(26), '0x0902f1ac'); if (rs && BigInt('0x' + rs.slice(2, 66)) > 0n) { opened = true; break; } } } if (opened) { for (const W of WALLETS) P.done[W.name] = P.done[W.name] || 'pool-open'; log(`跳過 ${c}：已經開池交易，不再鑄造`); continue; } }
+    if (!forced && isSerial(code)) { if (!P.serialLogged) { P.serialLogged = 1; log(`跳過 ${c}：同款合約 24 小時內部署 3 次以上，疑似批量發盤`); } continue; }
+    if (!forced) { const need = P.drain ? 40 : 20; const seen = Math.max(P.wallets || 0, HOT.get(c)?.from.size || 0); if (seen < need) { const r = await rpc('eth_getLogs', [{ address: tokAddr0 || c, fromBlock: '0x' + (parseInt(await rpc('eth_blockNumber', []), 16) - 3000).toString(16), toBlock: 'latest', topics: [T_TRANSFER] }]).catch(() => []); const uniq = new Set((r || []).map((l) => l.topics[2])).size; P.wallets = Math.max(P.wallets || 0, uniq); if (uniq < need) continue; } } // 還沒到 80%（或讀不到進度）→ 先不打，之後每分鐘再看
     const limitUsd = Infinity;
     let tokAddr = ''; const tr = await call(c, '0xfc0c546a'); if (tr && tr.length >= 66) tokAddr = '0x' + tr.slice(26, 66);
     const sym = tokAddr ? tokStr(await call(tokAddr, '0x95d89b41')) || P.name || c.slice(0, 8) : P.name || c.slice(0, 8);
@@ -728,7 +736,7 @@ async function paidLoop() {
             if (!mine.some((b) => Number(b.change) > 0)) return '模擬沒拿到代幣'; return '';
           });
           S.paidSpend[W.name] = spent + vb; P.done[W.name] = 'minted';
-          const usd = vb * price; if (tokAddr) S.dyn.push({ sym, addr: tokAddr, cost: +usd.toFixed(2), only: W.addr, deployer: P.deployer, boughtAt: Date.now() });
+          const usd = vb * price; if (tokAddr) S.dyn.push({ sym, addr: tokAddr, cost: +usd.toFixed(2), only: W.addr, deployer: P.deployer, boughtAt: Date.now(), ...(FORCE.has(c) ? { hold: true } : {}) }); // 使用者指定的項目照免費幣處理：只通知不自動賣
           await tg(`🛒 [${W.name}] 自動打了付費 Agent ID 項目：${sym}\n${n} 份，花 ${vb.toFixed(4)} BNB（約 ${usd.toFixed(1)}U）· 已售 ${sold ?? '?'} 份\n${c}\n交易 ${r.tx}\n已加入監控：3 倍回本、5 倍和 10 倍各賣一半、回落 60% 全賣`);
         } else {
           for (; n >= 1; n--) { const q = await call(c, '0x725c4058' + w(n)); costWei = q ? BigInt(q.slice(0, 66)) : 0n; if (costWei > 0n && price && ((Number(costWei) / 1e18) * 1.03) / price <= bal - PAID.keepBnb && Number(costWei) / 1e18 <= PAID.maxUsd) break; }

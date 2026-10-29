@@ -8,5 +8,6 @@
   "paid": { "goPct": 0.8, "maxUsd": 30, "keepBnb": 0.006 },
   "rules": { "backX": 3, "halfX": [5, 10], "crash": 0.6, "fastMin": 30, "fastCrash": 0.35, "noPumpMin": 20, "noPumpX": 2 },
   "tokens": [],
-  "watchVault": ""
+  "watchVault": "",
+  "forceMint": []
 }
