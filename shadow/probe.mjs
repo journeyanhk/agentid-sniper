@@ -1,30 +1,38 @@
-// Agent ID Sniper — W0 只读影子探针 v3（无钱包、无私钥、不下单、不依赖 baw）
-// v3 相对 v2 的改动（针对第二轮复核）：
-//  1. scanRange() 返回 { logs, hadGap, gapRanges }，crossGap 真正写回主循环并落进信号
-//  2. pending 溢出不再丢弃，改为转存 pending_overflow.jsonl；metrics 增加 pendingAgeMaxMin
-//  3. state.json 原子写入（tmp + fsync + rename + .bak），启动校验，损坏时标记 stateCorrupt 而不是静默冷启动
-//  4. V3 池子补 liquidity()/slot0()/token0()/token1()，无流动性标记 poolFoundButNotTradable
-//  5. 信号分级：bytecodeRegistryHit / selectorHit / agentHolderRatio / minterKnown / poolFound / poolTradable / signalClass A-D
-//  6. 每条信号带 eventBlock（首次观测到的铸造块）与 observedAt（补扫回填时间），补扫数据可识别
+// Agent ID Sniper — W0 只读影子探针 v4（无钱包、无私钥、不下单、不依赖 baw）
+// v4 = 对「报告已完成、代码未实现」的整改，每一项都能在文件里搜到对应标识符：
+//  1. cursorPaused / pauseReason / lastBlockBefore / lastBlockAfter  —— pending 积压且本轮仍有新 gap 时暂停主游标（10 分钟后强制恢复）
+//  2. stateCorrupt → BLOCKED：不扫描、不 head-60 冷启动；需 SHADOW_ALLOW_COLD_START=1 或 SHADOW_START_BLOCK 才继续
+//  3. V3 逐档遍历（4 fee × 2 quote），取流动性最大的可交易池；全部无流动性才判 poolFoundButNotTradable
+//  4. QuoterV2 真实报价（0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997, quoteExactInputSingle 0xc6a5026a）
+//     + 由 sqrtPriceX96 反推零冲击价，输出 priceImpactBps
+//  5. decimals() 归一（V2 储备、报价金额），不再硬编码 1e18
+//  6. eventBlockWasGap / dataComplete —— 该 token 的首次铸造块是否仍落在未补回的 gap 里
+//  7. build = 运行目录 git HEAD，写进启动日志、metrics、signals，方便与 GitHub commit 对账
 import {
   appendFileSync, mkdirSync, readFileSync, writeFileSync,
   openSync, writeSync, fsyncSync, closeSync, renameSync, copyFileSync, existsSync,
 } from 'node:fs';
+import { execSync } from 'node:child_process';
+
 const DIR = process.env.SHADOW_DIR ?? new URL('.', import.meta.url).pathname;
 mkdirSync(DIR, { recursive: true });
-const VERSION = 'probe-3.0.0';
+const VERSION = 'probe-4.0.0';
+let BUILD = 'unknown';
+try { BUILD = execSync('git -C ' + DIR + '/.. rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch {}
 const SIG = DIR + '/signals.jsonl', MET = DIR + '/metrics.jsonl', GAPF = DIR + '/gaps.jsonl';
 const PENDF = DIR + '/pending_overflow.jsonl', STF = DIR + '/state.json';
 
 const REGISTRY = '0x60b9262456de011f7d15a54cdd8c48baaa8b022f';
-const REGISTRY_HEX = REGISTRY.slice(2); // 字节码内是裸地址，匹配时必须去掉 0x
+const REGISTRY_HEX = REGISTRY.slice(2);
 const T_TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 const ZERO32 = '0x' + '0'.repeat(64);
 const V2F = '0xca143ce32fe78f1f7019d7d551a6402fc5350c73';
 const V3F = '0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865';
+const QUOTER_V2 = '0xb048bbc1ee6b733fffcfb9e9cef7375518e25997'; // PancakeSwap V3 QuoterV2（已实测 1 WBNB→717 USDT）
 const WBNB = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c';
 const USDT = '0x55d398326f99059ff775485246999027b3197955';
 const FEES = [100, 500, 2500, 10000];
+const PAUSE_AT = 5, PAUSE_MAX_MIN = 10;
 
 const MINT_SRC = [
   { url: 'https://bsc.blockrazor.xyz', max: 20 },
@@ -68,23 +76,27 @@ async function rpc(method, params, pool = RPC) {
   let last;
   for (const u of pool) {
     try { return await rpcTo(u, method, params); }
-    catch (e) { if (/revert/i.test(e.message)) throw e; last = e; } // revert 是合约行为，换源也一样
+    catch (e) { if (/revert/i.test(e.message)) throw e; last = e; }
   }
   throw last;
 }
 const hex = (n) => '0x' + Number(n).toString(16);
 const wa = (a) => a.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+const w64 = (n) => BigInt(n).toString(16).padStart(64, '0');
 const big = (h) => (h && h !== '0x' ? BigInt(h.slice(0, 66)) : 0n);
 
-// ---------- state（原子写 + 校验）----------
+// ---------- state（原子写 + 校验 + 损坏即 BLOCKED）----------
 let lastBlock = 0, pending = [], dupCount = 0, stateCorrupt = false, pendingOverflow = 0;
 try {
   const s = JSON.parse(readFileSync(STF, 'utf8'));
   lastBlock = s.lastBlock || 0; pending = s.pending || []; dupCount = s.dupCount || 0; pendingOverflow = s.pendingOverflow || 0;
-} catch (e) { if (e.code !== 'ENOENT') { stateCorrupt = true; log('  ! state.json 损坏，转入冷启动并告警: ' + e.message); } }
+} catch (e) { if (e.code !== 'ENOENT') { stateCorrupt = true; log('  ! state.json 损坏: ' + e.message); } }
+const FORCE_START = process.env.SHADOW_START_BLOCK ? parseInt(process.env.SHADOW_START_BLOCK, 10) : 0;
+const ALLOW_COLD = process.env.SHADOW_ALLOW_COLD_START === '1';
+
 function saveState() {
   trimPending();
-  const data = JSON.stringify({ version: VERSION, lastBlock, pending: pending.slice(-2000), dupCount, pendingOverflow, updated: ts() });
+  const data = JSON.stringify({ version: VERSION, build: BUILD, lastBlock, pending: pending.slice(-2000), dupCount, pendingOverflow, updated: ts() });
   const tmp = STF + '.tmp';
   try {
     const fd = openSync(tmp, 'w'); writeSync(fd, data); fsyncSync(fd); closeSync(fd);
@@ -98,11 +110,10 @@ function trimPending() {
   const dropped = pending.splice(0, pending.length - 2000);
   pendingOverflow += dropped.length;
   try { appendFileSync(PENDF, dropped.map((x) => JSON.stringify(x)).join('\n') + '\n'); } catch {}
-  log('  ! pending 超过 2000 段，溢出 ' + dropped.length + ' 段到 pending_overflow.jsonl（未丢弃）');
+  log('  ! pending 超过 2000 段，溢出 ' + dropped.length + ' 段到 pending_overflow.jsonl（可审计，但不会自动补扫）');
 }
 
-// ---------- dedupe by block height ----------
-const seen = new Map(); // key -> blockNumber
+const seen = new Map();
 function pruneSeen(head) { const cut = head - 3000; for (const [k, b] of seen) { if (b < cut) seen.delete(k); } }
 const MINTS = new Map(), checked = new Map();
 
@@ -155,94 +166,193 @@ function strAt(h) {
     return Buffer.from(x.slice(128, 128 + len * 2), 'hex').toString('utf8').replace(/[^\x20-\x7e\u4e00-\u9fa5]/g, '').slice(0, 40);
   } catch { return ''; }
 }
-async function callAt(to, data, blockTag) { try { return await rpc('eth_call', [{ to, data }, blockTag || 'latest']); } catch { return null; } }
+async function callAt(to, data, blockTag, pool) { try { return await rpc('eth_call', [{ to, data }, blockTag || 'latest'], pool || RPC); } catch { return null; } }
+// 免费 RPC 在限流时会返回 0x000…000 而不是报错（实测 48.club），零值必须交叉校验再采信
+const POOL_RPC = ['https://bsc.blockrazor.xyz', 'https://rpc.48.club'];
+let zeroDisagreements = 0;
+const isZeroHex = (h) => !h || h === '0x' || /^0x0+$/.test(h);
+async function callAtVerified(to, data) {
+  const a = await callAt(to, data, undefined, POOL_RPC);
+  if (!isZeroHex(a)) return a;
+  const b = await callAt(to, data, undefined, [POOL_RPC[1], POOL_RPC[0]]);
+  if (!isZeroHex(b)) { zeroDisagreements++; log('  ! 零值分歧 ' + to.slice(0, 10) + ' : ' + POOL_RPC[0] + '=0, ' + POOL_RPC[1] + '=有效'); return b; }
+  return a;
+}
+const DEC_CACHE = new Map();
+async function decimalsOf(tok) {
+  if (DEC_CACHE.has(tok)) return DEC_CACHE.get(tok);
+  const r = await callAt(tok, '0x313ce567');
+  const d = r && r !== '0x' ? Number(big(r)) : null;
+  const v = (d === null || d > 36) ? null : d;
+  DEC_CACHE.set(tok, v);
+  return v;
+}
+async function balanceOf(tok, who) { const r = await callAt(tok, '0x70a08231' + wa(who)); return r ? big(r) : 0n; }
 
-// V2：方向由 pair.token0() 决定
-async function v2Pool(tok) {
+// V2：储备按 decimals() 归一；某个 quote 无储备时继续下一个，不立即结束
+async function v2Pools(tok, dec) {
+  const out = [];
   for (const q of [WBNB, USDT]) {
-    const p = await callAt(V2F, '0xe6a43905' + wa(tok) + wa(q));
-    if (!p || p.length <= 66 || BigInt(p) === 0n) continue;
+    const p = await callAtVerified(V2F, '0xe6a43905' + wa(tok) + wa(q));
+    if (!p || p.length < 66 || BigInt(p) === 0n) continue;
     const pair = '0x' + p.slice(-40);
     const [t0, t1, rs] = await Promise.all([callAt(pair, '0x0dfe1681'), callAt(pair, '0xd21220a7'), callAt(pair, '0x0902f1ac')]);
-    if (!rs || rs.length <= 130) continue;
+    if (!rs || rs.length < 194) { out.push({ pool: pair, kind: 'v2', quote: q === WBNB ? 'WBNB' : 'USDT', tradable: false, reason: 'no_reserves' }); continue; }
     const r0 = BigInt('0x' + rs.slice(2, 66)), r1 = BigInt('0x' + rs.slice(66, 130));
-    const wbnbIs0 = t0 && '0x' + t0.slice(-40) === WBNB;
-    const base = wbnbIs0 ? Number(r0) / 1e18 : Number(r1) / 1e18;
-    const tradable = r0 > 0n && r1 > 0n;
-    return { pool: pair, kind: 'v2', quote: q === WBNB ? 'WBNB' : 'USDT', baseReserve: +base.toFixed(6), liquidity: tradable ? String(r0 < r1 ? r0 : r1) : '0', tradable };
+    const tokIs0 = t0 && '0x' + t0.slice(-40) === tok;
+    const decBase = await decimalsOf(q);
+    const resTok = tokIs0 ? r0 : r1, resBase = tokIs0 ? r1 : r0;
+    const tradable = resTok > 0n && resBase > 0n && dec !== null && decBase !== null;
+    out.push({
+      pool: pair, kind: 'v2', quote: q === WBNB ? 'WBNB' : 'USDT',
+      token0: t0 ? '0x' + t0.slice(-40) : null, token1: t1 ? '0x' + t1.slice(-40) : null,
+      reserveBase: tradable ? Number(resBase) / 10 ** decBase : 0,
+      reserveToken: tradable ? Number(resTok) / 10 ** dec : 0,
+      decToken: dec, decBase, tradable,
+    });
   }
-  return null;
+  return out;
 }
-// V3：真实流动性校验，只有池地址不算可交易
-async function v3Pool(tok) {
+
+// V3：逐档遍历，全部看过才下结论
+async function v3Pools(tok, dec) {
+  const out = [];
   for (const q of [WBNB, USDT]) {
     for (const fee of FEES) {
-      const p = await callAt(V3F, '0x1698ee82' + wa(tok) + wa(q) + BigInt(fee).toString(16).padStart(64, '0'));
-      if (!p || p.length <= 66 || BigInt(p) === 0n) continue;
+      const p = await callAtVerified(V3F, '0x1698ee82' + wa(tok) + wa(q) + w64(fee));
+      if (!p || p.length < 66 || BigInt(p) === 0n) continue;
       const pool = '0x' + p.slice(-40);
-      const [slot0, liq, t0, t1] = await Promise.all([
-        callAt(pool, '0x3850c7bd'), callAt(pool, '0x1a686502'), callAt(pool, '0x0dfe1681'), callAt(pool, '0xd21220a7'),
-      ]);
+      const [slot0, liq, t0] = await Promise.all([callAt(pool, '0x3850c7bd'), callAt(pool, '0x1a686502'), callAt(pool, '0x0dfe1681')]);
       const sqrtP = slot0 && slot0.length > 66 ? BigInt(slot0.slice(0, 66)) : 0n;
       const liquidity = liq ? big(liq) : 0n;
-      return {
+      out.push({
         pool, kind: 'v3', fee, quote: q === WBNB ? 'WBNB' : 'USDT',
-        liquidity: liquidity.toString(), sqrtPriceX96: sqrtP.toString(),
-        initialized: sqrtP > 0n, tradable: liquidity > 0n && sqrtP > 0n,
-        token0: t0 ? '0x' + t0.slice(-40) : null, token1: t1 ? '0x' + t1.slice(-40) : null,
-      };
+        token0: t0 ? '0x' + t0.slice(-40) : null,
+        sqrtPriceX96: sqrtP.toString(), liquidity: liquidity.toString(),
+        initialized: sqrtP > 0n, tradable: liquidity > 0n && sqrtP > 0n, decToken: dec,
+      });
     }
   }
-  return null;
+  return out;
 }
+
+// QuoterV2 真实报价 + 用 sqrtPriceX96 反推零冲击价算冲击
+async function quoteSellV3(pool, tok, amountInRaw) {
+  const q = pool.quote === 'WBNB' ? WBNB : USDT;
+  const data = '0xc6a5026a' + wa(tok) + wa(q) + BigInt(amountInRaw).toString(16).padStart(64, '0') + w64(pool.fee) + w64(0);
+  const r = await callAt(QUOTER_V2, data);
+  if (!r || r.length < 66) return { ok: false, reason: 'quoter_revert_or_empty' };
+  const outRaw = BigInt('0x' + r.slice(2, 66));
+  const sqrtP = BigInt(pool.sqrtPriceX96);
+  let spotOutRaw;
+  if (pool.token0 && pool.token0 === tok) spotOutRaw = (BigInt(amountInRaw) * sqrtP * sqrtP) >> 192n; // token1 per token0
+  else spotOutRaw = (BigInt(amountInRaw) << 192n) / (sqrtP * sqrtP); // token0 per token1
+  const impactBps = spotOutRaw > 0n ? Number(((spotOutRaw - outRaw) * 10000n) / spotOutRaw) : null;
+  const decOut = await decimalsOf(q);
+  return {
+    ok: true, amountInRaw: String(amountInRaw), amountOutRaw: String(outRaw),
+    amountOut: decOut !== null ? Number(outRaw) / 10 ** decOut : null,
+    spotOutRaw: String(spotOutRaw), priceImpactBps: impactBps,
+  };
+}
+
 async function minterOf(txHash) { try { const tx = await rpc('eth_getTransactionByHash', [txHash]); return tx && tx.to ? tx.to.toLowerCase() : null; } catch { return null; } }
 
 async function meta(tok) {
   const code = await codeOf(tok);
+  const dec = await decimalsOf(tok);
   const name = strAt((await callAt(tok, '0x06fdde03')) || '0x');
   const sym = strAt((await callAt(tok, '0x95d89b41')) || '0x');
   const m = MINTS.get(tok);
   let agentHolders = 0, agentBlock = 'latest';
   const sample = [...(m?.to || [])].slice(0, 7);
   if (m && m.firstBlock) { const at = await callAt(REGISTRY, '0x18160ddd', hex(m.firstBlock)); if (at) agentBlock = hex(m.firstBlock); }
-  for (const a of sample) {
-    const r = await callAt(REGISTRY, '0x70a08231' + wa(a), agentBlock);
-    if (r && big(r) > 0n) agentHolders++;
-  }
+  for (const a of sample) { const r = await callAt(REGISTRY, '0x70a08231' + wa(a), agentBlock); if (r && big(r) > 0n) agentHolders++; }
+
   const bytecodeRegistryHit = code.includes(REGISTRY_HEX);
   const selectorHit = code.includes('9f92d0dd');
   const gated0 = bytecodeRegistryHit || selectorHit;
-  const v2 = gated0 ? await v2Pool(tok) : null;
-  const v3 = (gated0 && !v2) ? await v3Pool(tok) : null;
-  const pool = v2 || v3;
+
+  let v2 = [], v3 = [], quoter = null;
+  if (gated0) {
+    v2 = await v2Pools(tok, dec);
+    const v3all = await v3Pools(tok, dec);
+    v3 = v3all;
+    const tradableV3 = v3all.filter((x) => x.tradable).sort((a, b) => (BigInt(b.liquidity) > BigInt(a.liquidity) ? 1 : -1));
+    if (tradableV3.length) {
+      const best = tradableV3[0];
+      const poolBal = await balanceOf(tok, best.pool);
+      if (poolBal > 0n) {
+        const amt = poolBal / 100n > 0n ? poolBal / 100n : poolBal; // 池内 1% 作为卖出规模
+        quoter = await quoteSellV3(best, tok, amt);
+        quoter.sizeBasis = 'pool_token_balance/100';
+      } else quoter = { ok: false, reason: 'pool_has_no_token_balance' };
+    }
+  }
+
+  const poolFound = v2.length > 0 || v3.length > 0;
+  const v2Tradable = v2.filter((x) => x.tradable).length;
+  const v3Tradable = v3.filter((x) => x.tradable).length;
+  const poolTradable = v2Tradable + v3Tradable > 0;
   const minter = m ? await minterOf(m.tx) : null;
   const agentHolderRatio = sample.length ? +(agentHolders / sample.length).toFixed(3) : 0;
-  const poolFound = !!pool;
-  const poolTradable = !!(pool && pool.tradable);
-  const behavioralGateVerified = false; // 待「有/无 Agent ID 钱包」行为差异验证，当前恒 false
-  const signalClass = (behavioralGateVerified && poolTradable) ? 'A'
+  const inUnrecoveredGap = m ? pending.some((r) => m.firstBlock >= Number(r.from) && m.firstBlock <= Number(r.to)) : false;
+
+  const sellPathEvidence = quoter && quoter.ok ? 'pancake_v3_quote' : null;
+  const behavioralGateVerified = false;
+  const signalClass = (behavioralGateVerified && poolTradable && sellPathEvidence) ? 'A'
     : (gated0 && agentHolderRatio >= 0.99 && !!minter) ? 'B'
     : gated0 ? 'C' : 'D';
+
   return {
-    name, sym, codeLen: Math.max(0, code.length / 2 - 1),
+    name, sym, decimals: dec, codeLen: Math.max(0, code.length / 2 - 1),
     bytecodeRegistryHit, selectorHit, agentHolders, sampleN: sample.length, agentHolderRatio, agentBlock,
     minterKnown: !!minter, minter,
     poolFound, poolTradable, poolFoundButNotTradable: poolFound && !poolTradable,
-    pool, behavioralGateVerified, signalClass, gated: gated0,
+    v2PoolCount: v2.length, v3PoolCount: v3.length, v2Tradable, v3Tradable,
+    v2, v3, quoter, sellPathEvidence,
+    behavioralGateVerified, signalClass, gated: gated0,
+    dataComplete: !inUnrecoveredGap, eventBlockWasGap: inUnrecoveredGap,
   };
 }
 
+async function selftest() {
+  log('[selftest] QuoterV2 / V3 / decimals 路径自检');
+  const dec = await decimalsOf(WBNB);
+  log('  WBNB decimals = ' + dec);
+  const pools = await v3Pools(WBNB, dec);
+  log('  V3 池数(2 quote × 4 fee) = ' + pools.length + ' ，可交易 ' + pools.filter((p) => p.tradable).length);
+  const best = pools.filter((p) => p.tradable).sort((a, b) => (BigInt(b.liquidity) > BigInt(a.liquidity) ? 1 : -1))[0];
+  if (best) {
+    const q = await quoteSellV3(best, WBNB, 10n ** 18n);
+    log('  quote 1 WBNB → ' + JSON.stringify(q));
+  } else log('  ! 无可用 V3 池');
+}
+
 async function main() {
-  log('[' + ts() + '] ' + VERSION + ' start; resume lastBlock=' + lastBlock + ' pending=' + pending.length + (stateCorrupt ? ' [STATE CORRUPT]' : ''));
+  log('[' + ts() + '] ' + VERSION + ' build=' + BUILD + ' start; resume lastBlock=' + lastBlock + ' pending=' + pending.length + (stateCorrupt ? ' [STATE CORRUPT]' : ''));
+  if (process.env.SHADOW_SELFTEST === '1') { await selftest(); return; }
+
+  // state 损坏：只读告警，不冷启动、不扫描；systemd 保持 active 但探针 BLOCKED，等人工恢复
+  if (stateCorrupt && !ALLOW_COLD && !FORCE_START) {
+    log('  BLOCKED: state 损坏且未授权冷启动。修复 state.json 或设置 SHADOW_ALLOW_COLD_START=1 / SHADOW_START_BLOCK=<n> 后重启。');
+    for (;;) {
+      appendFileSync(MET, JSON.stringify({ t: ts(), v: VERSION, build: BUILD, blocked: true, reason: 'state_corrupt', hint: 'set SHADOW_ALLOW_COLD_START=1 or SHADOW_START_BLOCK' }) + '\n');
+      await sleep(60000);
+    }
+  }
   let head = 0;
   try { head = parseInt(await rpc('eth_blockNumber', []), 16); } catch {}
-  if (!lastBlock || head - lastBlock > 3000) { lastBlock = head - 60; log('  cold start at ' + lastBlock); }
+  if (FORCE_START) { lastBlock = FORCE_START - 1; log('  forced start at ' + FORCE_START); }
+  else if (!lastBlock || head - lastBlock > 3000) { lastBlock = head - 60; log('  cold start at ' + lastBlock + (stateCorrupt ? ' (stateCorrupt 且已授权)' : '')); }
+
+  let pausedSince = 0;
   for (;;) {
     const t0 = Date.now();
     let gapFlag = false, gapRanges = [];
+    let cursorPaused = false, pauseReason = null;
     try {
       head = parseInt(await rpc('eth_blockNumber', []), 16);
-      // 先补上一轮欠的区间（最多 30 段）
       if (pending.length) {
         const todo = pending.splice(0, 30);
         const retryLogs = [];
@@ -255,13 +365,22 @@ async function main() {
       }
       const to = Math.min(head, lastBlock + 60);
       const fromBlock = lastBlock + 1;
+      const lastBlockBefore = lastBlock;
       const scan = await scanRange(fromBlock, to);
       const fresh = ingest(scan.logs, Date.now());
       if (scan.hadGap) { gapFlag = true; gapRanges.push(...scan.gapRanges); }
-      lastBlock = to;
+
+      // 主游标控制：pending 积压 + 本轮又出新 gap → 不推进，先补洞（10 分钟后强制恢复，避免卡死）
+      if (pending.length >= PAUSE_AT && scan.hadGap) {
+        if (!pausedSince) pausedSince = Date.now();
+        const pausedMin = (Date.now() - pausedSince) / 60000;
+        if (pausedMin < PAUSE_MAX_MIN) { cursorPaused = true; pauseReason = 'pending_gap'; }
+        else { pauseReason = 'forced_resume_after_' + PAUSE_MAX_MIN + 'min'; pausedSince = 0; }
+      } else if (pending.length < PAUSE_AT) pausedSince = 0;
+      if (!cursorPaused) lastBlock = to;
       pruneSeen(head);
 
-      let hits = 0, checkedNow = 0, pooled = 0, notTradable = 0, byClass = { A: 0, B: 0, C: 0, D: 0 };
+      let hits = 0, checkedNow = 0, pooled = 0, notTradable = 0, quoted = 0, byClass = { A: 0, B: 0, C: 0, D: 0 }, incomplete = 0;
       for (const [tok, m] of MINTS) {
         if (Date.now() - m.at > 30 * 60e3) { MINTS.delete(tok); continue; }
         if (m.to.size < 6) continue;
@@ -272,20 +391,24 @@ async function main() {
         if (mm.gated) hits++;
         if (mm.poolFound) pooled++;
         if (mm.poolFoundButNotTradable) notTradable++;
+        if (mm.quoter && mm.quoter.ok) quoted++;
+        if (!mm.dataComplete) incomplete++;
         byClass[mm.signalClass] = (byClass[mm.signalClass] || 0) + 1;
-        const observedAt = ts();
         appendFileSync(SIG, JSON.stringify({
-          t: observedAt, v: VERSION, tok, ...mm,
+          t: ts(), v: VERSION, build: BUILD, tok, ...mm,
           wallets: m.to.size, mints: m.mints,
           ageMin: +((Date.now() - m.at) / 60e3).toFixed(1),
-          eventBlock: m.firstBlock, observedAt,
+          eventBlock: m.firstBlock,
           scanFrom: fromBlock, scanTo: to, crossGap: gapFlag,
           gapRanges: gapFlag ? gapRanges.slice(0, 5) : [],
         }) + '\n');
-        if (mm.gated) log('  * ' + mm.signalClass + ' ' + (mm.sym || mm.name || tok) + ' ' + tok + ' wallets=' + m.to.size + ' agent=' + mm.agentHolders + '/' + mm.sampleN + '@' + mm.agentBlock + ' pool=' + (mm.pool ? mm.pool.kind + (mm.pool.tradable ? '+liq' : '-noLiq') : '-') + ' minter=' + (mm.minter ? mm.minter.slice(0, 10) : '-') + (gapFlag ? ' GAP' : ''));
+        if (mm.gated) log('  * ' + mm.signalClass + (mm.dataComplete ? '' : '(INC)') + ' ' + (mm.sym || mm.name || tok) + ' ' + tok
+          + ' w=' + m.to.size + ' agent=' + mm.agentHolders + '/' + mm.sampleN + '@' + mm.agentBlock
+          + ' v2=' + mm.v2Tradable + '/' + mm.v2PoolCount + ' v3=' + mm.v3Tradable + '/' + mm.v3PoolCount
+          + ' quote=' + (mm.quoter ? (mm.quoter.ok ? mm.quoter.amountOut + ' impact=' + mm.quoter.priceImpactBps + 'bps' : mm.quoter.reason) : '-')
+          + ' minter=' + (mm.minter ? mm.minter.slice(0, 10) : '-') + (gapFlag ? ' GAP' : ''));
       }
-      const ms = Date.now() - t0;
-      const nowMs = Date.now();
+      const ms = Date.now() - t0, nowMs = Date.now();
       const ages = pending.map((x) => (nowMs - Date.parse(x.t)) / 60000).filter((x) => x > 0);
       const rpcStats = [...STATS.values()].map((s) => ({
         url: s.url, calls: s.calls, ok: s.ok, err: s.err, k429: s.k429, kLimit: s.kLimit, kRevert: s.kRevert, kOther: s.kOther,
@@ -296,14 +419,18 @@ async function main() {
       }));
       const saved = saveState();
       appendFileSync(MET, JSON.stringify({
-        t: ts(), v: VERSION, head, scannedTo: to, lagBlocks: head - to, fromBlock, fresh,
+        t: ts(), v: VERSION, build: BUILD, head, scannedTo: to, lagBlocks: head - to, fromBlock, fresh,
         hadGap: gapFlag, gapCount: gapRanges.length, pending: pending.length,
         pendingAgeMaxMin: ages.length ? +Math.max(...ages).toFixed(1) : 0,
         pendingOverflow, stateCorrupt, stateSaved: saved,
-        tokens: MINTS.size, candidates: checkedNow, gatedHits: hits, pooled, poolNotTradable: notTradable, byClass,
+        cursorPaused, pauseReason, lastBlockBefore, lastBlockAfter: lastBlock,
+        tokens: MINTS.size, candidates: checkedNow, gatedHits: hits, pooled, poolNotTradable: notTradable, quoted,
+        byClass, incompleteSignals: incomplete, zeroDisagreements,
         seenSize: seen.size, ms, rpc: rpcStats,
       }) + '\n');
-      log('[' + ts() + '] head=' + head + ' lag=' + (head - to) + ' fresh=' + fresh + ' gap=' + (gapFlag ? gapRanges.length : 0) + ' pending=' + pending.length + ' mints30m=' + MINTS.size + ' cand=' + checkedNow + ' gated=' + hits + ' pool=' + pooled + ' ' + ms + 'ms');
+      log('[' + ts() + '] head=' + head + ' lag=' + (head - to) + ' gap=' + (gapFlag ? gapRanges.length : 0)
+        + ' pending=' + pending.length + (cursorPaused ? ' [PAUSED:' + pauseReason + ']' : '')
+        + ' cand=' + checkedNow + ' gated=' + hits + ' pool=' + pooled + ' quote=' + quoted + ' ' + ms + 'ms');
     } catch (e) { log('[' + ts() + '] CYCLE ERR ' + e.message); saveState(); }
     const used = Date.now() - t0;
     await sleep(Math.max(1500, 12000 - used));
