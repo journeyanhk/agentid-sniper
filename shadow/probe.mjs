@@ -35,8 +35,8 @@ const FEES = [100, 500, 2500, 10000];
 const PAUSE_AT = 5, PAUSE_MAX_MIN = 10;
 
 const MINT_SRC = [
+  { url: 'https://rpc.48.club', max: 500 },
   { url: 'https://bsc.blockrazor.xyz', max: 20 },
-  { url: 'https://rpc.48.club', max: 60 },
   { url: 'https://1rpc.io/bnb', max: 20 },
 ];
 const RPC = ['https://rpc.48.club', 'https://bsc.blockrazor.xyz'];
@@ -47,7 +47,7 @@ const log = (...a) => console.log(...a);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const COOLDOWN = new Map(); let nextSlot = 0;
-const RPS = 6;
+const RPS = 9;
 async function pace() { const now = Date.now(); const at = Math.max(now, nextSlot); nextSlot = at + Math.ceil(1000 / RPS); if (at > now) await sleep(at - now); }
 
 async function rpcTo(url, method, params, timeout = 25000) {
@@ -258,20 +258,33 @@ async function quoteSellV3(pool, tok, amountInRaw) {
 
 async function minterOf(txHash) { try { const tx = await rpc('eth_getTransactionByHash', [txHash]); return tx && tx.to ? tx.to.toLowerCase() : null; } catch { return null; } }
 
-async function meta(tok) {
+const IMM = new Map();   // 不可变字段：name/symbol/decimals/code/assetType
+const AGT = new Map();   // Agent ID 持币比例，5 分钟 TTL
+async function immutableOf(tok) {
+  if (IMM.has(tok)) return IMM.get(tok);
   const code = await codeOf(tok);
   const dec = await decimalsOf(tok);
   const name = strAt((await callAt(tok, '0x06fdde03')) || '0x');
   const sym = strAt((await callAt(tok, '0x95d89b41')) || '0x');
+  const ownerOf = await callAt(tok, '0x6352211e' + w64(1));
+  const v = { code, dec, name, sym, assetType: ownerOf && ownerOf !== '0x' ? 'erc721' : 'erc20' };
+  IMM.set(tok, v);
+  if (IMM.size > 20000) IMM.delete(IMM.keys().next().value);
+  return v;
+}
+async function meta(tok) {
+  const imm = await immutableOf(tok);
+  const code = imm.code, dec = imm.dec, name = imm.name, sym = imm.sym, assetType = imm.assetType;
   const m = MINTS.get(tok);
   let agentHolders = 0, agentBlock = 'latest';
-  const sample = [...(m?.to || [])].slice(0, 7);
-  if (m && m.firstBlock) { const at = await callAt(REGISTRY, '0x18160ddd', hex(m.firstBlock)); if (at) agentBlock = hex(m.firstBlock); }
-  for (const a of sample) { const r = await callAt(REGISTRY, '0x70a08231' + wa(a), agentBlock); if (r && big(r) > 0n) agentHolders++; }
-
-  // 资产类型：ERC-721(NFT) 与 ERC-20 的退出路径完全不同，必须先分清
-  const ownerOf = await callAt(tok, '0x6352211e' + w64(1));
-  const assetType = ownerOf && ownerOf !== '0x' ? 'erc721' : 'erc20';
+  const sample = [...(m?.to || [])].slice(0, 5);
+  const cached = AGT.get(tok);
+  if (cached && Date.now() - cached.at < 300000) { agentHolders = cached.hit; agentBlock = cached.block; }
+  else {
+    if (m && m.firstBlock) { const at = await callAt(REGISTRY, '0x18160ddd', hex(m.firstBlock)); if (at) agentBlock = hex(m.firstBlock); }
+    for (const a of sample) { const r = await callAt(REGISTRY, '0x70a08231' + wa(a), agentBlock); if (r && big(r) > 0n) agentHolders++; }
+    AGT.set(tok, { at: Date.now(), hit: agentHolders, block: agentBlock, n: sample.length });
+  }
   const bytecodeRegistryHit = code.includes(REGISTRY_HEX);
   const selectorHit = code.includes('9f92d0dd');
   const gated0 = bytecodeRegistryHit || selectorHit;
@@ -308,9 +321,10 @@ async function meta(tok) {
     : (gated0 && agentHolderRatio >= 0.99 && !!minter) ? 'B'
     : gated0 ? 'C' : 'D';
 
+  const sampleN = (cached && sample.length === 0) ? cached.n : sample.length;
   return {
     name, sym, decimals: dec, assetType, exitVenue, codeLen: Math.max(0, code.length / 2 - 1),
-    bytecodeRegistryHit, selectorHit, agentHolders, sampleN: sample.length, agentHolderRatio, agentBlock,
+    bytecodeRegistryHit, selectorHit, agentHolders, sampleN, agentHolderRatio, agentBlock,
     minterKnown: !!minter, minter,
     poolFound, poolTradable, poolFoundButNotTradable: poolFound && !poolTradable,
     v2PoolCount: v2.length, v3PoolCount: v3.length, v2Tradable, v3Tradable,
@@ -367,7 +381,7 @@ async function main() {
         }
         dupCount += ingest(retryLogs, Date.now());
       }
-      const to = Math.min(head, lastBlock + 60);
+      const to = Math.min(head - 2, lastBlock + 600);
       const fromBlock = lastBlock + 1;
       const lastBlockBefore = lastBlock;
       const scan = await scanRange(fromBlock, to);
