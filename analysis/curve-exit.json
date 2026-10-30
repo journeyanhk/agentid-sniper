@@ -1,0 +1,184 @@
+{
+ "generated": "2026-10-30T06:50:59Z",
+ "summary": {
+  "tokens": 8,
+  "with_candidates": 1,
+  "total_candidates": 1,
+  "mint_selectors": [
+   [
+    "0x42842e0e",
+    1
+   ]
+  ],
+  "sell_selectors": [
+   [
+    "0x42842e0e",
+    1
+   ]
+  ],
+  "replay_ok": 0,
+  "replay_total": 3,
+  "rpc_calls": 72,
+  "errors": {
+   "not supported": 9,
+   "You've reached the usage limit for": 3
+  }
+ },
+ "tokens": [
+  {
+   "tok": "0x6b1d77d3dede3fc775ca8c7bde08c2c2eaab9bea",
+   "sym": "HIRE",
+   "eventBlock": 130617189,
+   "transfers": 339,
+   "mints": 257,
+   "mintTx": "0xad3cb7313b229e20fd43aa55fb7e6d35e2bf4761ab5921e8507982309b5e1c3c",
+   "candidates": [],
+   "detail": []
+  },
+  {
+   "tok": "0xf197f509137db1eb45b17a362bc446d48e6dac4f",
+   "sym": "CMPASS",
+   "eventBlock": null,
+   "transfers": 0,
+   "mints": 0,
+   "mintTx": null,
+   "candidates": [],
+   "detail": []
+  },
+  {
+   "tok": "0x3f5abfc7eb3f9732e057a22d40546b6adaf90cbb",
+   "sym": "SPOKELY",
+   "eventBlock": 130617330,
+   "transfers": 194,
+   "mints": 194,
+   "mintTx": "0x579eeb197660894bc30b318a2a68884003dff0494c8f21f11a2ec454db4eb34e",
+   "candidates": [],
+   "detail": []
+  },
+  {
+   "tok": "0x40cdf5515370f3605adba8e9510b0d3a5bc16cee",
+   "sym": "PERISCOPA",
+   "eventBlock": 130617229,
+   "transfers": 132,
+   "mints": 132,
+   "mintTx": "0x432126cc8e2a7c1c8367674b6322dccbe1c880f0663a47c04679d48cd9f18fd4",
+   "candidates": [],
+   "detail": []
+  },
+  {
+   "tok": "0x44ab9f4687d5d6cd2454266b1e548552fb924908",
+   "sym": "BRUTE",
+   "eventBlock": 130617194,
+   "transfers": 123,
+   "mints": 122,
+   "mintTx": "0xbc851ad77deef88823ce6a9352990221bdab49f7f2fadb37de54f320ee89bccd",
+   "candidates": [],
+   "detail": []
+  },
+  {
+   "tok": "0xc5ea565f44d180dfa3c59e33ae37d16abf085786",
+   "sym": "TCM",
+   "eventBlock": 130617191,
+   "transfers": 72,
+   "mints": 72,
+   "mintTx": "0x937284d016f5878e902da8ec78f75507b21a60af8312f8c8e7a24e0e5bc8809d",
+   "candidates": [],
+   "detail": []
+  },
+  {
+   "tok": "0x59661d7f8f996f687cd98c116ccaf66efd254076",
+   "sym": "SOLVD",
+   "eventBlock": 130617193,
+   "transfers": 184,
+   "mints": 88,
+   "mintTx": "0x1b9bf519f957fbc8c22e5984a5e7c57b6a057685f5d015d39b38500a7af741be",
+   "candidates": [
+    {
+     "addr": "0xcf19bafccbf27369ceea7ff0f60c891dec1a0830",
+     "distinctSenders": 4
+    }
+   ],
+   "detail": [
+    {
+     "contract": "0xcf19bafccbf27369ceea7ff0f60c891dec1a0830",
+     "distinctSenders": 4,
+     "selectors": {
+      "0x42842e0e": 4
+     },
+     "txs": [
+      {
+       "hash": "0x5a05e8b7270387e3985412850341b408a55064f897f20b3ca4eb74c2064cd534",
+       "block": 130618647,
+       "from": "0x03ddd90454f66d04ce242cca919e5747e6ffcda7",
+       "to": "0x59661d7f8f996f687cd98c116ccaf66efd254076",
+       "selector": "0x42842e0e",
+       "value": 0,
+       "inputLen": 202,
+       "input": "0x42842e0e00000000000000000000000003ddd90454f66d04ce242cca919e5747e6ffcda7..."
+      },
+      {
+       "hash": "0x842b1096ee69c04485f558da87cb70c50bf534c161db9c485ced04b310870390",
+       "block": 130618664,
+       "from": "0xbd451fa818dffb53f810a9345cc9eec85366d7c8",
+       "to": "0x59661d7f8f996f687cd98c116ccaf66efd254076",
+       "selector": "0x42842e0e",
+       "value": 0,
+       "inputLen": 202,
+       "input": "0x42842e0e000000000000000000000000bd451fa818dffb53f810a9345cc9eec85366d7c8..."
+      },
+      {
+       "hash": "0xebe85bb73716a2526e3177a4c9a893a3c0294623e2a8cbb73a71c97b11d2e959",
+       "block": 130618682,
+       "from": "0x6c616b771fd17621d188308baa38fcd1c3f33593",
+       "to": "0x59661d7f8f996f687cd98c116ccaf66efd254076",
+       "selector": "0x42842e0e",
+       "value": 0,
+       "inputLen": 202,
+       "input": "0x42842e0e0000000000000000000000006c616b771fd17621d188308baa38fcd1c3f33593..."
+      },
+      {
+       "hash": "0x36bbd1302436d98f64342d9ad639008cf9be2e66d09f9703b3965d9fdafa20fb",
+       "block": 130618703,
+       "from": "0x6ad9723b5aaec1f598d587a76e4a63ec0afaefae",
+       "to": "0x59661d7f8f996f687cd98c116ccaf66efd254076",
+       "selector": "0x42842e0e",
+       "value": 0,
+       "inputLen": 202,
+       "input": "0x42842e0e0000000000000000000000006ad9723b5aaec1f598d587a76e4a63ec0afaefae..."
+      }
+     ],
+     "replays": [
+      {
+       "hash": "0x5a05e8b7270387e3985412850341b408a55064f897f20b3ca4eb74c2064cd534",
+       "block": 130618647,
+       "ok": false,
+       "result": ""
+      },
+      {
+       "hash": "0x842b1096ee69c04485f558da87cb70c50bf534c161db9c485ced04b310870390",
+       "block": 130618664,
+       "ok": false,
+       "result": ""
+      },
+      {
+       "hash": "0xebe85bb73716a2526e3177a4c9a893a3c0294623e2a8cbb73a71c97b11d2e959",
+       "block": 130618682,
+       "ok": false,
+       "result": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tok": "0xbc2c4a71791fb86d14a2a859b0253aa3bbaeb34c",
+   "sym": "PLOT",
+   "eventBlock": 130617210,
+   "transfers": 95,
+   "mints": 86,
+   "mintTx": "0x3b12996c4fceb9a9989f88d5ebec2a4c4fe8d5d9224942db7936773a591669b4",
+   "candidates": [],
+   "detail": []
+  }
+ ]
+}

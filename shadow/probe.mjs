@@ -269,12 +269,16 @@ async function meta(tok) {
   if (m && m.firstBlock) { const at = await callAt(REGISTRY, '0x18160ddd', hex(m.firstBlock)); if (at) agentBlock = hex(m.firstBlock); }
   for (const a of sample) { const r = await callAt(REGISTRY, '0x70a08231' + wa(a), agentBlock); if (r && big(r) > 0n) agentHolders++; }
 
+  // 资产类型：ERC-721(NFT) 与 ERC-20 的退出路径完全不同，必须先分清
+  const ownerOf = await callAt(tok, '0x6352211e' + w64(1));
+  const assetType = ownerOf && ownerOf !== '0x' ? 'erc721' : 'erc20';
   const bytecodeRegistryHit = code.includes(REGISTRY_HEX);
   const selectorHit = code.includes('9f92d0dd');
   const gated0 = bytecodeRegistryHit || selectorHit;
 
   let v2 = [], v3 = [], quoter = null;
-  if (gated0) {
+  const exitVenue = assetType === 'erc721' ? 'nft_marketplace_unknown' : 'amm';
+  if (gated0 && assetType === 'erc20') {
     v2 = await v2Pools(tok, dec);
     const v3all = await v3Pools(tok, dec);
     v3 = v3all;
@@ -305,7 +309,7 @@ async function meta(tok) {
     : gated0 ? 'C' : 'D';
 
   return {
-    name, sym, decimals: dec, codeLen: Math.max(0, code.length / 2 - 1),
+    name, sym, decimals: dec, assetType, exitVenue, codeLen: Math.max(0, code.length / 2 - 1),
     bytecodeRegistryHit, selectorHit, agentHolders, sampleN: sample.length, agentHolderRatio, agentBlock,
     minterKnown: !!minter, minter,
     poolFound, poolTradable, poolFoundButNotTradable: poolFound && !poolTradable,
@@ -402,7 +406,7 @@ async function main() {
           scanFrom: fromBlock, scanTo: to, crossGap: gapFlag,
           gapRanges: gapFlag ? gapRanges.slice(0, 5) : [],
         }) + '\n');
-        if (mm.gated) log('  * ' + mm.signalClass + (mm.dataComplete ? '' : '(INC)') + ' ' + (mm.sym || mm.name || tok) + ' ' + tok
+        if (mm.gated) log('  * ' + mm.signalClass + '/' + mm.assetType + (mm.dataComplete ? '' : '(INC)') + ' ' + (mm.sym || mm.name || tok) + ' ' + tok
           + ' w=' + m.to.size + ' agent=' + mm.agentHolders + '/' + mm.sampleN + '@' + mm.agentBlock
           + ' v2=' + mm.v2Tradable + '/' + mm.v2PoolCount + ' v3=' + mm.v3Tradable + '/' + mm.v3PoolCount
           + ' quote=' + (mm.quoter ? (mm.quoter.ok ? mm.quoter.amountOut + ' impact=' + mm.quoter.priceImpactBps + 'bps' : mm.quoter.reason) : '-')
