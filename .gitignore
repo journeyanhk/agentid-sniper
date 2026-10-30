@@ -1,6 +1,7 @@
-config.json
-data/
-baw2/
-baw2pkg/
 node_modules/
-WATCH_STOP
+package-lock.json
+config.json
+.env
+*.log
+*.jsonl
+data/
