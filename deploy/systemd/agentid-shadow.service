@@ -1,0 +1,20 @@
+# 只读影子探针（无钱包、无私钥、不下单）
+# 安装：sudo cp deploy/systemd/agentid-shadow.service /etc/systemd/system/
+#       sudo systemctl daemon-reload && sudo systemctl enable --now agentid-shadow
+# 路径按本机用户调整（此处为 /home/laoda/agentid-sniper）
+[Unit]
+Description=AgentID Sniper shadow probe (read-only, no wallet)
+After=network-online.target
+
+[Service]
+Type=simple
+User=laoda
+WorkingDirectory=/home/laoda/agentid-sniper/shadow
+ExecStart=/usr/bin/node /home/laoda/agentid-sniper/shadow/probe.mjs
+Restart=always
+RestartSec=10
+Nice=10
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

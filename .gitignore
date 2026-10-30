@@ -3,5 +3,7 @@ package-lock.json
 config.json
 .env
 *.log
-*.jsonl
-data/
+# 运行时产物：数据与状态不进仓库
+shadow/*.jsonl
+shadow/state.json
+shadow/state.json.bak
