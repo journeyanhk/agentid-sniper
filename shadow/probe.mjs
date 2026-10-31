@@ -16,9 +16,9 @@ import { execSync } from 'node:child_process';
 
 const DIR = process.env.SHADOW_DIR ?? new URL('.', import.meta.url).pathname;
 mkdirSync(DIR, { recursive: true });
-const VERSION = 'probe-4.0.0';
+const VERSION = 'probe-5.1.0';
 let BUILD = 'unknown';
-try { BUILD = execSync('git -C ' + DIR + '/.. rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch {}
+try { BUILD = execSync('git -C ' + new URL('..', import.meta.url).pathname + ' rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch {}
 const SIG = DIR + '/signals.jsonl', MET = DIR + '/metrics.jsonl', GAPF = DIR + '/gaps.jsonl';
 const PENDF = DIR + '/pending_overflow.jsonl', STF = DIR + '/state.json';
 
@@ -258,6 +258,55 @@ async function quoteSellV3(pool, tok, amountInRaw) {
 
 async function minterOf(txHash) { try { const tx = await rpc('eth_getTransactionByHash', [txHash]); return tx && tx.to ? tx.to.toLowerCase() : null; } catch { return null; } }
 
+// ---------- 行为级门槛判定（probe-5.1.0）----------
+// 静态判据（字节码含 registry / 含 mint selector）会漏掉「门槛藏在调用链后」的项目：
+// 实证 SIGIL 0xdd8bdfc9… 自身字节码不含 registry，但 mint(uint256) 对铸造者成功、对无 Agent ID 地址 revert。
+// 做法：拿一笔真实 mint 的 calldata，分别以「原铸造者」和「无 Agent ID 的探针地址」eth_call，比较结果。
+// 结果三态：gated（只有持 ID 者能过）/ open（两者都能过）/ unknown（都 revert 或传输失败）。
+const NO_AGENT = '0x000000000000000000000000000000000000dead';
+const PROBE_CACHE = new Map();
+let noAgentZero = null;
+
+async function rawEthCall(from, to, data, value) {
+  const p = { from, to, data };
+  if (value && value !== '0x0') p.value = value;
+  try { return { ok: true, out: await rpc('eth_call', [p, 'latest']) }; }
+  catch (e) {
+    const msg = String(e.message || '');
+    if (/revert/i.test(msg)) return { ok: false, revert: msg.slice(0, 120) };
+    return { ok: null, err: msg.slice(0, 80) };
+  }
+}
+
+async function gatedByBehavior(tok, txHash) {
+  const c = PROBE_CACHE.get(tok);
+  if (c && Date.now() - c.at < 600000) return c;
+  const res = (state, reason) => {
+    const v = { state, reason, at: Date.now() };
+    PROBE_CACHE.set(tok, v);
+    if (PROBE_CACHE.size > 5000) PROBE_CACHE.delete(PROBE_CACHE.keys().next().value);
+    return v;
+  };
+  if (!txHash) return res('unknown', 'no_mint_tx');
+  let tx = null;
+  try { tx = await rpc('eth_getTransactionByHash', [txHash]); } catch { return res('unknown', 'tx_fetch_failed'); }
+  if (!tx || !tx.to || tx.to.toLowerCase() !== tok) return res('unknown', 'tx_to_mismatch');
+  const input = tx.input || '0x';
+  if (input.length < 10) return res('unknown', 'no_calldata');
+  if (noAgentZero === null) {
+    try { const r = await callAt(REGISTRY, '0x70a08231' + wa(NO_AGENT)); noAgentZero = !!r && big(r) === 0n; }
+    catch { noAgentZero = null; }
+  }
+  if (!noAgentZero) return res('unknown', 'probe_addr_has_agent');
+  const a = await rawEthCall(tx.from, tok, input, tx.value);
+  const b = await rawEthCall(NO_AGENT, tok, input, tx.value);
+  if (a.ok === true && b.ok === true) return res('open', 'both_succeed');
+  if (a.ok === true && b.ok === false) return res('gated', 'holder_only');
+  if (a.ok === false && b.ok === true) return res('unknown', 'nonholder_only');
+  if (a.ok === false && b.ok === false) return res('unknown', 'both_revert');
+  return res('unknown', 'transport_error');
+}
+
 const IMM = new Map();   // 不可变字段：name/symbol/decimals/code/assetType
 const AGT = new Map();   // Agent ID 持币比例，5 分钟 TTL
 async function immutableOf(tok) {
@@ -287,7 +336,14 @@ async function meta(tok) {
   }
   const bytecodeRegistryHit = code.includes(REGISTRY_HEX);
   const selectorHit = code.includes('9f92d0dd');
-  const gated0 = bytecodeRegistryHit || selectorHit;
+  let gated0 = bytecodeRegistryHit || selectorHit;
+  // ERC-721 且静态判据未命中时，用行为判据复核（避免漏掉门槛藏在调用链后的项目）
+  let gatedProbe = null, gatedProbeReason = null;
+  if (!gated0 && assetType === 'erc721') {
+    const pr = await gatedByBehavior(tok, m && m.tx);
+    gatedProbe = pr.state; gatedProbeReason = pr.reason;
+    if (pr.state === 'gated') gated0 = true;
+  }
 
   let v2 = [], v3 = [], quoter = null;
   const exitVenue = assetType === 'erc721' ? 'nft_marketplace_unknown' : 'amm';
@@ -324,7 +380,7 @@ async function meta(tok) {
   const sampleN = (cached && sample.length === 0) ? cached.n : sample.length;
   return {
     name, sym, decimals: dec, assetType, exitVenue, codeLen: Math.max(0, code.length / 2 - 1),
-    bytecodeRegistryHit, selectorHit, agentHolders, sampleN, agentHolderRatio, agentBlock,
+    bytecodeRegistryHit, selectorHit, gatedProbe, gatedProbeReason, agentHolders, sampleN, agentHolderRatio, agentBlock,
     minterKnown: !!minter, minter,
     poolFound, poolTradable, poolFoundButNotTradable: poolFound && !poolTradable,
     v2PoolCount: v2.length, v3PoolCount: v3.length, v2Tradable, v3Tradable,
