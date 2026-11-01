@@ -47,14 +47,30 @@ R = Rpc()
 def u(h): return int(h, 16) if h and h != '0x' else 0
 
 def scan(frm, to):
-    out, cur, step = [], frm, 500
+    """扫描 [frm,to] 的 Fill 日志，返回 (logs, stats)。
+
+    旧实现失败只把分片减半、到 25 块后原地死循环，且不记录丢块 —— 会静默给出
+    「看起来完整」的成交数据。现在：分片减半到 MINSTEP 仍失败的区间记进
+    skippedRanges 并前进，绝不静默丢块。
+    """
+    MINSTEP, MAXRETRY = 25, 4
+    out, cur, step, fails = [], frm, 500, 0
+    stats = {'chunks': 0, 'retries': 0, 'skippedRanges': [], 'skippedBlocks': 0}
     while cur <= to:
         end = min(to, cur + step - 1)
         r = R.call('eth_getLogs', [{'fromBlock': hex(cur), 'toBlock': hex(end), 'topics': [FILL]}])
         if r is None:
-            step = max(25, step // 2); continue
-        out.extend(r); cur = end + 1
-    return out
+            stats['retries'] += 1; fails += 1
+            if step > MINSTEP:
+                step = max(MINSTEP, step // 2); continue
+            if fails >= MAXRETRY:
+                stats['skippedRanges'].append([cur, end])
+                stats['skippedBlocks'] += end - cur + 1
+                cur = end + 1; fails = 0; continue
+            time.sleep(0.5 * fails); continue
+        out.extend(r); stats['chunks'] += 1; cur = end + 1; fails = 0
+        if step < 500: step = min(500, step * 2)
+    return out, stats
 
 def decode(l):
     d = l['data'][2:]
@@ -69,10 +85,30 @@ def decode(l):
     }
 
 def main():
-    hours = float(sys.argv[1]) if len(sys.argv) > 1 else 12
+    # 参数：--hours N（默认 12）/ --from-block / --to-block / --output
+    hours, frm, to, outpath = 12.0, None, None, None
+    a = sys.argv[1:]; i = 0
+    while i < len(a):
+        k = a[i]
+        if k == '--hours' and i + 1 < len(a): hours = float(a[i + 1]); i += 2
+        elif k == '--from-block' and i + 1 < len(a): frm = int(a[i + 1], 0); i += 2
+        elif k == '--to-block' and i + 1 < len(a): to = int(a[i + 1], 0); i += 2
+        elif k == '--output' and i + 1 < len(a): outpath = a[i + 1]; i += 2
+        else:
+            try: hours = float(k)
+            except Exception: pass
+            i += 1
     head = u(R.call('eth_blockNumber', []))
-    frm = head - int(hours * BLOCKS_PER_HOUR)
-    logs = scan(frm, head)
+    if to is None: to = head
+    if frm is None: frm = to - int(hours * BLOCKS_PER_HOUR)
+    logs, scan_stats = scan(frm, to)
+
+    def _bts(b):
+        r = R.call('eth_getBlockByNumber', [hex(b), False])
+        return int(r['timestamp'], 16) if r else None
+
+    _t0, _t1 = _bts(frm), _bts(to)
+    iso = lambda x: time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(x)) if x else None
     fills = [x for x in (decode(l) for l in logs) if x]
     native = [x for x in fills if int(x['payToken'], 16) == NATIVE]
     coll = defaultdict(lambda: {'sales': 0, 'vol': 0, 'min': None, 'max': None,
@@ -119,6 +155,14 @@ def main():
     agg = {
         'generated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         'windowHours': hours, 'head': head, 'fromBlock': frm,
+        'window': {
+            'fromBlock': frm, 'toBlock': to, 'blocks': to - frm + 1,
+            'fromTimestamp': iso(_t0), 'toTimestamp': iso(_t1),
+            'windowHoursActual': round((_t1 - _t0) / 3600, 2) if _t0 and _t1 else None,
+            'dataComplete': not scan_stats['skippedRanges'],
+            'skippedBlocks': scan_stats['skippedBlocks'],
+        },
+        'scanStats': scan_stats,
         'fills_total': len(fills), 'fills_native_bnb': len(native),
         'fills_erc20_pay': len(fills) - len(native),
         'collections_traded': len(coll),
@@ -135,7 +179,7 @@ def main():
                                 'minBnb': (v['min'] or 0) / 1e18, 'maxBnb': (v['max'] or 0) / 1e18,
                                 'buyers': len(v['buyers']), 'sellers': len(v['sellers'])}
                                for k, v in top]}
-    dest = os.path.expanduser('~/agentid-sniper/analysis/element-fills.json')
+    dest = os.path.expanduser(outpath or '~/agentid-sniper/analysis/element-fills.json')
     json.dump(out, open(dest, 'w'), ensure_ascii=False, indent=1)
     print(json.dumps(agg, ensure_ascii=False, indent=1))
     print('--- 全市场 Top5 系列（按成交量）')
