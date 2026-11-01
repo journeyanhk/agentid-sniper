@@ -1,0 +1,56 @@
+{
+ "at": "2026-11-01T03:42:41Z",
+ "cases": [
+  {
+   "case": "01_version_mix",
+   "pass": true,
+   "exit": 2,
+   "status": "BLOCKED",
+   "blocked": [
+    "G3_VERSION_MIX"
+   ],
+   "expect": "G3_VERSION_MIX"
+  },
+  {
+   "case": "02_fills_stale",
+   "pass": true,
+   "exit": 2,
+   "status": "BLOCKED",
+   "blocked": [
+    "G1_FILLS_STALE"
+   ],
+   "expect": "G1_FILLS_STALE"
+  },
+  {
+   "case": "03_fills_incomplete",
+   "pass": true,
+   "exit": 2,
+   "status": "BLOCKED",
+   "blocked": [
+    "G1_FILLS_INCOMPLETE",
+    "G1_SKIPPED_RANGES",
+    "G1_COVERAGE_RATIO"
+   ],
+   "expect": "G1_FILLS_INCOMPLETE"
+  },
+  {
+   "case": "04_no_window",
+   "pass": true,
+   "exit": 2,
+   "status": "BLOCKED",
+   "blocked": [
+    "G1_NO_ELEMENT_WINDOW"
+   ],
+   "expect": "G1_NO_ELEMENT_WINDOW"
+  },
+  {
+   "case": "05_ready",
+   "pass": true,
+   "exit": 0,
+   "status": "READY_FOR_DECISION",
+   "blocked": [],
+   "expect": "READY"
+  }
+ ],
+ "fail": 0
+}

@@ -1,115 +1,198 @@
 #!/usr/bin/env python3
-"""Element(BSC) NFT 真实成交取证 v2 —— 只读
+"""Element(BSC) NFT 成交取证 v3 —— 只读，带可证明的窗口覆盖
 
-事件：Element Fill（匿名参数，14/12 words）
+相对 v2 的改动（2026-11-01 复核要求）：
+  1. 显式窗口：--from-block/--to-block 或 --from-time/--to-time（自动解析成块高）；
+  2. 覆盖证明：requestedRanges / scannedRanges / skippedRanges / retryCount /
+     rpcSources / dataComplete，全部写进 coverage 段；
+  3. 失败区间有限终止：分片减到 25 块仍失败 → 记 status=skipped + reason + attempts，
+     前进到下一段，绝不死循环、也绝不把失败当「没有成交」；
+  4. 去重：按 (txHash, logIndex) 去重，边界块不会重复计数；
+  5. decoder 版本落盘，避免不同解码器结果被直接比较；
+  6. 退出码：0=完整，3=有 skipped（此时 dataComplete=false）。
+
+事件：Element Fill
   0x9c248aa1a265aa616f707b979d57f4529bb63a4fc34dc7fc61fdddc18410f74e
-字段布局（2026-10-31 实测校准，逐条验证过 ownerOf(1)）：
-  w1 = 卖家地址      w2 = 买家地址
-  w4 = 支付币（0xeeee...eeee = 原生 BNB，否则为 ERC20）
-  w5 = 成交价(wei)   w7 = NFT 集合合约      w8 = tokenId（12 words 版本里 w3 不是 tokenId）
-  w10 = 市场结算合约(0x67c0a1fc...)         w11 = 手续费(约 2%)
-判据：只有本事件计入"成交"；EOA↔EOA 转账永不计数。
+  w1 卖家 / w2 买家 / w4 支付币（0xeeee…=BNB）/ w5 价格 / w7 集合 / w8 tokenId
+  w10 结算合约 / w11 手续费；12 或 14 words 两种布局按 len(words) 分流。
 
-输出 analysis/element-fills.json + 终端摘要
 不做：签名、approve、mint、sell、baw、任何写操作。
 """
-import json, os, sys, time, urllib.request
+import calendar, json, os, sys, time, urllib.request
 from collections import Counter, defaultdict
 
 RPCS = ['https://rpc.48.club', 'https://bsc.blockrazor.xyz', 'https://1rpc.io/bnb']
 FILL = '0x9c248aa1a265aa616f707b979d57f4529bb63a4fc34dc7fc61fdddc18410f74e'
 NATIVE = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 BLOCKS_PER_HOUR = 8000
+DECODER_VERSION = 'element-fill-v3'
+STEP, MINSTEP, MAXRETRY = 500, 25, 4
+
 
 class Rpc:
-    def __init__(self): self.i = 0; self.calls = 0; self.last = 0; self.err = Counter()
+    def __init__(self):
+        self.i = 0; self.calls = 0; self.last = 0
+        self.err = Counter(); self.ok = Counter(); self.used = Counter()
+
     def pace(self):
         dt = time.time() - self.last
-        if dt < 0.17: time.sleep(0.17 - dt)
+        if dt < 0.17:
+            time.sleep(0.17 - dt)
         self.last = time.time()
+
     def call(self, method, params, tries=3):
         for k in range(tries):
             url = RPCS[(self.i + k) % len(RPCS)]
-            self.pace(); self.calls += 1
+            self.pace(); self.calls += 1; self.used[url] += 1
             body = json.dumps({'jsonrpc': '2.0', 'id': 1, 'method': method, 'params': params}).encode()
             try:
-                req = urllib.request.Request(url, body, {'content-type': 'application/json', 'user-agent': 'element-watch/2.0'})
+                req = urllib.request.Request(url, body, {'content-type': 'application/json',
+                                                         'user-agent': 'element-watch/3.0'})
                 r = json.load(urllib.request.urlopen(req, timeout=25))
                 if 'error' in r:
-                    self.err[r['error'].get('message', '')[:30]] += 1
+                    self.err[r['error'].get('message', '')[:40]] += 1
                     continue
+                self.ok[url] += 1
                 return r.get('result')
             except Exception as e:
-                self.err[str(e)[:30]] += 1
+                self.err[str(e)[:40]] += 1
+        self.i = (self.i + 1) % len(RPCS)
         return None
 
+
 R = Rpc()
-def u(h): return int(h, 16) if h and h != '0x' else 0
+u = lambda h: int(h, 16) if h and h != '0x' else 0
+
+
+def block_ts(b, tries=4):
+    for _ in range(tries):
+        r = R.call('eth_getBlockByNumber', [hex(b), False])
+        if r:
+            return int(r['timestamp'], 16)
+    return None
+
+
+def block_at_time(target_ts):
+    """把时间戳解析成块高：先按 20k 步长向后退到目标时间之前，再二分收敛。
+
+    不能直接从 head-80天 二分：免费 RPC 对过老的块返回 null（实测 2,000,000 块前
+    就取不到 timestamp），会让整个解析失败或退化。这里只触碰最近几十万块。
+    """
+    head = u(R.call('eth_blockNumber', []))
+    if not head:
+        return None
+    hi, lo, step = head, None, 20000
+    for _ in range(40):
+        b = max(0, hi - step)
+        ts = block_ts(b)
+        if ts is None:
+            return None
+        if ts <= target_ts:
+            lo = b
+            break
+        hi = b
+        if hi == 0:
+            lo = 0
+            break
+        step = min(step * 2, 400000)
+    if lo is None:
+        return None
+    while lo < hi:
+        mid = (lo + hi) // 2
+        ts = block_ts(mid)
+        if ts is None:
+            return None
+        if ts < target_ts:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo
+
 
 def scan(frm, to):
-    """扫描 [frm,to] 的 Fill 日志，返回 (logs, stats)。
-
-    旧实现失败只把分片减半、到 25 块后原地死循环，且不记录丢块 —— 会静默给出
-    「看起来完整」的成交数据。现在：分片减半到 MINSTEP 仍失败的区间记进
-    skippedRanges 并前进，绝不静默丢块。
-    """
-    MINSTEP, MAXRETRY = 25, 4
-    out, cur, step, fails = [], frm, 500, 0
-    stats = {'chunks': 0, 'retries': 0, 'skippedRanges': [], 'skippedBlocks': 0}
+    """扫描 [frm,to]，返回 (logs, coverage)。失败区间有限重试后记为 skipped 并前进。"""
+    out, cur, step, fails = [], frm, STEP, 0
+    cov = {'requestedRanges': (to - frm) // STEP + 1, 'scannedRanges': 0,
+           'retryCount': 0, 'skippedBlocks': 0, 'coveredBlocks': 0,
+           'skippedRanges': []}
     while cur <= to:
         end = min(to, cur + step - 1)
         r = R.call('eth_getLogs', [{'fromBlock': hex(cur), 'toBlock': hex(end), 'topics': [FILL]}])
         if r is None:
-            stats['retries'] += 1; fails += 1
+            cov['retryCount'] += 1; fails += 1
             if step > MINSTEP:
                 step = max(MINSTEP, step // 2); continue
             if fails >= MAXRETRY:
-                stats['skippedRanges'].append([cur, end])
-                stats['skippedBlocks'] += end - cur + 1
+                cov['skippedRanges'].append({'fromBlock': cur, 'toBlock': end, 'status': 'skipped',
+                                             'reason': 'all_rpc_failed', 'attempts': fails})
+                cov['skippedBlocks'] += end - cur + 1
                 cur = end + 1; fails = 0; continue
-            time.sleep(0.5 * fails); continue
-        out.extend(r); stats['chunks'] += 1; cur = end + 1; fails = 0
-        if step < 500: step = min(500, step * 2)
-    return out, stats
+            time.sleep(0.4 * fails); continue
+        out.extend(r)
+        cov['scannedRanges'] += 1; cov['coveredBlocks'] += end - cur + 1
+        cur = end + 1; fails = 0
+        if step < STEP: step = min(STEP, step * 2)
+    cov['dataComplete'] = not cov['skippedRanges']
+    cov['blocksRequested'] = to - frm + 1
+    cov['coverageRatio'] = round((cov['coveredBlocks'] + cov['skippedBlocks']) / max(1, cov['blocksRequested']), 4)
+    cov['rpcSources'] = sum(1 for v in R.ok.values() if v > 0)
+    cov['rpcOk'] = dict(R.ok)
+    return out, cov
+
 
 def decode(l):
     d = l['data'][2:]
     w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
-    if len(w) < 12: return None
+    if len(w) < 12:
+        return None
     g = lambda i: w[i] if i < len(w) else 0
     return {
         'block': u(l['blockNumber']), 'tx': l['transactionHash'],
+        'logIndex': u(l.get('logIndex', '0x0')), 'words': len(w),
         'seller': '0x%040x' % g(1), 'buyer': '0x%040x' % g(2),
-        'tokenId': g(8) if len(w) >= 9 else g(3), 'payToken': '0x%040x' % g(4), 'priceWei': g(5),
+        'tokenId': g(8), 'payToken': '0x%040x' % g(4), 'priceWei': g(5),
         'collection': '0x%040x' % g(7), 'market': '0x%040x' % g(10), 'feeWei': g(11),
     }
 
+
+def arg(name, default=None):
+    a = sys.argv
+    return a[a.index(name) + 1] if name in a and a.index(name) + 1 < len(a) else default
+
+
 def main():
-    # 参数：--hours N（默认 12）/ --from-block / --to-block / --output
-    hours, frm, to, outpath = 12.0, None, None, None
-    a = sys.argv[1:]; i = 0
-    while i < len(a):
-        k = a[i]
-        if k == '--hours' and i + 1 < len(a): hours = float(a[i + 1]); i += 2
-        elif k == '--from-block' and i + 1 < len(a): frm = int(a[i + 1], 0); i += 2
-        elif k == '--to-block' and i + 1 < len(a): to = int(a[i + 1], 0); i += 2
-        elif k == '--output' and i + 1 < len(a): outpath = a[i + 1]; i += 2
-        else:
-            try: hours = float(k)
-            except Exception: pass
-            i += 1
+    from_ts = arg('--from-time'); to_ts = arg('--to-time')
+    frm, to = arg('--from-block'), arg('--to-block')
+    outpath = arg('--output', os.path.expanduser('~/agentid-sniper/analysis/element-fills.json'))
+    hours = float(arg('--hours', 12))
+
+    if from_ts:
+        frm = block_at_time(calendar.timegm(time.strptime(from_ts, '%Y-%m-%dT%H:%M:%SZ')))
+        if frm is None:
+            print('无法把 --from-time 解析成块高，终止（不猜窗口）'); sys.exit(2)
+    if to_ts:
+        to = block_at_time(calendar.timegm(time.strptime(to_ts, '%Y-%m-%dT%H:%M:%SZ')))
+        if to is None:
+            print('无法把 --to-time 解析成块高，终止（不猜窗口）'); sys.exit(2)
     head = u(R.call('eth_blockNumber', []))
-    if to is None: to = head
-    if frm is None: frm = to - int(hours * BLOCKS_PER_HOUR)
-    logs, scan_stats = scan(frm, to)
+    def _i(x):
+        return int(x, 0) if isinstance(x, str) else int(x)
+    to = _i(to) if to is not None else head
+    frm = _i(frm) if frm is not None else to - int(hours * BLOCKS_PER_HOUR)
+    if frm > to:
+        print('窗口非法：fromBlock %s > toBlock %s' % (frm, to)); sys.exit(2)
 
-    def _bts(b):
-        r = R.call('eth_getBlockByNumber', [hex(b), False])
-        return int(r['timestamp'], 16) if r else None
+    logs, cov = scan(frm, to)
 
-    _t0, _t1 = _bts(frm), _bts(to)
-    iso = lambda x: time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(x)) if x else None
-    fills = [x for x in (decode(l) for l in logs) if x]
+    # 去重：同 (tx, logIndex) 只算一次
+    seen, uniq = set(), []
+    for l in logs:
+        k = (l['transactionHash'], l.get('logIndex', '0x0'))
+        if k in seen:
+            continue
+        seen.add(k); uniq.append(l)
+
+    fills = [x for x in (decode(l) for l in uniq) if x]
     native = [x for x in fills if int(x['payToken'], 16) == NATIVE]
     coll = defaultdict(lambda: {'sales': 0, 'vol': 0, 'min': None, 'max': None,
                                 'sellers': set(), 'buyers': set(), 'last': 0})
@@ -121,75 +204,74 @@ def main():
         c['max'] = p if c['max'] is None else max(c['max'], p)
         c['sellers'].add(x['seller']); c['buyers'].add(x['buyer']); c['last'] = max(c['last'], x['block'])
 
-    # 我们的 gated 集合
     tracked = {}
     sig = os.path.expanduser('~/agentid-sniper/shadow/signals.jsonl')
     if os.path.exists(sig):
         for line in open(sig):
-            try: r = json.loads(line)
-            except: continue
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
             if r.get('gated') and r.get('assetType') == 'erc721':
                 t = r['tok'].lower()
-                tracked.setdefault(t, {'sym': r.get('sym'), 'mints': 0, 'eventBlock': r.get('eventBlock')})
-                tracked[t]['mints'] = max(tracked[t]['mints'], r.get('mints') or 0)
+                e = tracked.setdefault(t, {'sym': r.get('sym'), 'mints': 0, 'lastBlock': 0})
+                e['mints'] = max(e['mints'], r.get('mints') or 0)
+                e['lastBlock'] = max(e['lastBlock'], r.get('eventBlock') or 0)
 
-    tracked_rows = []
+    rows = []
     for t, m in tracked.items():
         c = coll.get(t)
-        mint_gas = 0.00003 * m['mints']  # 单次 mint gas 约 3e-5 BNB（实测口径，量级参考）
-        tracked_rows.append({
-            'collection': t, 'sym': m['sym'], 'mints': m['mints'],
-            'sales': c['sales'] if c else 0,
-            'volumeBnb': (c['vol'] / 1e18) if c else 0,
-            'minPriceBnb': (c['min'] / 1e18) if c and c['min'] is not None else None,
-            'maxPriceBnb': (c['max'] / 1e18) if c and c['max'] is not None else None,
-            'uniqueBuyers': len(c['buyers']) if c else 0,
-            'uniqueSellers': len(c['sellers']) if c else 0,
-            'sellThrough': (c['sales'] / m['mints']) if c and m['mints'] else 0,
-            'lastSaleBlock': c['last'] if c else None,
-            'mintGasBnbEst': round(mint_gas, 6),
-        })
-    tracked_rows.sort(key=lambda r: -r['sales'])
+        rows.append({'collection': t, 'sym': m['sym'], 'mints': m['mints'],
+                     'sales': c['sales'] if c else 0,
+                     'volumeBnb': round(c['vol'] / 1e18, 6) if c else 0,
+                     'uniqueBuyers': len(c['buyers']) if c else 0,
+                     'uniqueSellers': len(c['sellers']) if c else 0,
+                     'sellThrough': round(c['sales'] / m['mints'], 4) if c and m['mints'] else 0,
+                     'lastSaleBlock': c['last'] if c else None})
+    rows.sort(key=lambda r: -r['sales'])
 
-    top = sorted(coll.items(), key=lambda kv: -kv[1]['vol'])[:10]
+    t0, t1 = block_ts(frm), block_ts(to)
+    iso = lambda x: time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(x)) if x else None
+
     agg = {
         'generated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-        'windowHours': hours, 'head': head, 'fromBlock': frm,
-        'window': {
-            'fromBlock': frm, 'toBlock': to, 'blocks': to - frm + 1,
-            'fromTimestamp': iso(_t0), 'toTimestamp': iso(_t1),
-            'windowHoursActual': round((_t1 - _t0) / 3600, 2) if _t0 and _t1 else None,
-            'dataComplete': not scan_stats['skippedRanges'],
-            'skippedBlocks': scan_stats['skippedBlocks'],
-        },
-        'scanStats': scan_stats,
+        'window': {'fromBlock': frm, 'toBlock': to, 'blocks': to - frm + 1,
+                   'fromTimestamp': iso(t0), 'toTimestamp': iso(t1),
+                   'windowMinutes': round((t1 - t0) / 60, 1) if t0 and t1 else None},
+        'coverage': cov,
+        'decoder': {'elementTopic': FILL, 'version': DECODER_VERSION,
+                    'layouts': ['12words', '14words'], 'dedupe': 'txHash+logIndex'},
         'fills_total': len(fills), 'fills_native_bnb': len(native),
         'fills_erc20_pay': len(fills) - len(native),
         'collections_traded': len(coll),
-        'volumeBnb': sum(c['vol'] for c in coll.values()) / 1e18,
+        'volumeBnb': round(sum(c['vol'] for c in coll.values()) / 1e18, 6),
         'tracked_collections': len(tracked),
-        'tracked_with_sales': sum(1 for r in tracked_rows if r['sales'] > 0),
-        'tracked_sales': sum(r['sales'] for r in tracked_rows),
-        'tracked_volumeBnb': round(sum(r['volumeBnb'] for r in tracked_rows), 6),
-        'rpcCalls': R.calls, 'errors': dict(R.err.most_common(4)),
+        'tracked_with_sales': sum(1 for r in rows if r['sales'] > 0),
+        'tracked_sales': sum(r['sales'] for r in rows),
+        'tracked_volumeBnb': round(sum(r['volumeBnb'] for r in rows), 6),
+        'rpcCalls': R.calls, 'errors': dict(R.err.most_common(5)),
     }
-    out = {'agg': agg, 'tracked': tracked_rows[:80],
+    out = {'agg': agg, 'tracked': rows[:120],
            'top_collections': [{'collection': k, 'sales': v['sales'],
                                 'volumeBnb': round(v['vol'] / 1e18, 6),
-                                'minBnb': (v['min'] or 0) / 1e18, 'maxBnb': (v['max'] or 0) / 1e18,
                                 'buyers': len(v['buyers']), 'sellers': len(v['sellers'])}
-                               for k, v in top]}
-    dest = os.path.expanduser(outpath or '~/agentid-sniper/analysis/element-fills.json')
-    json.dump(out, open(dest, 'w'), ensure_ascii=False, indent=1)
-    print(json.dumps(agg, ensure_ascii=False, indent=1))
-    print('--- 全市场 Top5 系列（按成交量）')
-    for t in out['top_collections'][:5]:
-        print('  %s sales=%d vol=%.4fBNB 单价 %.5f~%.5f 买%d/卖%d' % (
-            t['collection'], t['sales'], t['volumeBnb'], t['minBnb'], t['maxBnb'], t['buyers'], t['sellers']))
-    hit = [r for r in tracked_rows if r['sales'] > 0]
-    print('--- 我们跟踪的 gated 集合有成交的:', len(hit))
-    for r in hit[:10]:
-        print('  %s %s sales=%d vol=%.5f sell-through=%.4f' % (r['sym'], r['collection'], r['sales'], r['volumeBnb'], r['sellThrough']))
+                               for k, v in sorted(coll.items(), key=lambda kv: -kv[1]['vol'])[:10]]}
+    tmp = outpath + '.tmp'
+    json.dump(out, open(tmp, 'w'), ensure_ascii=False, indent=1)
+    os.replace(tmp, outpath)
+
+    print('窗口 %s..%s  %s → %s（%s 分钟）' % (frm, to, iso(t0), iso(t1), agg['window']['windowMinutes']))
+    print('覆盖: requested=%s scanned=%s skipped=%s retry=%s dataComplete=%s ratio=%s' % (
+        cov['requestedRanges'], cov['scannedRanges'], len(cov['skippedRanges']),
+        cov['retryCount'], cov['dataComplete'], cov['coverageRatio']))
+    print('成交: fills=%s native=%s collections=%s vol=%s BNB  tracked=%s withSales=%s sales=%s' % (
+        agg['fills_total'], agg['fills_native_bnb'], agg['collections_traded'], agg['volumeBnb'],
+        agg['tracked_collections'], agg['tracked_with_sales'], agg['tracked_sales']))
+    print('已写 %s' % outpath)
+    if not cov['dataComplete']:
+        print('!! 有 %d 个区间被跳过，dataComplete=false，不可用于最终基线' % len(cov['skippedRanges']))
+        sys.exit(3)
+
 
 if __name__ == '__main__':
     main()
