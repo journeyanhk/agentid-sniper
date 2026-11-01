@@ -1,0 +1,112 @@
+{
+ "status": "READY_FOR_DECISION",
+ "blocked": [],
+ "generated": "2026-11-01T03:57:20Z",
+ "window": {
+  "source": "element-fills",
+  "fromBlock": 130787291,
+  "toBlock": 130979241,
+  "fromTimestamp": "2026-10-31T03:45:00Z",
+  "toTimestamp": "2026-11-01T03:45:00Z",
+  "windowMinutes": 1440.0
+ },
+ "versions": {
+  "probe": [
+   "probe-4.0.0"
+  ],
+  "build": [
+   "4353130"
+  ],
+  "schemaVersion": [],
+  "collectorVersion": [],
+  "probeSha256Rounds": []
+ },
+ "provenance": {
+  "probeFileSha256": "bb2c73efdbcadcfdcb8f59612427dcf90c6f81b1eaf771e80c1ece0129a0ae40",
+  "probeFileBytes": 34021,
+  "probeGitCommit": "52774a28b6b5a48fa473aaba0ef7516699ac6fbf",
+  "probeSha256Source": "working-tree-at-baseline-time",
+  "note": "冻结期不能在探针里加 probeSha256 字段，故按工作树 hash + git 提交溯源"
+ },
+ "integrity": {
+  "rounds": 7187,
+  "incompleteRounds": 0,
+  "hadGapRounds": 0,
+  "gapCountSum": 0,
+  "gapsInWindow": 0,
+  "pendingMax": 0,
+  "pendingOverflowMax": 0,
+  "stateCorruptRounds": 0,
+  "cursorPausedRounds": 0,
+  "zeroDisagreements": 0,
+  "msAvg": 666.0,
+  "msP95": 2478
+ },
+ "dataFresh": {
+  "maxLagBlocks": 1705,
+  "maxLagMinutes": 12.8,
+  "lagLast": 2,
+  "dataFresh": false,
+  "degraded": true,
+  "realtimeFailed": false,
+  "note": "lag 高但已追平 = 数据完整、实时性降级；不等于扫描正常"
+ },
+ "signals": {
+  "signalRows": 4202,
+  "uniqueContracts": 1481,
+  "uniqueEvents": 1700,
+  "duplicateRows": 2502,
+  "gatedRows": 2901,
+  "gatedContracts": 945,
+  "gatedErc721Rows": 2835,
+  "gatedErc721Contracts": 915,
+  "byClass": {
+   "B": 2841,
+   "D": 1301,
+   "C": 60
+  },
+  "byAssetType": {
+   "erc721": 3319,
+   "erc20": 883
+  }
+ },
+ "sales": {
+  "generatedAt": "2026-11-01T03:47:55Z",
+  "fills": 986,
+  "fillsNative": 916,
+  "collectionsTraded": 41,
+  "volumeBnb": 0.720122,
+  "trackedCollections": 1168,
+  "trackedWithSales": 12,
+  "trackedSales": 123,
+  "trackedVolumeBnb": 0.063458
+ },
+ "elementCoverage": {
+  "dataComplete": true,
+  "requestedRanges": 384,
+  "scannedRanges": 384,
+  "skippedRanges": 0,
+  "retryCount": 0,
+  "coverageRatio": 1.0,
+  "rpcSources": 1
+ },
+ "inputs": {
+  "metrics.jsonl": {
+   "sha256": "27e675544dfd181807c1214021c603cce2759d8c6c706e59896edc77485db9cf",
+   "bytes": 13048528
+  },
+  "signals.jsonl": {
+   "sha256": "b985a7f6aa3f7b4deb6fc2614a72af218be0d25c18263b0d7008d26036054aae",
+   "bytes": 7823677
+  },
+  "element-fills": {
+   "sha256": "8385296a192caf9d15a9e95ab0e9a66aac634b8e95522abbd4ec79a15c3c83a1",
+   "bytes": 30843
+  }
+ },
+ "thresholds": {
+  "dataFreshLagWarn": 600,
+  "dataFreshLagDegraded": 1200,
+  "dataFreshLagFail": 2400
+ }
+}

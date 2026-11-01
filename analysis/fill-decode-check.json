@@ -1,0 +1,41 @@
+{
+ "at": "2026-11-01T03:57:10Z",
+ "fromBlock": 130956713,
+ "toBlock": 130980713,
+ "logs": 425,
+ "byWords": {
+  "14": {
+   "txs": 300,
+   "match": 296,
+   "mismatch": 4,
+   "fills": 393,
+   "samples": [
+    {
+     "sum": "14070000000000000",
+     "paid": "15940650989797558",
+     "fills": 8,
+     "tx": "0x410731de6ce0c6e36dfbc71ca7f46f4ba9bea6b74d9796ba9e62d5030db1047b"
+    },
+    {
+     "sum": "400000000000000",
+     "paid": "800000000000000",
+     "fills": 1,
+     "tx": "0xc63b08dd352a64a8e198ccc363dba0ab62c6fc539924ea92f8c546ed6ffb0bf7"
+    },
+    {
+     "sum": "300000000000000",
+     "paid": "600000000000000",
+     "fills": 1,
+     "tx": "0xd8fe9a5252ba7366541047962a79e2b58a740f9c7ce8ceea3157cdd13c17aa49"
+    }
+   ]
+  },
+  "12": {
+   "txs": 18,
+   "match": 18,
+   "mismatch": 0,
+   "fills": 24,
+   "samples": []
+  }
+ }
+}
