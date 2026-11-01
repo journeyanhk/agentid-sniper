@@ -16,7 +16,7 @@ import { execSync } from 'node:child_process';
 
 const DIR = process.env.SHADOW_DIR ?? new URL('.', import.meta.url).pathname;
 mkdirSync(DIR, { recursive: true });
-const VERSION = 'probe-5.2.0';
+const VERSION = 'probe-5.2.1';
 let BUILD = 'unknown';
 try { BUILD = execSync('git -C ' + new URL('..', import.meta.url).pathname + ' rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch {}
 const SIG = DIR + '/signals.jsonl', MET = DIR + '/metrics.jsonl', GAPF = DIR + '/gaps.jsonl';
@@ -258,7 +258,7 @@ async function quoteSellV3(pool, tok, amountInRaw) {
 
 async function minterOf(txHash) { try { const tx = await rpc('eth_getTransactionByHash', [txHash]); return tx && tx.to ? tx.to.toLowerCase() : null; } catch { return null; } }
 
-// ---------- 行为级门槛判定（probe-5.2.0）----------
+// ---------- 行为级门槛判定（probe-5.2.1）----------
 // 静态判据会漏掉「门槛藏在调用链后」的项目（实证 SIGIL：自身字节码 26 个 PUSH20 无一含 registry，
 // 但 mint(uint256) 对持 ID 者成功、对无 ID 地址 revert）。
 // v5.2 用三地址对照，避免把「额度用完」「项目已关」误判成权限结论：
@@ -267,6 +267,9 @@ async function minterOf(txHash) { try { const tx = await rpc('eth_getTransaction
 //   H = 该笔 mint 的原铸造者（只作参考，可能额度已用完）
 // 输出：gated / open / mint_closed / positive_control_invalid / unknown
 const NO_AGENT = '0x000000000000000000000000000000000000dead';
+// 普通 EOA 负样本：无代码、无 Agent ID（已核验 code=0x、registry.balanceOf=0），
+// 避免只依赖 0x…dEaD —— 有些合约会对销毁地址做特殊处理。
+const NO_AGENT2 = '0x5a17e3e4f0d2c9b8a6c1d3e7f0a2b4c6d8e0f135';
 const PROBE_HOLDERS = new Set();   // 已验证 registry.balanceOf > 0 的地址池
 const PROBE_CACHE = new Map();
 let noAgentZero = null;
@@ -291,22 +294,28 @@ async function gatedByBehavior(tok, txHash) {
   if (input.length < 10) return { state: 'unknown', reason: 'no_calldata', detail: null };
   const value = tx.value || '0x0', selector = input.slice(0, 10), blockTag = 'latest';
 
-  // cache key 必须含完整 calldata 与 value：同一合约不同 mint 数量/tokenId/deadline 结论可能不同
+  // 缓存键必须含完整 calldata 与 value：同一合约不同 mint 数量/tokenId/deadline 结论可能不同。
   const key = [tok, selector, input, value, blockTag].join('|');
   const hit = PROBE_CACHE.get(key);
-  if (hit && Date.now() - hit.at < 600000) return hit;
+  if (hit && Date.now() - hit.at < hit.ttl) return hit;
 
-  if (noAgentZero === null) {
-    try { const r = await callAt(REGISTRY, '0x70a08231' + wa(NO_AGENT)); noAgentZero = !!r && big(r) === 0n; }
-    catch { noAgentZero = null; }
+  // 两个负样本：dEaD 可能被合约特殊处理（黑名单/禁止销毁地址），必须再有一个普通 EOA。
+  const negs = [];
+  for (const [name, addr] of [['dead', NO_AGENT], ['eoa', NO_AGENT2]]) {
+    const r = await rawEthCall(addr, tok, input, value);
+    negs.push({ name, from: addr, ok: r.ok, err: r.err || null });
   }
-  if (!noAgentZero) return { state: 'unknown', reason: 'probe_addr_has_agent', detail: null };
+  const nOk = negs.filter((n) => n.ok === true).length;
+  const nRevert = negs.filter((n) => n.ok === false).length;
+  if (negs.some((n) => n.ok === null)) {
+    return { state: 'unknown', reason: 'negative_transport_error', detail: { negs } };
+  }
 
   const minterSet = new Set([...((MINTS.get(tok) || {}).to || [])].map((a) => String(a).toLowerCase()));
-  const nCall = await rawEthCall(NO_AGENT, tok, input, value);
-  const detail = { selector, value, blockTag, txHash, minter: tx.from, minterResult: null, positive: null, positiveFrom: null, negative: nCall.ok };
+  const detail = { selector, value, blockTag, txHash, minter: tx.from, minterResult: null,
+                   positive: null, positiveFrom: null, negatives: negs,
+                   holderSnapshotBlock: blockTag, simulationBlock: blockTag };
 
-  // P：优先「持 ID 且未铸造过本项目」；池空时退回 H，并在 reason 里标明是 fallback
   let pOk = null;
   const pool = [...PROBE_HOLDERS].filter((x) => !minterSet.has(x)).slice(0, 3);
   for (const a of pool) {
@@ -318,23 +327,29 @@ async function gatedByBehavior(tok, txHash) {
   const hCall = await rawEthCall(tx.from, tok, input, value);
   detail.minterResult = hCall.ok;
 
+  // 不同终态不同 TTL：mint_closed 可能因分阶段/重新开窗而失效，不能和 gated 一样缓存 10 分钟
+  const TTL = { gated: 600000, open: 600000, mint_closed: 120000 };
   const fin = (state, reason) => {
-    const v = { state, reason, at: Date.now(), detail };
-    if (/^(gated|open|mint_closed)$/.test(state)) {
+    const v = { state, reason, at: Date.now(), ttl: TTL[state] || 0, detail };
+    if (TTL[state]) {
       PROBE_CACHE.set(key, v);
       if (PROBE_CACHE.size > 5000) PROBE_CACHE.delete(PROBE_CACHE.keys().next().value);
     }
     return v;
   };
 
-  if (pOk === true && nCall.ok === false) return fin('gated', 'holder_only');
-  if (pOk === true && nCall.ok === true) return fin('open', 'both_succeed');
-  if (pOk === false && nCall.ok === true) return fin('positive_control_invalid', 'holder_reverts_nonholder_succeeds');
-  if (pOk === false && nCall.ok === false) return fin('mint_closed', 'both_revert');
-  // pool 为空：只能用原铸造者作参考，不把「铸造者成功 + 空地址 revert」当成强证据
-  if (hCall.ok === true && nCall.ok === false) return fin('gated', 'minter_fallback');
-  if (hCall.ok === true && nCall.ok === true) return fin('open', 'both_succeed_fallback');
-  if (hCall.ok === false && nCall.ok === true) return fin('positive_control_invalid', 'quota_exhausted_fallback');
+  // 强证据：P 成功 + 两个负样本都 revert
+  if (pOk === true && nRevert === 2) return fin('gated', 'holder_only_both_negatives_revert');
+  // P 成功但负样本一个成功一个失败：不能判 gated，也不能判 open
+  if (pOk === true && nOk > 0 && nRevert > 0) return fin('unknown', 'negative_control_inconsistent');
+  if (pOk === true && nOk === 2) return fin('open', 'both_succeed');
+  if (pOk === false && nOk > 0) return fin('positive_control_invalid', 'holder_reverts_nonholder_succeeds');
+  if (pOk === false && nRevert === 2) return fin('mint_closed', 'both_revert');
+
+  // 池为空：退回原铸造者，只作参考，reason 必须带 fallback
+  if (hCall.ok === true && nRevert === 2) return fin('gated', 'minter_fallback');
+  if (hCall.ok === true && nOk > 0) return fin('open', 'both_succeed_fallback');
+  if (hCall.ok === false && nOk > 0) return fin('positive_control_invalid', 'quota_exhausted_fallback');
   return fin('mint_closed', 'all_revert_fallback');
 }
 
@@ -554,7 +569,7 @@ async function selftestGated() {
   const g1 = await gatedByBehavior(TOK_SIG, SIGTX);
   rec('known_gated_SIGIL', g1.state === 'gated', { state: g1.state, reason: g1.reason });
 
-  rec('probe_detail', !!(g1.detail && g1.detail.selector && g1.detail.blockTag && g1.detail.negative === false),
+  rec('probe_detail', !!(g1.detail && g1.detail.selector && g1.detail.blockTag && Array.isArray(g1.detail.negatives) && g1.detail.negatives.filter((n) => n.ok === false).length === 2),
     g1.detail ? { selector: g1.detail.selector, value: g1.detail.value, blockTag: g1.detail.blockTag, negative: g1.detail.negative, from: g1.detail.positiveFrom || g1.detail.minter } : { detail: null });
 
   const g2 = await gatedByBehavior(TOK_SIG, SIGTX);
