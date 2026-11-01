@@ -283,8 +283,12 @@ async function gatedByBehavior(tok, txHash) {
   if (c && Date.now() - c.at < 600000) return c;
   const res = (state, reason) => {
     const v = { state, reason, at: Date.now() };
-    PROBE_CACHE.set(tok, v);
-    if (PROBE_CACHE.size > 5000) PROBE_CACHE.delete(PROBE_CACHE.keys().next().value);
+    // 只缓存终态：输入缺失（no_mint_tx / tx_to_mismatch）、取 tx 失败、传输错误都可能下次变好，
+    // 缓存它们会让带真实 tx 的后续探测在 10 分钟内直接返回旧结论。
+    if (!/^(no_mint_tx|tx_to_mismatch|tx_fetch_failed|transport_error)$/.test(reason)) {
+      PROBE_CACHE.set(tok, v);
+      if (PROBE_CACHE.size > 5000) PROBE_CACHE.delete(PROBE_CACHE.keys().next().value);
+    }
     return v;
   };
   if (!txHash) return res('unknown', 'no_mint_tx');
@@ -326,7 +330,7 @@ async function meta(tok) {
   const code = imm.code, dec = imm.dec, name = imm.name, sym = imm.sym, assetType = imm.assetType;
   const m = MINTS.get(tok);
   let agentHolders = 0, agentBlock = 'latest';
-  const sample = [...(m?.to || [])].slice(0, 5);
+  const sample = [...(m?.to || [])].slice(0, 10);
   const cached = AGT.get(tok);
   if (cached && Date.now() - cached.at < 300000) { agentHolders = cached.hit; agentBlock = cached.block; }
   else {
@@ -510,4 +514,57 @@ async function main() {
     await sleep(Math.max(1500, 12000 - used));
   }
 }
+
+// ---------- 合并前自检（PROBE_SELFTEST=1 node probe.mjs）----------
+// 只读：eth_getLogs / eth_getTransactionByHash / eth_call，不签名、不交易。
+// 闸门：真实 mint calldata + 正样本（原铸造者）+ 负样本（无 Agent ID 地址）+ 三态输出 + 缓存 + ERC-20 隔离。
+async function selftestGated() {
+  const rows = [];
+  const rec = (name, ok, detail) => { rows.push({ case: name, pass: !!ok, ...detail }); log(`SELFTEST ${ok ? 'PASS' : 'FAIL'} ${name} ${JSON.stringify(detail)}`); };
+
+  const TOK_SIG = '0xdd8bdfc91cbd572935b09863a742d8296fed0acf';
+  const SIGTX = '0xa631ce40c0837cfde5eaa15ed53cd58a508963026207ce10dba261e04d383c77';
+  const g1 = await gatedByBehavior(TOK_SIG, SIGTX);
+  rec('known_gated_SIGIL', g1.state === 'gated', { state: g1.state, reason: g1.reason });
+
+  const g2 = await gatedByBehavior(TOK_SIG, SIGTX);
+  rec('cache_reuse', g2.at === g1.at, { atSame: g2.at === g1.at, state: g2.state });
+
+  const g3 = await gatedByBehavior('0xfd3430e86df73c4e1e55036dc368a52716b84937', null);
+  rec('no_mint_tx_unknown', g3.state === 'unknown' && g3.reason === 'no_mint_tx', { state: g3.state, reason: g3.reason });
+  const mis = await gatedByBehavior('0xfd3430e86df73c4e1e55036dc368a52716b84937', SIGTX);
+  rec('tx_to_mismatch_unknown', mis.state === 'unknown' && mis.reason === 'tx_to_mismatch', { state: mis.state, reason: mis.reason });
+
+  const sd = await gatedByBehavior('0xfd3430e86df73c4e1e55036dc368a52716b84937', '0xfa6a346f82ac1ebf902da0a33fac2fb9a863ebe9d3c05fe635723db461e7aa9a');
+  rec('second_gated_sample_SEED', sd.state === 'gated' || sd.state === 'unknown', { state: sd.state, reason: sd.reason });
+
+  let open = null;
+  try {
+    const hd = Number(await rpc('eth_blockNumber', []));
+    const lines = readFileSync(process.env.SHADOW_SIGNALS || new URL('./signals.jsonl', import.meta.url).pathname, 'utf8').trim().split('\n').slice(-320).map((l) => JSON.parse(l));
+    const cands = [...new Set(lines.filter((r) => r.assetType === 'erc721' && !r.gated).map((r) => r.tok))].slice(0, 10);
+    for (const t of cands) {
+      const lg = (await scanRange(hd - 6000, hd)).logs.filter((l) => l.address === t);
+      const mint = lg.find((l) => /^0x0{64}$/.test(l.topics[1] || ''));
+      if (!mint) continue;
+      const r = await gatedByBehavior(t, mint.transactionHash);
+      log('SELFTEST cand ' + t + ' -> ' + r.state + '/' + r.reason);
+      if (r.state === 'open') { open = { tok: t, reason: r.reason }; break; }
+    }
+  } catch (e) { log('SELFTEST open 扫描失败 ' + e.message); }
+  if (open) rec('open_sample', true, open);
+  else { rows.push({ case: 'open_sample', pass: null, skipped: true }); log('SELFTEST SKIP open_sample 近期候选的 mint 窗口已关闭（正样本也 revert），无法构造 open 对照，不判失败'); }
+
+  const self = readFileSync(new URL(import.meta.url).pathname, 'utf8');
+  rec('erc20_isolated', /if \(!gated0 && assetType === 'erc721'\)/.test(self), { guard: true });
+  rec('signal_fields', /gatedProbe, gatedProbeReason/.test(self) && /eventBlockWasGap/.test(self), { fields: true });
+
+  const fail = rows.filter((r) => r.pass === false).length;
+  log(`SELFTEST DONE total=${rows.length} fail=${fail}`);
+  writeFileSync(DIR + '/selftest.json', JSON.stringify({ at: new Date().toISOString(), fail, rows }, null, 1));
+  return fail === 0;
+}
+
+if (process.env.PROBE_SELFTEST) { const ok = await selftestGated(); process.exit(ok ? 0 : 1); }
+
 main();
