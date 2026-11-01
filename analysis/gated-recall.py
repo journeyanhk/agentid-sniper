@@ -86,11 +86,14 @@ def main():
             print(f'  {n}/{len(cand)} checked={stat["checked"]} 漏判={stat["missedGated"]} rpc={_calls[0]}', flush=True)
 
     out = {'generated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+           'method': 'holder_correlation', 'isProof': False,
+           'note': '相关性指标，不能当作分类器漏判率；真判据见分支 feat/gated-indirect 的 behavioral_mint_probe',
            'sampled': len(cand), 'lookbackBlocks': lookback, 'stats': dict(stat),
-           'missRate': round(stat['missedGated'] / max(1, stat['checked']), 3),
+           'correlationMissRate': round(stat['missedGated'] / max(1, stat['checked']), 3),
            'misses': misses, 'rpcCalls': _calls[0]}
     json.dump(out, open(base + '/analysis/gated-recall.json', 'w'), ensure_ascii=False, indent=1)
-    print(json.dumps({k: out[k] for k in ['sampled', 'stats', 'missRate', 'rpcCalls']}, ensure_ascii=False, indent=1))
+    print('!! CORRELATION ONLY — 不是 gated 判据，仅供线索（真判据：behavioral_mint_probe）')
+    print(json.dumps({k: out[k] for k in ['method', 'isProof', 'sampled', 'stats', 'correlationMissRate', 'rpcCalls']}, ensure_ascii=False, indent=1))
     for m in misses[:15]:
         print('   漏判 %-12s %s mints=%-4d wallets=%-3d agentRatio=%.2f' % (m['sym'], m['tok'], m['mints'], m['wallets'], m['agentRatio']))
 
