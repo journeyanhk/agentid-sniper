@@ -58,3 +58,47 @@ replay 主路径、多钱包同步加仓。我们的 fork 一律 `UPD.on = false
 - MORI 仍是唯一有正 EV 的系列，但买家 62 → 20、tts 175m → 777m；
 - 尚未出现「≥2 集合 × ≥2 连续窗口 × 独立买家 ≥20 × 扣费后 EV 持续为正」的组合；
 - 结论仍偏 **B（有成交、不足以证明可重复正收益）**，到点再判。
+
+---
+
+## 终点操作流程（2026-11-01 修订，必须按顺序执行）
+
+终点时间：**2026-11-02 09:30 CST = 2026-11-02T01:30:00Z**，窗口起点固定
+**2026-10-31T01:30:00Z**（该时刻起 probe 已全程为 `probe-4.0.0`，48h 内无版本混用）。
+
+```bash
+cd ~/agentid-sniper
+
+# 1) 成交快照：显式窗口，必须 requested=scanned、skipped=0、ratio=1.0
+python3 analysis/element-watch.py \
+  --from-block <窗口起始块> --to-block <窗口结束块> \
+  --output analysis/element-fills-w0.json
+
+# 2) 基线：窗口单一来源取自上面这份快照
+python3 analysis/w0-baseline.py --fills analysis/element-fills-w0.json \
+  --out analysis/w0-baseline.json
+
+# 3) 只有 STATUS=READY_FOR_DECISION 才允许给 A/B/C；否则先修数据，不许人工脑补
+```
+
+闸门（缺一即 BLOCKED，只写 `.invalid.json`）：
+G1 快照新鲜 ≤13h + dataComplete + skippedRanges 为空；G2 metrics 块覆盖含两端；
+G3 version/build 唯一；G4 incomplete/gap/pending/stateCorrupt 归零；
+G5 probe 文件 SHA-256 与 git 提交可溯源；G6 四个输入文件 hash 齐全。
+
+### 口径纪律（此前踩过）
+
+- **信号按行数会虚高**：24h 窗口 rows 4202，但唯一事件 1700、重复行 2502（60%）。
+  任何「gated 数量」必须写成 `gatedErc721Contracts`（唯一合约），不能报行数。
+- 1128（旧报告）是行数，与 446（旧文档）不同分母，不得并列比较。
+- `dataComplete` 与 `dataFresh` 分开：lagMax 1705 块（12.8 分钟）说明数据最终完整、
+  但实时性降级；历史研究可用，执行器不可用。
+- 解码正确性用「同一 tx 内原生 Fill 价格之和 == tx.value」校验（逐笔比会误判，
+  一个 tx 常含多笔 Fill）：12 words 18/18、14 words 296/300。
+
+### 仍未完成（不阻塞 A/B/C，但写进结论）
+
+1. 探针冻结期内无法每轮写 `probeSha256`/`collectorVersion`/`schemaVersion`，
+   当前基线用「工作树 SHA-256 + git 提交」溯源，来源已标注 `working-tree-at-baseline-time`；
+   解冻后第一件事是给 metrics 加这四个字段。
+2. 分支 `feat/gated-indirect`（probe-5.2.1）不合并，等 A/B/C 判定后单独评审。
