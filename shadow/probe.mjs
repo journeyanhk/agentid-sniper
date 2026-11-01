@@ -16,7 +16,7 @@ import { execSync } from 'node:child_process';
 
 const DIR = process.env.SHADOW_DIR ?? new URL('.', import.meta.url).pathname;
 mkdirSync(DIR, { recursive: true });
-const VERSION = 'probe-5.1.0';
+const VERSION = 'probe-5.2.0';
 let BUILD = 'unknown';
 try { BUILD = execSync('git -C ' + new URL('..', import.meta.url).pathname + ' rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch {}
 const SIG = DIR + '/signals.jsonl', MET = DIR + '/metrics.jsonl', GAPF = DIR + '/gaps.jsonl';
@@ -258,12 +258,16 @@ async function quoteSellV3(pool, tok, amountInRaw) {
 
 async function minterOf(txHash) { try { const tx = await rpc('eth_getTransactionByHash', [txHash]); return tx && tx.to ? tx.to.toLowerCase() : null; } catch { return null; } }
 
-// ---------- 行为级门槛判定（probe-5.1.0）----------
-// 静态判据（字节码含 registry / 含 mint selector）会漏掉「门槛藏在调用链后」的项目：
-// 实证 SIGIL 0xdd8bdfc9… 自身字节码不含 registry，但 mint(uint256) 对铸造者成功、对无 Agent ID 地址 revert。
-// 做法：拿一笔真实 mint 的 calldata，分别以「原铸造者」和「无 Agent ID 的探针地址」eth_call，比较结果。
-// 结果三态：gated（只有持 ID 者能过）/ open（两者都能过）/ unknown（都 revert 或传输失败）。
+// ---------- 行为级门槛判定（probe-5.2.0）----------
+// 静态判据会漏掉「门槛藏在调用链后」的项目（实证 SIGIL：自身字节码 26 个 PUSH20 无一含 registry，
+// 但 mint(uint256) 对持 ID 者成功、对无 ID 地址 revert）。
+// v5.2 用三地址对照，避免把「额度用完」「项目已关」误判成权限结论：
+//   P = 持有 Agent ID 且未铸造过本项目（真正的正样本，来自 PROBE_HOLDERS 池）
+//   N = 不持有 Agent ID（负样本）
+//   H = 该笔 mint 的原铸造者（只作参考，可能额度已用完）
+// 输出：gated / open / mint_closed / positive_control_invalid / unknown
 const NO_AGENT = '0x000000000000000000000000000000000000dead';
+const PROBE_HOLDERS = new Set();   // 已验证 registry.balanceOf > 0 的地址池
 const PROBE_CACHE = new Map();
 let noAgentZero = null;
 
@@ -273,42 +277,65 @@ async function rawEthCall(from, to, data, value) {
   try { return { ok: true, out: await rpc('eth_call', [p, 'latest']) }; }
   catch (e) {
     const msg = String(e.message || '');
-    if (/revert/i.test(msg)) return { ok: false, revert: msg.slice(0, 120) };
+    if (/revert/i.test(msg)) return { ok: false, revert: msg.slice(0, 160) };
     return { ok: null, err: msg.slice(0, 80) };
   }
 }
 
 async function gatedByBehavior(tok, txHash) {
-  const c = PROBE_CACHE.get(tok);
-  if (c && Date.now() - c.at < 600000) return c;
-  const res = (state, reason) => {
-    const v = { state, reason, at: Date.now() };
-    // 只缓存终态：输入缺失（no_mint_tx / tx_to_mismatch）、取 tx 失败、传输错误都可能下次变好，
-    // 缓存它们会让带真实 tx 的后续探测在 10 分钟内直接返回旧结论。
-    if (!/^(no_mint_tx|tx_to_mismatch|tx_fetch_failed|transport_error)$/.test(reason)) {
-      PROBE_CACHE.set(tok, v);
-      if (PROBE_CACHE.size > 5000) PROBE_CACHE.delete(PROBE_CACHE.keys().next().value);
-    }
-    return v;
-  };
-  if (!txHash) return res('unknown', 'no_mint_tx');
+  if (!txHash) return { state: 'unknown', reason: 'no_mint_tx', detail: null };
   let tx = null;
-  try { tx = await rpc('eth_getTransactionByHash', [txHash]); } catch { return res('unknown', 'tx_fetch_failed'); }
-  if (!tx || !tx.to || tx.to.toLowerCase() !== tok) return res('unknown', 'tx_to_mismatch');
+  try { tx = await rpc('eth_getTransactionByHash', [txHash]); } catch { return { state: 'unknown', reason: 'tx_fetch_failed', detail: null }; }
+  if (!tx || !tx.to || tx.to.toLowerCase() !== tok) return { state: 'unknown', reason: 'tx_to_mismatch', detail: null };
   const input = tx.input || '0x';
-  if (input.length < 10) return res('unknown', 'no_calldata');
+  if (input.length < 10) return { state: 'unknown', reason: 'no_calldata', detail: null };
+  const value = tx.value || '0x0', selector = input.slice(0, 10), blockTag = 'latest';
+
+  // cache key 必须含完整 calldata 与 value：同一合约不同 mint 数量/tokenId/deadline 结论可能不同
+  const key = [tok, selector, input, value, blockTag].join('|');
+  const hit = PROBE_CACHE.get(key);
+  if (hit && Date.now() - hit.at < 600000) return hit;
+
   if (noAgentZero === null) {
     try { const r = await callAt(REGISTRY, '0x70a08231' + wa(NO_AGENT)); noAgentZero = !!r && big(r) === 0n; }
     catch { noAgentZero = null; }
   }
-  if (!noAgentZero) return res('unknown', 'probe_addr_has_agent');
-  const a = await rawEthCall(tx.from, tok, input, tx.value);
-  const b = await rawEthCall(NO_AGENT, tok, input, tx.value);
-  if (a.ok === true && b.ok === true) return res('open', 'both_succeed');
-  if (a.ok === true && b.ok === false) return res('gated', 'holder_only');
-  if (a.ok === false && b.ok === true) return res('unknown', 'nonholder_only');
-  if (a.ok === false && b.ok === false) return res('unknown', 'both_revert');
-  return res('unknown', 'transport_error');
+  if (!noAgentZero) return { state: 'unknown', reason: 'probe_addr_has_agent', detail: null };
+
+  const minterSet = new Set([...((MINTS.get(tok) || {}).to || [])].map((a) => String(a).toLowerCase()));
+  const nCall = await rawEthCall(NO_AGENT, tok, input, value);
+  const detail = { selector, value, blockTag, txHash, minter: tx.from, minterResult: null, positive: null, positiveFrom: null, negative: nCall.ok };
+
+  // P：优先「持 ID 且未铸造过本项目」；池空时退回 H，并在 reason 里标明是 fallback
+  let pOk = null;
+  const pool = [...PROBE_HOLDERS].filter((x) => !minterSet.has(x)).slice(0, 3);
+  for (const a of pool) {
+    const r = await rawEthCall(a, tok, input, value);
+    detail.positiveFrom = a; detail.positive = r.ok;
+    if (r.ok === true) { pOk = true; break; }
+    pOk = false;
+  }
+  const hCall = await rawEthCall(tx.from, tok, input, value);
+  detail.minterResult = hCall.ok;
+
+  const fin = (state, reason) => {
+    const v = { state, reason, at: Date.now(), detail };
+    if (/^(gated|open|mint_closed)$/.test(state)) {
+      PROBE_CACHE.set(key, v);
+      if (PROBE_CACHE.size > 5000) PROBE_CACHE.delete(PROBE_CACHE.keys().next().value);
+    }
+    return v;
+  };
+
+  if (pOk === true && nCall.ok === false) return fin('gated', 'holder_only');
+  if (pOk === true && nCall.ok === true) return fin('open', 'both_succeed');
+  if (pOk === false && nCall.ok === true) return fin('positive_control_invalid', 'holder_reverts_nonholder_succeeds');
+  if (pOk === false && nCall.ok === false) return fin('mint_closed', 'both_revert');
+  // pool 为空：只能用原铸造者作参考，不把「铸造者成功 + 空地址 revert」当成强证据
+  if (hCall.ok === true && nCall.ok === false) return fin('gated', 'minter_fallback');
+  if (hCall.ok === true && nCall.ok === true) return fin('open', 'both_succeed_fallback');
+  if (hCall.ok === false && nCall.ok === true) return fin('positive_control_invalid', 'quota_exhausted_fallback');
+  return fin('mint_closed', 'all_revert_fallback');
 }
 
 const IMM = new Map();   // 不可变字段：name/symbol/decimals/code/assetType
@@ -335,7 +362,7 @@ async function meta(tok) {
   if (cached && Date.now() - cached.at < 300000) { agentHolders = cached.hit; agentBlock = cached.block; }
   else {
     if (m && m.firstBlock) { const at = await callAt(REGISTRY, '0x18160ddd', hex(m.firstBlock)); if (at) agentBlock = hex(m.firstBlock); }
-    for (const a of sample) { const r = await callAt(REGISTRY, '0x70a08231' + wa(a), agentBlock); if (r && big(r) > 0n) agentHolders++; }
+    for (const a of sample) { const r = await callAt(REGISTRY, '0x70a08231' + wa(a), agentBlock); if (r && big(r) > 0n) { agentHolders++; PROBE_HOLDERS.add(String(a).toLowerCase()); if (PROBE_HOLDERS.size > 300) PROBE_HOLDERS.delete(PROBE_HOLDERS.values().next().value); } }
     AGT.set(tok, { at: Date.now(), hit: agentHolders, block: agentBlock, n: sample.length });
   }
   const bytecodeRegistryHit = code.includes(REGISTRY_HEX);
@@ -527,6 +554,9 @@ async function selftestGated() {
   const g1 = await gatedByBehavior(TOK_SIG, SIGTX);
   rec('known_gated_SIGIL', g1.state === 'gated', { state: g1.state, reason: g1.reason });
 
+  rec('probe_detail', !!(g1.detail && g1.detail.selector && g1.detail.blockTag && g1.detail.negative === false),
+    g1.detail ? { selector: g1.detail.selector, value: g1.detail.value, blockTag: g1.detail.blockTag, negative: g1.detail.negative, from: g1.detail.positiveFrom || g1.detail.minter } : { detail: null });
+
   const g2 = await gatedByBehavior(TOK_SIG, SIGTX);
   rec('cache_reuse', g2.at === g1.at, { atSame: g2.at === g1.at, state: g2.state });
 
@@ -536,7 +566,7 @@ async function selftestGated() {
   rec('tx_to_mismatch_unknown', mis.state === 'unknown' && mis.reason === 'tx_to_mismatch', { state: mis.state, reason: mis.reason });
 
   const sd = await gatedByBehavior('0xfd3430e86df73c4e1e55036dc368a52716b84937', '0xfa6a346f82ac1ebf902da0a33fac2fb9a863ebe9d3c05fe635723db461e7aa9a');
-  rec('second_gated_sample_SEED', sd.state === 'gated' || sd.state === 'unknown', { state: sd.state, reason: sd.reason });
+  rec('second_gated_sample_SEED', ['gated', 'mint_closed', 'unknown'].includes(sd.state), { state: sd.state, reason: sd.reason });
 
   let open = null;
   try {
@@ -561,7 +591,7 @@ async function selftestGated() {
 
   const fail = rows.filter((r) => r.pass === false).length;
   log(`SELFTEST DONE total=${rows.length} fail=${fail}`);
-  writeFileSync(DIR + '/selftest.json', JSON.stringify({ at: new Date().toISOString(), fail, rows }, null, 1));
+  writeFileSync(new URL('../analysis/selftest.json', import.meta.url).pathname, JSON.stringify({ at: new Date().toISOString(), probe: VERSION, build: BUILD, fail, rows }, null, 1));
   return fail === 0;
 }
 

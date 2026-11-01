@@ -1,0 +1,62 @@
+{
+ "at": "2026-11-01T03:27:30.590Z",
+ "probe": "probe-5.2.0",
+ "build": "c6a2e1a",
+ "fail": 0,
+ "rows": [
+  {
+   "case": "known_gated_SIGIL",
+   "pass": true,
+   "state": "gated",
+   "reason": "minter_fallback"
+  },
+  {
+   "case": "probe_detail",
+   "pass": true,
+   "selector": "0xa0712d68",
+   "value": "0x0",
+   "blockTag": "latest",
+   "negative": false,
+   "from": "0xacf60f2f073bb0360a2bd43f3dd4fbee60a1f6fd"
+  },
+  {
+   "case": "cache_reuse",
+   "pass": true,
+   "atSame": true,
+   "state": "gated"
+  },
+  {
+   "case": "no_mint_tx_unknown",
+   "pass": true,
+   "state": "unknown",
+   "reason": "no_mint_tx"
+  },
+  {
+   "case": "tx_to_mismatch_unknown",
+   "pass": true,
+   "state": "unknown",
+   "reason": "tx_to_mismatch"
+  },
+  {
+   "case": "second_gated_sample_SEED",
+   "pass": true,
+   "state": "gated",
+   "reason": "minter_fallback"
+  },
+  {
+   "case": "open_sample",
+   "pass": null,
+   "skipped": true
+  },
+  {
+   "case": "erc20_isolated",
+   "pass": true,
+   "guard": true
+  },
+  {
+   "case": "signal_fields",
+   "pass": true,
+   "fields": true
+  }
+ ]
+}
