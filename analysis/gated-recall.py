@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# ⚠️ 口径警告：本脚本用「铸造钱包是否持有 Agent ID」= 相关性，不是证明。
+# 2026-10-31 对照实验：已知 gated 样本 6/6 通过，但非 gated 样本同样大量通过，
+# 该指标对内圈钱包不具区分度，不能据此判定 gated。
+# 真正的判据是 mint calldata 的正反对照 eth_call，见分支 feat/gated-indirect 的
+# gatedByBehavior()（probe-5.1.x）。本脚本仅作辅助线索。
+
 """gated-recall.py —— 量化 gated 分类器的漏判率（只读）
 
 现状：gated 判据 = 合约自身字节码是否含 Agent ID registry 地址。
