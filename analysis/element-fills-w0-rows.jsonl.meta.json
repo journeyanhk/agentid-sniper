@@ -1,0 +1,44 @@
+{
+ "generated": "2026-11-02T04:01:42Z",
+ "rows": 1350,
+ "sha256": "5e36e199a83f87b92182fb7fa4f853e8ae664380f0433c2e74f541ae79bc339e",
+ "window": {
+  "fromBlock": 130769296,
+  "toBlock": 131153193,
+  "blocks": 383898,
+  "fromTimestamp": "2026-10-31T01:30:00Z",
+  "toTimestamp": "2026-11-02T01:30:00Z",
+  "windowMinutes": 2880.0
+ },
+ "coverage": {
+  "dataComplete": true,
+  "coverageRatio": 1.0
+ },
+ "decoder": {
+  "elementTopic": "0x9c248aa1a265aa616f707b979d57f4529bb63a4fc34dc7fc61fdddc18410f74e",
+  "version": "element-fill-v3",
+  "layouts": [
+   "12words",
+   "14words"
+  ],
+  "dedupe": "txHash+logIndex+collection+tokenId"
+ },
+ "dedupeKey": "txHash+logIndex+collection+tokenId",
+ "transferVerification": {
+  "sampled": 169,
+  "ok": 200,
+  "coverage": 0.1252,
+  "method": "receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)"
+ },
+ "aggregates": {
+  "fills_total": 1350,
+  "fills_native_bnb": 1267,
+  "fills_erc20_pay": 83,
+  "collections_traded": 55,
+  "volumeBnb": 2.028348,
+  "tracked_sales": 242,
+  "tracked_with_sales": 21
+ },
+ "command": "analysis/element-watch.py --from-block 130769296 --to-block 131153193 --output /tmp/ew-rows-agg.json --dump-rows analysis/element-fills-w0-rows.jsonl --verify-transfers 200",
+ "rpcCalls": 1869
+}

@@ -1,0 +1,421 @@
+{
+ "generated": "2026-11-02T04:02:57Z",
+ "inputs": {
+  "rows": "analysis/element-fills-w0-rows.jsonl",
+  "rowsSha256": "5e36e199a83f87b92182fb7fa4f853e8ae664380f0433c2e74f541ae79bc339e",
+  "meta": "analysis/element-fills-w0-rows.jsonl.meta.json",
+  "dedupeKey": "txHash+logIndex+collection+tokenId",
+  "transferVerification": {
+   "sampled": 169,
+   "ok": 200,
+   "coverage": 0.1252,
+   "method": "receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)"
+  }
+ },
+ "positions": {
+  "note": "buyerQualitySignals 只是结构信号，不是真人身份验证",
+  "flags": [
+   "repeatPairShare_high"
+  ],
+  "verdict": "mixed_signals",
+  "cannot_conclude": [
+   "真实需求不足/充足",
+   "退出规模是否足够"
+  ]
+ },
+ "saleBuyerQuality": {
+  "window": {
+   "fromBlock": 130769296,
+   "toBlock": 131153193,
+   "blocks": 383898,
+   "fromTimestamp": "2026-10-31T01:30:00Z",
+   "toTimestamp": "2026-11-02T01:30:00Z",
+   "windowMinutes": 2880.0
+  },
+  "all": {
+   "fills": 1350,
+   "uniqueBuyerCount": 265,
+   "uniqueSellerCount": 631,
+   "buyerSellerOverlap": 0.2906,
+   "buyerSellerOverlapCount": 77,
+   "repeatPairCount": 147,
+   "repeatPairFills": 515,
+   "repeatPairShare": 0.3815,
+   "top1BuyerShare": 0.077,
+   "top10BuyerShare": 0.3304,
+   "selfTradeCount": 0,
+   "sameAmountCluster": {
+    "tolerance": {
+     "relative": 0.005,
+     "absolute": 1
+    },
+    "grouping": "collection+paymentToken",
+    "clusters": [
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "400000000000000",
+      "clusterCount": 35,
+      "clusterBuyerCount": 16,
+      "clusterShare": 0.0259,
+      "suspicious": false
+     },
+     {
+      "collection": "0xb777c52296f0d7d3c5cab7ae0c1aaac6b014b256",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "1499900000000000",
+      "clusterCount": 29,
+      "clusterBuyerCount": 17,
+      "clusterShare": 0.0215,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "130000000000000",
+      "clusterCount": 28,
+      "clusterBuyerCount": 7,
+      "clusterShare": 0.0207,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "500000000000000",
+      "clusterCount": 28,
+      "clusterBuyerCount": 17,
+      "clusterShare": 0.0207,
+      "suspicious": false
+     },
+     {
+      "collection": "0x68869d4edc15ec2fba0eacfe1486caf9d0c37572",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "748000000000000",
+      "clusterCount": 27,
+      "clusterBuyerCount": 4,
+      "clusterShare": 0.02,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "124900000000000",
+      "clusterCount": 26,
+      "clusterBuyerCount": 6,
+      "clusterShare": 0.0193,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "170000000000000",
+      "clusterCount": 24,
+      "clusterBuyerCount": 8,
+      "clusterShare": 0.0178,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "249000000000000",
+      "clusterCount": 23,
+      "clusterBuyerCount": 6,
+      "clusterShare": 0.017,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "300000000000000",
+      "clusterCount": 21,
+      "clusterBuyerCount": 12,
+      "clusterShare": 0.0156,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "160000000000000",
+      "clusterCount": 20,
+      "clusterBuyerCount": 8,
+      "clusterShare": 0.0148,
+      "suspicious": false
+     }
+    ],
+    "clusterFillsShare": 0.8407,
+    "suspiciousClusterFillsShare": 0.1459,
+    "note": "同价重复在同集合地板价场景很常见，需看 suspicious（≥5 笔且 ≤2 个买家）"
+   }
+  },
+  "native": {
+   "fills": 1267,
+   "uniqueBuyerCount": 259,
+   "uniqueSellerCount": 609,
+   "buyerSellerOverlap": 0.278,
+   "buyerSellerOverlapCount": 72,
+   "repeatPairCount": 134,
+   "repeatPairFills": 458,
+   "repeatPairShare": 0.3615,
+   "top1BuyerShare": 0.0821,
+   "top10BuyerShare": 0.3149,
+   "selfTradeCount": 0,
+   "sameAmountCluster": {
+    "tolerance": {
+     "relative": 0.005,
+     "absolute": 1
+    },
+    "grouping": "collection+paymentToken",
+    "clusters": [
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "400000000000000",
+      "clusterCount": 35,
+      "clusterBuyerCount": 16,
+      "clusterShare": 0.0276,
+      "suspicious": false
+     },
+     {
+      "collection": "0xb777c52296f0d7d3c5cab7ae0c1aaac6b014b256",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "1499900000000000",
+      "clusterCount": 29,
+      "clusterBuyerCount": 17,
+      "clusterShare": 0.0229,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "130000000000000",
+      "clusterCount": 28,
+      "clusterBuyerCount": 7,
+      "clusterShare": 0.0221,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "500000000000000",
+      "clusterCount": 28,
+      "clusterBuyerCount": 17,
+      "clusterShare": 0.0221,
+      "suspicious": false
+     },
+     {
+      "collection": "0x68869d4edc15ec2fba0eacfe1486caf9d0c37572",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "748000000000000",
+      "clusterCount": 27,
+      "clusterBuyerCount": 4,
+      "clusterShare": 0.0213,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "124900000000000",
+      "clusterCount": 26,
+      "clusterBuyerCount": 6,
+      "clusterShare": 0.0205,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "170000000000000",
+      "clusterCount": 24,
+      "clusterBuyerCount": 8,
+      "clusterShare": 0.0189,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "249000000000000",
+      "clusterCount": 23,
+      "clusterBuyerCount": 6,
+      "clusterShare": 0.0182,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "300000000000000",
+      "clusterCount": 21,
+      "clusterBuyerCount": 12,
+      "clusterShare": 0.0166,
+      "suspicious": false
+     },
+     {
+      "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+      "asset": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "clusterAmount": "160000000000000",
+      "clusterCount": 20,
+      "clusterBuyerCount": 8,
+      "clusterShare": 0.0158,
+      "suspicious": false
+     }
+    ],
+    "clusterFillsShare": 0.8414,
+    "suspiciousClusterFillsShare": 0.1231,
+    "note": "同价重复在同集合地板价场景很常见，需看 suspicious（≥5 笔且 ≤2 个买家）"
+   }
+  },
+  "erc20": {
+   "fills": 83,
+   "uniqueBuyerCount": 22,
+   "uniqueSellerCount": 27,
+   "buyerSellerOverlap": 0.0455,
+   "buyerSellerOverlapCount": 1,
+   "repeatPairCount": 13,
+   "repeatPairFills": 56,
+   "repeatPairShare": 0.6747,
+   "top1BuyerShare": 0.506,
+   "top10BuyerShare": 0.8554,
+   "selfTradeCount": 0,
+   "sameAmountCluster": {
+    "tolerance": {
+     "relative": 0.005,
+     "absolute": 1
+    },
+    "grouping": "collection+paymentToken",
+    "clusters": [
+     {
+      "collection": "0xab21d6291f4635917945b0cf3b50c1c2dc3266ab",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "20300000000000000",
+      "clusterCount": 9,
+      "clusterBuyerCount": 2,
+      "clusterShare": 0.1084,
+      "suspicious": true
+     },
+     {
+      "collection": "0x053259a3d30e63d9447e3d90813c6a494bcb398a",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "349900000000000000",
+      "clusterCount": 9,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.1084,
+      "suspicious": true
+     },
+     {
+      "collection": "0x053259a3d30e63d9447e3d90813c6a494bcb398a",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "1000000000000000000",
+      "clusterCount": 9,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.1084,
+      "suspicious": true
+     },
+     {
+      "collection": "0x053259a3d30e63d9447e3d90813c6a494bcb398a",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "990000000000000000",
+      "clusterCount": 7,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.0843,
+      "suspicious": true
+     },
+     {
+      "collection": "0x00fbc656caa753a5280835bf9e849c4c0aff9bf4",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "100000000000000",
+      "clusterCount": 7,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.0843,
+      "suspicious": true
+     },
+     {
+      "collection": "0x2106674431f6672d71777356bd7ab2999562d5b1",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "19600000000000000",
+      "clusterCount": 4,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.0482,
+      "suspicious": false
+     },
+     {
+      "collection": "0x053259a3d30e63d9447e3d90813c6a494bcb398a",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "890000000000000000",
+      "clusterCount": 4,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.0482,
+      "suspicious": false
+     },
+     {
+      "collection": "0x053259a3d30e63d9447e3d90813c6a494bcb398a",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "900000000000000000",
+      "clusterCount": 3,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.0361,
+      "suspicious": false
+     },
+     {
+      "collection": "0x053259a3d30e63d9447e3d90813c6a494bcb398a",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "980000000000000000",
+      "clusterCount": 3,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.0361,
+      "suspicious": false
+     },
+     {
+      "collection": "0x4addbd796edf3d4d186fb5aa314caff3f98984a6",
+      "asset": "0x55d398326f99059ff775485246999027b3197955",
+      "clusterAmount": "111700000000000000",
+      "clusterCount": 2,
+      "clusterBuyerCount": 1,
+      "clusterShare": 0.0241,
+      "suspicious": false
+     }
+    ],
+    "clusterFillsShare": 0.8313,
+    "suspiciousClusterFillsShare": 0.494,
+    "note": "同价重复在同集合地板价场景很常见，需看 suspicious（≥5 笔且 ≤2 个买家）"
+   }
+  }
+ },
+ "mintSenderQuality": {
+  "window": {
+   "fromBlock": 131122055,
+   "toBlock": 131170055,
+   "blocks": 48001,
+   "approxMinutes": 360.0
+  },
+  "sampleSize": 139,
+  "directMintShare": 1.0,
+  "relayLikeShare": 0.0,
+  "contractSenderShare": 0.0,
+  "failedShare": 0.0,
+  "uniqueSenderCount": 113,
+  "top1SenderShare": 0.0288,
+  "layers": {
+   "rawEventsMarketWide": 323035,
+   "rawEvents": 149,
+   "uniqueTx": 139,
+   "receiptSuccess": 139,
+   "confirmedTransfer": 139,
+   "cohortIncluded": 139,
+   "excluded": {
+    "notReplayed_dueToLimit": 0,
+    "rpcMissing": 0,
+    "receiptFailed": 0,
+    "noTransferToSender": 0
+   }
+  },
+  "note": "mint 交易指标，窗口与成交分析不同，禁止与 saleBuyerQuality 合并为总分"
+ },
+ "historyProxy": {
+  "historySource": "not_requested",
+  "historyWindowBlocks": 100000,
+  "buyerWithHistoryCount": null,
+  "freshBuyerCount": null
+ },
+ "rpc": {
+  "ok": 0,
+  "err": 0
+ }
+}

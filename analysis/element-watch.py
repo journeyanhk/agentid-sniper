@@ -18,12 +18,13 @@
 
 不做：签名、approve、mint、sell、baw、任何写操作。
 """
-import calendar, json, os, sys, time, urllib.request
+import calendar, hashlib, json, os, sys, time, urllib.request
 from collections import Counter, defaultdict
 
 RPCS = ['https://rpc.48.club', 'https://bsc.blockrazor.xyz', 'https://1rpc.io/bnb']
 FILL = '0x9c248aa1a265aa616f707b979d57f4529bb63a4fc34dc7fc61fdddc18410f74e'
 NATIVE = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+T721 = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 BLOCKS_PER_HOUR = 8000
 DECODER_VERSION = 'element-fill-v3'
 STEP, MINSTEP, MAXRETRY = 500, 25, 4
@@ -207,6 +208,15 @@ def main():
         seen.add(k); uniq.append(l)
 
     fills = [x for x in (decode(l) for l in uniq) if x]
+    # 二次去重：txHash+logIndex+collection+tokenId（批量成交里同一 log 只应有一个 tokenId，
+    # 但用四元组能防止不同布局被合并）
+    seen4, uniq4 = set(), []
+    for x in fills:
+        k4 = (x['tx'], x['logIndex'], x['collection'], x['tokenId'])
+        if k4 in seen4:
+            continue
+        seen4.add(k4); uniq4.append(x)
+    fills = uniq4
     native = [x for x in fills if int(x['payToken'], 16) == NATIVE]
     coll = defaultdict(lambda: {'sales': 0, 'vol': 0, 'min': None, 'max': None,
                                 'sellers': set(), 'buyers': set(), 'last': 0})
@@ -254,7 +264,7 @@ def main():
                    'windowMinutes': round((t1 - t0) / 60, 1) if t0 and t1 else None},
         'coverage': cov,
         'decoder': {'elementTopic': FILL, 'version': DECODER_VERSION,
-                    'layouts': ['12words', '14words'], 'dedupe': 'txHash+logIndex'},
+                    'layouts': ['12words', '14words'], 'dedupe': 'txHash+logIndex+collection+tokenId'},
         'fills_total': len(fills), 'fills_native_bnb': len(native),
         'fills_erc20_pay': len(fills) - len(native),
         'collections_traded': len(coll),
@@ -265,6 +275,61 @@ def main():
         'tracked_volumeBnb': round(sum(r['volumeBnb'] for r in rows), 6),
         'rpcCalls': R.calls, 'errors': dict(R.err.most_common(5)),
     }
+    dump = arg('--dump-rows', '')
+    if dump:
+        bts = {}
+        for x in fills:
+            if x['block'] not in bts:
+                bts[x['block']] = block_ts(x['block'])
+        nver = int(arg('--verify-transfers', 0))
+        verified, vok = {}, 0
+        if nver > 0 and fills:
+            stepn = max(1, len(fills) // nver)
+            for x in fills[::stepn][:nver]:
+                rc = R.call('eth_getTransactionReceipt', [x['tx']])
+                ok = False
+                if rc and rc.get('status') == '0x1':
+                    for lg in rc.get('logs') or []:
+                        if (lg['address'].lower() == x['collection'] and len(lg['topics']) == 4
+                                and lg['topics'][0].lower() == T721
+                                and ('0x' + lg['topics'][2][-40:]) == x['buyer']
+                                and int(lg['topics'][3], 16) == x['tokenId']):
+                            ok = True; break
+                verified[x['tx']] = ok
+                vok += 1 if ok else 0
+        with open(dump, 'w') as f:
+            for x in fills:
+                b = x['block']
+                f.write(json.dumps({
+                    'collection': x['collection'], 'tokenId': str(x['tokenId']),
+                    'buyer': x['buyer'], 'seller': x['seller'],
+                    'priceNative': str(x['priceWei']), 'paymentToken': x['payToken'],
+                    'txHash': x['tx'], 'logIndex': x['logIndex'], 'blockNumber': b,
+                    'timestamp': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(bts[b])) if bts.get(b) else None,
+                    'marketplace': 'element', 'selfTrade': x['buyer'].lower() == x['seller'].lower(),
+                    'fillEvidence': True, 'transferEvidence': verified.get(x['tx']),
+                }, ensure_ascii=False) + '\n')
+        h = hashlib.sha256()
+        with open(dump, 'rb') as f:
+            for chunk in iter(lambda: f.read(1 << 20), b''):
+                h.update(chunk)
+        meta = {'generated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                'rows': len(fills), 'sha256': h.hexdigest(),
+                'window': agg['window'], 'coverage': {'dataComplete': cov['dataComplete'],
+                                                      'coverageRatio': cov['coverageRatio']},
+                'decoder': agg['decoder'],
+                'dedupeKey': 'txHash+logIndex+collection+tokenId',
+                'transferVerification': {'sampled': len(verified), 'ok': vok,
+                                         'coverage': round(len(verified) / max(1, len(fills)), 4),
+                                         'method': 'receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)'},
+                'aggregates': {k: agg[k] for k in ('fills_total', 'fills_native_bnb', 'fills_erc20_pay',
+                                                   'collections_traded', 'volumeBnb',
+                                                   'tracked_sales', 'tracked_with_sales')},
+                'command': ' '.join(sys.argv),
+                'rpcCalls': R.calls}
+        json.dump(meta, open(dump.rstrip('/') + '.meta.json', 'w'), ensure_ascii=False, indent=1)
+        print('已写逐笔 rows %d 行 → %s（转账抽检 %d 笔，成功 %d）' % (len(fills), dump, len(verified), vok))
+
     out = {'agg': agg, 'tracked': rows[:120],
            'top_collections': [{'collection': k, 'sales': v['sales'],
                                 'volumeBnb': round(v['vol'] / 1e18, 6),

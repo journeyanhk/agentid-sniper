@@ -261,4 +261,80 @@ vol 2.028348 / trackedSales 242`，与归档输入**逐字段相同**。
 ### 6. buyer-quality 定位
 
 只作为**风险信号**，不得称为 realBuyers，也不得把 `nonce >= 8` 当真人证明。
-字段沿用 `buyerQualitySignals` 分组；结论措辞上限是 `no obvious relay concentration`。
+字段沿用 `buyerQualitySignals` 分组；结论措辞上限是 `no obvious relay concentration`。---
+
+## buyer-quality 结果（2026-11-02，W0 全窗口）
+
+### 数据准备
+
+```
+--dump-rows → analysis/element-fills-w0-rows.jsonl（1350 行，逐笔）
+             analysis/element-fills-w0-rows.jsonl.meta.json（sha256 / 命令 / decoder / 抽检）
+去重键      txHash + logIndex + collection + tokenId
+复扫核对    fills 1350 / native 1267 / collections 55 / vol 2.028348 / trackedSales 242 —— 五项全一致
+转账抽检    200 笔 receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)
+```
+
+### saleBuyerQuality（全窗口 1350 笔）
+
+| 指标 | 值 |
+|---|---:|
+| uniqueBuyerCount | 265 |
+| selfTradeCount | 0 |
+| buyerSellerOverlap | 29%（77 个地址既买又卖） |
+| repeatPairCount | 147 对，覆盖 515 笔（38.1%） |
+| top1BuyerShare | 8% |
+| top10BuyerShare | 33% |
+| sameAmountCluster 原始占比 | 84.1% |
+| suspiciousClusterFillsShare | **14.6%** |
+
+同价簇前三名（按集合+资产聚类后）：
+
+```
+0.0004 BNB  ×35 笔，16 个买家
+0.0015 BNB  ×29 笔，17 个买家
+0.00013 BNB ×28 笔，7 个买家
+```
+
+即：**同价重复主要是地板价成交通常伴随的多买家行为，不是少数地址对刷**。
+
+### 判定
+
+```
+flags = [repeatPairShare_high]
+verdict = mixed_signals        （不是 low_independence）
+```
+
+`sameAmountCluster 84%` 不能直接当刷量证据：NFT 地板价天然重复，真正有判别力的是
+`suspiciousClusterFillsShare`（≥5 笔且 ≤2 个买家），该值 14.6%，未达 30% 阈值。
+
+结论边界：
+
+```
+能说：没有发现明显的地址集中/对刷结构（no obvious wash structure）
+不能说：这批成交就是真实需求；也不能据此推翻 C
+C 的依据是 net EV>0 且买家≥20 的集合为 0、独立买家不足、退出规模不足，不是「市场是假的」
+```
+
+### mintSenderQuality（另一样本，禁止与上面合并）
+
+```
+窗口 131122055..131170055（6h），21 个集合
+rawEvents 149 → uniqueTx 139 → receiptSuccess 139 → confirmedTransfer 139 → cohortIncluded 139
+direct 100%、relayLike 0%、uniqueSender 113、top1 2.9%
+```
+
+### 两段 mint 窗口必须分开写
+
+```
+window A: 131115477..131163477 → 174 unique tx（当时 --limit-tx 150 截断，被排除 24 笔）
+window B: 131122055..131170055 → rawEvents 149 / uniqueTx 139 / confirmed 139
+```
+
+不同窗口的数字不得同行比较；`174` 与 `139` 的差异主要来自窗口不同与截断，不是数据缺失。
+
+### 历史画像
+
+免费 RPC 无 archive，`eth_getTransactionCount(buyer, fillBlock-1)` 不可用，
+`historySource=unavailable`，`buyerWithHistoryCount/freshBuyerCount` 保持 null，
+**不做推断**；`currentNonceProxy` 仅作标注，不参与任何判定。
