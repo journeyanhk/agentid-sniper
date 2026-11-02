@@ -179,4 +179,86 @@ freshBuyerCount / repeatBuyerCount / buyerSellerOverlap / top1BuyerShare / top10
 repeatPairCount / selfTradeCount
 ```
 
-真实含义是 heuristic classification，不是身份验证。
+真实含义是 heuristic classification，不是身份验证。---
+
+## 补证复核后的口径修正（2026-11-02 第二轮）
+
+### 1. 重启连续性：只写可验证项
+
+```
+restartRecovery      = verified
+scanCursorContinuity = verified
+blockHoles           = 0
+blockOverlaps        = 0
+signalContinuity     = verified
+metricsIntegrity     = verified（20678 行，坏行 0）
+signalsIntegrity     = verified（19652 行，坏行 0）
+recoveryConfidence   = high
+```
+
+**不得写成「绝对无损」**：`state.json` 是单文件覆盖写，历史游标不可回读，
+只能以「metrics 相邻两轮游标 + signals 文件连续性 + pending 两侧为 0」作为旁证。
+每次断层的 `restartAt / lastMetricBefore / firstMetricAfter / blockBefore / blockAfter /
+pendingBefore / pendingAfter / lastSignalBeforeRestart / firstSignalAfterRestart` 见
+`analysis/restart-audit.json`。
+
+### 2. mint replay 命名纪律
+
+| 名字 | 判据 | 能说明什么 |
+|---|---|---|
+| `direct` | `tx.from == recipient` | 发送者自己付 gas 自己收款 |
+| `sponsored_or_relay_like` | `tx.from != recipient` | **只说明发送者与收款人不同**，不证明是合约 |
+| `contract_sender` | 且 `eth_getCode(tx.from, 该块) != 0x` | 有代码才敢叫合约发送者 |
+| `unknown_code` | 取不到历史 code | 不做定性 |
+
+行内字段：`txFrom / recipient / recipients / txTo / senderCodeAtBlock / senderKind /
+senderMatchesRecipient / receiptStatus / blockNumber / receivedTokenIds / paymentValue /
+gasUsed / gasCostNative / mintOutcome`。
+
+五层计数（缺一层就会被误读）：
+
+```
+rawEventsMarketWide → rawEvents(限定集合) → uniqueTx → receiptSuccess
+→ confirmedTransfer → cohortIncluded        （excluded 逐项列原因）
+```
+
+### 3. 174 与 150 的解释（历史记录，防止误读为数据矛盾）
+
+- `174` = 窗口 131115477..131163477（6h）内命中 21 个集合的 unique mint 交易数；
+- `150` = 当时命令行 `--limit-tx 150` 的**人为截断**，不是数据缺失；
+- 被截断的 24 笔 `excluded.notReplayed_dueToLimit`，数据质量无问题；
+- 修正后（limit 400、窗口 131122055..131170055）：
+  `rawEvents 149 → uniqueTx 139 → receiptSuccess 139 → confirmedTransfer 139 → cohortIncluded 139`，
+  排除项全 0，`direct 139 / senderKind eoa 139`，113 个发送者、top1 2.9%。
+
+### 4. EV 命名
+
+```
+grossEvPerMint          未扣费
+netKnownCostEvPerMint   扣 mintGas + 卖出 gas + Element 2% 手续费；royalty 未知
+royaltyUnknown          = true
+evLowerBound            取 royalty=10% 的最不利假设
+```
+
+**`netKnownCostEvPerMint` 不是完全净 EV**：MORI 在 royalty 0 / 2.5 / 5 / 7.5 / 10% 下
+依次为 +$0.0626 / +0.0609 / +0.0591 / +0.0573 / +0.0555，始终为正，但这是**同一个 12 买家样本**的正，
+不改变「买家 < 20」的结论。
+
+覆盖度必须同时报告：
+
+```
+collectionCoverage 21/55    saleCoverage 242/1350
+volumeCoverage 0.4598/2.0283  evCoverage 12/21
+```
+
+### 5. Element 证据归档（已完成）
+
+`analysis/element-archive-w0.json` 内容：输入/输出 SHA-256、窗口块与时间、768 个 chunk 的
+逐块记录（`fills`/`status`/`stepUsed`）、retry/skipped、`decoder=element-fill-v3`、RPC 来源、
+可复跑命令。补跑一致性：同窗口重扫得到 `fills 1350 / native 1267 / collections 55 /
+vol 2.028348 / trackedSales 242`，与归档输入**逐字段相同**。
+
+### 6. buyer-quality 定位
+
+只作为**风险信号**，不得称为 realBuyers，也不得把 `nonce >= 8` 当真人证明。
+字段沿用 `buyerQualitySignals` 分组；结论措辞上限是 `no obvious relay concentration`。

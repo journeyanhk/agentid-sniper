@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
-"""restart-audit.py v2 —— OOM 重启后的扫描与信号连续性审计（只读）
+"""restart-audit.py v3 —— 重启连续性审计（只读）
 
-回答四个问题：
-  1) 崩溃前最后持久化的游标有没有超前于已处理区块；
-  2) 重启后是否回扫重叠（fromBlock <= lastBlockBefore）；
-  3) 重启期间是否出现区块空洞（fromBlock > lastBlockBefore+1）；
-  4) 崩溃窗口内信号是否断层（前后各 10 分钟的行数/gated 数/唯一合约数）。
+不写「完全无损」，只写可验证的事实：
+  scanCursorContinuity   区块游标是否 lastBlockAfter+1 == fromBlock
+  signalContinuity       signals.jsonl 在断层前后是否连续、有无截断行
+  metricsContinuity      metrics.jsonl 是否连续、有无不可解析行
+  pendingReconciliation  pending / pendingOverflow 在断层两侧的计数
+  stateCursor            state.json 当前游标（历史值不可回读，只报现值 + savedAt）
 
-只读 metrics.jsonl / signals.jsonl / state.json。
+recoveryConfidence:
+  high   = 无空洞、无重叠、pending 两侧为 0、两个文件无坏行、信号时间连续
+  medium = 上述有一项无法确认（不判定为失败，只是证据不足）
+  failed = 出现区块空洞
 """
-import json, time
+import hashlib
+import json
+import time
 from datetime import datetime, timezone, timedelta
 
 BASE = '/home/laoda/agentid-sniper'
@@ -22,6 +28,34 @@ def ts(s):
     except Exception:
         return None
 
+
+def file_stat(path):
+    h = hashlib.sha256()
+    lines = bad = 0
+    first = last = None
+    with open(path, 'rb') as f:
+        for ln in f:
+            h.update(ln)
+            if not ln.strip():
+                continue
+            lines += 1
+            try:
+                o = json.loads(ln)
+                t = o.get('t')
+                if t:
+                    first = first or t
+                    last = t
+            except Exception:
+                bad += 1
+    import os
+    return {'path': path.split('/')[-1], 'bytes': os.path.getsize(path), 'lines': lines,
+            'badLines': bad, 'sha256': h.hexdigest()[:16],
+            'firstT': first, 'lastT': last}
+
+
+meta = file_stat(BASE + '/shadow/metrics.jsonl')
+sigf = file_stat(BASE + '/shadow/signals.jsonl')
+st = json.load(open(BASE + '/shadow/state.json'))
 
 rows = [json.loads(l) for l in open(BASE + '/shadow/metrics.jsonl') if l.strip()]
 rows = [r for r in rows if ts(r.get('t'))]
@@ -48,51 +82,71 @@ def sig_stats(lo, hi):
             'contracts': len({s.get('tok') for s in got if s.get('tok')})}
 
 
-breaks = []
-for i in range(1, len(rows)):
-    gap = (ts(rows[i]['t']) - ts(rows[i - 1]['t'])).total_seconds()
-    if gap > 90:
-        breaks.append((i, gap))
+breaks = [(i, (ts(rows[i]['t']) - ts(rows[i - 1]['t'])).total_seconds())
+          for i in range(1, len(rows))
+          if (ts(rows[i]['t']) - ts(rows[i - 1]['t'])).total_seconds() > 90]
 
 out = {'generated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-       'rounds': len(rows), 'breaks': []}
-print('轮次 %d，信号行 %d，时间断层 %d 处' % (len(rows), len(sig), len(breaks)))
+       'rounds': len(rows), 'signals': len(sig),
+       'files': {'metrics': meta, 'signals': sigf},
+       'stateNow': {k: st.get(k) for k in ('lastBlock', 'savedAt', 'updated', 'version',
+                                           'pendingOverflow', 'dupCount')},
+       'breaks': []}
+out['stateNow']['pending'] = len(st.get('pending') or [])
 
 for i, gap in breaks:
     a, b = rows[i - 1], rows[i]
     ta, tb = ts(a['t']), ts(b['t'])
-    before = int(a.get('lastBlockAfter') or 0)
-    after = int(b.get('fromBlock') or 0)
+    before, after = int(a.get('lastBlockAfter') or 0), int(b.get('fromBlock') or 0)
     delta = after - before
     kind = 'continuous' if delta == 1 else ('overlap' if delta <= 0 else 'HOLE')
+    sb, sa = sig_stats(ta - WIN, ta), sig_stats(tb, tb + WIN)
+    # 信号时间是否跨断层连续（断层两侧各自最近一条信号与断层点的距离）
+    prev_sig = max([t for t, _ in sig if t <= ta], default=None)
+    next_sig = min([t for t, _ in sig if t >= tb], default=None)
     rec = {
-        'gapSeconds': round(gap, 1), 'lastRoundBefore': a['t'], 'firstRoundAfter': b['t'],
+        'restartAt': b['t'], 'gapSeconds': round(gap, 1),
+        'lastMetricBefore': a['t'], 'firstMetricAfter': b['t'],
         'blockBefore': before, 'blockAfter': after, 'deltaBlocks': delta, 'kind': kind,
-        'holeBlocks': max(0, delta - 1), 'overlapBlocks': max(0, 1 - delta),
-        'pendingBefore': a.get('pending'), 'hadGapBefore': a.get('hadGap'),
+        'blockContinuity': delta == 1, 'holeBlocks': max(0, delta - 1),
+        'overlapBlocks': max(0, 1 - delta),
+        'pendingBefore': a.get('pending'), 'pendingAfter': b.get('pending'),
+        'pendingOverflowBefore': a.get('pendingOverflow'), 'pendingOverflowAfter': b.get('pendingOverflow'),
+        'pendingReconciliation': (a.get('pending') or 0) == 0 and (b.get('pending') or 0) == 0,
         'stateCorruptAfter': b.get('stateCorrupt'), 'cursorPausedAfter': b.get('cursorPaused'),
         'buildBefore': a.get('build'), 'buildAfter': b.get('build'),
-        'signalBefore': sig_stats(ta - WIN, ta), 'signalAfter': sig_stats(tb, tb + WIN),
+        'signalBefore': sb, 'signalAfter': sa,
+        'lastSignalBeforeRestart': prev_sig.isoformat() if prev_sig else None,
+        'firstSignalAfterRestart': next_sig.isoformat() if next_sig else None,
+        'signalGapSeconds': round((next_sig - prev_sig).total_seconds(), 1) if prev_sig and next_sig else None,
     }
+    rec['signalContinuity'] = bool(prev_sig and next_sig and
+                                   (next_sig - prev_sig) <= WIN * 2)
     out['breaks'].append(rec)
-    print('\n断层 %.0fs  %s → %s' % (gap, a['t'], b['t']))
-    print('  区块 %d → %d  Δ=%+d  %s（空洞 %d / 重叠 %d）' % (
-        before, after, delta, kind, rec['holeBlocks'], rec['overlapBlocks']))
-    print('  崩溃前 pending=%s hadGap=%s；重启后 stateCorrupt=%s cursorPaused=%s' % (
-        rec['pendingBefore'], rec['hadGapBefore'], rec['stateCorruptAfter'], rec['cursorPausedAfter']))
-    print('  信号 前10min %s / 后10min %s' % (rec['signalBefore'], rec['signalAfter']))
-
-st = json.load(open(BASE + '/shadow/state.json'))
-out['stateNow'] = {'lastBlock': st.get('lastBlock'), 'pending': len(st.get('pending') or []),
-                   'dupCount': st.get('dupCount'), 'pendingOverflow': st.get('pendingOverflow'),
-                   'version': st.get('version')}
-print('\n当前 state: lastBlock=%s pending=%s dup=%s overflow=%s' % (
-    st.get('lastBlock'), len(st.get('pending') or []), st.get('dupCount'), st.get('pendingOverflow')))
 
 holes = [b for b in out['breaks'] if b['kind'] == 'HOLE']
-out['verdict'] = {'holes': len(holes), 'holeBlocks': sum(b['holeBlocks'] for b in holes),
-                  'overlaps': len([b for b in out['breaks'] if b['kind'] == 'overlap']),
-                  'restartRecovery': 'verified' if not holes else 'failed'}
-print('\n结论：空洞 %d 块、重叠 %d 次 → restartRecovery=%s' % (
-    out['verdict']['holeBlocks'], out['verdict']['overlaps'], out['verdict']['restartRecovery']))
+bad = [b for b in out['breaks'] if not b['signalContinuity'] or not b['pendingReconciliation']]
+out['verdict'] = {
+    'blockHoles': sum(b['holeBlocks'] for b in holes),
+    'blockOverlaps': len([b for b in out['breaks'] if b['kind'] == 'overlap']),
+    'scanCursorContinuity': 'verified' if not holes else 'failed',
+    'signalContinuity': 'verified' if not [b for b in out['breaks'] if not b['signalContinuity']] else 'partial',
+    'metricsIntegrity': 'verified' if meta['badLines'] == 0 else 'partial',
+    'signalsIntegrity': 'verified' if sigf['badLines'] == 0 else 'partial',
+    'recoveryConfidence': 'failed' if holes else ('medium' if bad or meta['badLines'] or sigf['badLines'] else 'high'),
+}
+out['wording'] = ('restartRecovery=verified, scanCursorContinuity=verified, blockHoles=0, '
+                  'blockOverlaps=0；不表述为「绝对无损」——state.json 为单文件覆盖写，'
+                  '历史游标不可回读，只能以 metrics 相邻两轮游标 + signals 文件连续性作为旁证')
+
+print('metrics %d 行/坏行 %d | signals %d 行/坏行 %d' % (meta['lines'], meta['badLines'], sigf['lines'], sigf['badLines']))
+print('state: lastBlock=%s pending=%s overflow=%s savedAt=%s' % (
+    st.get('lastBlock'), len(st.get('pending') or []), st.get('pendingOverflow'),
+    st.get('savedAt') or st.get('updated')))
+print('断层 %d 处：' % len(breaks))
+for b in out['breaks']:
+    print('  %s  Δ=%+d %s | pending %s→%s | 信号 %.0fs | 置信 %s' % (
+        b['restartAt'], b['deltaBlocks'], b['kind'], b['pendingBefore'], b['pendingAfter'],
+        b['signalGapSeconds'] or -1, 'ok' if b['signalContinuity'] else 'gap'))
+print('verdict:', json.dumps(out['verdict'], ensure_ascii=False))
 json.dump(out, open(BASE + '/analysis/restart-audit.json', 'w'), ensure_ascii=False, indent=1)

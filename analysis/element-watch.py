@@ -109,9 +109,18 @@ def block_at_time(target_ts):
     return lo
 
 
-def scan(frm, to):
-    """扫描 [frm,to]，返回 (logs, coverage)。失败区间有限重试后记为 skipped 并前进。"""
+def scan(frm, to, log_path=None):
+    """扫描 [frm,to]，返回 (logs, coverage)。失败区间有限重试后记为 skipped 并前进。
+
+    log_path 非空时逐 chunk 追加一行 JSON（fromBlock/toBlock/blocks/fills/status/retries），
+    供 element-archive.py 生成可复跑的 chunk 清单。
+    """
     out, cur, step, fails = [], frm, STEP, 0
+    lg = open(log_path, 'a') if log_path else None
+
+    def _chunk(rec):
+        if lg:
+            lg.write(json.dumps(rec, ensure_ascii=False) + '\n'); lg.flush()
     cov = {'requestedRanges': (to - frm) // STEP + 1, 'scannedRanges': 0,
            'retryCount': 0, 'skippedBlocks': 0, 'coveredBlocks': 0,
            'skippedRanges': []}
@@ -126,9 +135,14 @@ def scan(frm, to):
                 cov['skippedRanges'].append({'fromBlock': cur, 'toBlock': end, 'status': 'skipped',
                                              'reason': 'all_rpc_failed', 'attempts': fails})
                 cov['skippedBlocks'] += end - cur + 1
+                _chunk({'fromBlock': cur, 'toBlock': end, 'blocks': end - cur + 1,
+                        'fills': 0, 'status': 'skipped', 'reason': 'all_rpc_failed',
+                        'retries': fails})
                 cur = end + 1; fails = 0; continue
             time.sleep(0.4 * fails); continue
         out.extend(r)
+        _chunk({'fromBlock': cur, 'toBlock': end, 'blocks': end - cur + 1,
+                'fills': len(r), 'status': 'ok', 'stepUsed': step})
         cov['scannedRanges'] += 1; cov['coveredBlocks'] += end - cur + 1
         cur = end + 1; fails = 0
         if step < STEP: step = min(STEP, step * 2)
@@ -182,7 +196,7 @@ def main():
     if frm > to:
         print('窗口非法：fromBlock %s > toBlock %s' % (frm, to)); sys.exit(2)
 
-    logs, cov = scan(frm, to)
+    logs, cov = scan(frm, to, arg('--chunk-log', '') or None)
 
     # 去重：同 (tx, logIndex) 只算一次
     seen, uniq = set(), []

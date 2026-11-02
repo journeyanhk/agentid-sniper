@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-"""mint-replay.py —— mint 历史交易回放审计（只读，不接钱包）
+"""mint-replay.py v3 —— mint 历史交易回放（只读）
 
-核心发现驱动的口径：BSC 上大量 mint 是「合约/中继代发」，tx.from 并不等于 NFT 收款人。
-因此每笔 mint 同时记录 sender（tx.from）与 recipient（Transfer 的 to），并分类：
+命名纪律（本轮修正）：
+  direct                  tx.from == NFT 收款人
+  sponsored_or_relay_like tx.from != NFT 收款人（只说明「发送者与收款人不同」）
+  contract_sender         且 eth_getCode(tx.from, 该 tx 区块) != 0x（有代码才敢叫合约发送者）
+  unknown_code            取不到历史 code，不做定性
 
-  direct     tx.from == recipient          自己付 gas 自己铸
-  mediated   tx.from != recipient          合约/中继代发（批量铸造、机器人、平台代铸）
-  failed     receipt.status != 1           交易失败
-  reverted_no_token  status==1 但目标集合无 Transfer
-
-对 cohort 的意义：mediated 占比高时，「独立钱包数」不等于「独立付款人」，
-卖压可能来自同一批操作者的批量铸造。
+五层计数（禁止只报两个数）：
+  rawEvents → uniqueTx → receiptSuccess → confirmedTransfer → cohortIncluded
+  每层都带 excluded / reason，并显式记录窗口与 limit 截断。
 
 用法：
-  python3 analysis/mint-replay.py --hours 2 --collections 0xabc,0xdef --limit-tx 300
-  python3 analysis/mint-replay.py --from-block 131149699 --to-block 131161699 --sold-only
+  python3 analysis/mint-replay.py --hours 6 --sold-only --limit-tx 400 --output analysis/mint-replay-sold.json
 """
 import argparse
 import json
@@ -67,18 +65,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--from-block', type=int)
     ap.add_argument('--to-block', type=int)
-    ap.add_argument('--hours', type=float, default=2)
-    ap.add_argument('--limit-tx', type=int, default=200)
-    ap.add_argument('--collections', default='', help='逗号分隔的集合地址；留空=全市场')
-    ap.add_argument('--sold-only', action='store_true', help='只看 W0 有成交的 21 个集合')
+    ap.add_argument('--hours', type=float, default=6)
+    ap.add_argument('--limit-tx', type=int, default=400)
+    ap.add_argument('--collections', default='')
+    ap.add_argument('--sold-only', action='store_true')
     ap.add_argument('--output', default='analysis/mint-replay.json')
     a = ap.parse_args()
 
     want = {c.strip().lower() for c in a.collections.split(',') if c.strip()}
     if a.sold_only:
         want |= sold_collections()
-    if want:
-        print('限定集合 %d 个' % len(want))
 
     R = Rpc()
     head = int(R.call('eth_blockNumber', []), 16)
@@ -86,7 +82,8 @@ def main():
     from_b = a.from_block or max(0, to_b - int(a.hours * 8000))
 
     t0 = time.time()
-    mints = defaultdict(list)
+    events = defaultdict(list)
+    raw_events = 0
     chunks = skipped = total_logs = 0
     b = from_b
     while b <= to_b:
@@ -103,22 +100,23 @@ def main():
             skipped += 1
             b = e + 1
             continue
-        total_logs += len(logs)
         for lg in logs:
+            total_logs += 1
             c = lg['address'].lower()
             if want and c not in want:
                 continue
-            mints[lg['transactionHash']].append({
+            raw_events += 1
+            events[lg['transactionHash']].append({
                 'contract': c,
                 'tokenId': int(lg['topics'][3], 16) if len(lg['topics']) > 3 else None,
                 'recipient': '0x' + lg['topics'][2][-40:]})
         b = e + 1
 
-    print('窗口 %d..%d（%.1f 分钟）分片 %d、skipped %d、全市场 mint 事件 %d、命中集合 mint 交易 %d 笔'
-          % (from_b, to_b, (to_b - from_b) / 8000 * 60, chunks, skipped, total_logs, len(mints)))
+    unique_tx = len(events)
+    txs = list(events.items())[:a.limit_tx]
+    truncated = unique_tx - len(txs)
 
-    txs = list(mints.items())[:a.limit_tx]
-    rows, tally, senders = [], Counter(), Counter()
+    rows, tally, senders, sender_kind = [], Counter(), Counter(), Counter()
     for h, evs in txs:
         rc = R.call('eth_getTransactionReceipt', [h])
         tx = R.call('eth_getTransactionByHash', [h])
@@ -126,45 +124,92 @@ def main():
             tally['rpc_missing'] += 1
             continue
         sender = (tx.get('from') or '').lower()
+        tx_to = (tx.get('to') or '').lower()
         status = int(rc.get('status') or '0x0', 16)
         gas_used = int(rc.get('gasUsed') or '0x0', 16)
         gas_price = int(rc.get('effectiveGasPrice') or tx.get('gasPrice') or '0x0', 16)
         value = int(tx.get('value') or '0x0', 16)
-        recipients = {e['recipient'] for e in evs}
-        mediated = recipients != {sender}
+        blk = rc.get('blockNumber') or tx.get('blockNumber')
+        recipients = sorted({e['recipient'] for e in evs})
+        matches = sender in recipients
+
+        code = None
+        if not matches:
+            code = R.call('eth_getCode', [sender, blk]) if blk else None
+        if matches:
+            skind, code_hex = 'eoa', None          # 自己付款铸造，发送者必然是 EOA（有代码无法发起 tx）
+        elif code is None:
+            skind, code_hex = 'unknown_code', None
+        elif code in ('0x', '0x0', ''):
+            skind, code_hex = 'eoa', code
+        else:
+            skind, code_hex = 'contract', code[:74]
+
         if status != 1:
             outcome = 'failed'
-        elif not recipients:
-            outcome = 'reverted_no_token'
+        elif matches:
+            outcome = 'direct'
+        elif skind == 'contract':
+            outcome = 'contract_sender'
         else:
-            outcome = 'mediated' if mediated else 'direct'
+            outcome = 'sponsored_or_relay_like'
         tally[outcome] += 1
         senders[sender] += 1
+        sender_kind[skind] += 1
         rows.append({
             'txHash': h, 'contract': sorted({e['contract'] for e in evs})[0],
-            'sender': sender, 'minter': sorted(recipients)[0] if len(recipients) == 1 else None,
-            'recipients': sorted(recipients), 'recipientCount': len(recipients),
-            'receiptStatus': status, 'mediated': mediated,
+            'txFrom': sender, 'recipient': recipients[0] if len(recipients) == 1 else None,
+            'recipients': recipients, 'recipientCount': len(recipients),
+            'txTo': tx_to, 'senderCodeAtBlock': code_hex, 'senderKind': skind,
+            'senderMatchesRecipient': matches,
+            'receiptStatus': status, 'blockNumber': int(blk, 16) if isinstance(blk, str) else blk,
             'receivedTokenIds': [e['tokenId'] for e in evs if e['recipient'] == sender],
-            'transferToMinter': bool([e for e in evs if e['recipient'] == sender]),
+            'transferToMinter': matches,
             'paymentValue': str(value), 'gasUsed': gas_used,
             'gasCostNative': str(gas_used * gas_price), 'mintOutcome': outcome})
 
+    confirmed = [r for r in rows if r['receiptStatus'] == 1 and r['transferToMinter']]
+    layers = {
+        'rawEventsMarketWide': total_logs,
+        'rawEvents': raw_events,
+        'uniqueTx': unique_tx,
+        'receiptSuccess': sum(1 for r in rows if r['receiptStatus'] == 1),
+        'confirmedTransfer': len(confirmed),
+        'cohortIncluded': len(confirmed),
+        'excluded': {
+            'notReplayed_dueToLimit': truncated,
+            'rpcMissing': tally.get('rpc_missing', 0),
+            'receiptFailed': tally.get('failed', 0),
+            'noTransferToSender': len([r for r in rows if r['receiptStatus'] == 1 and not r['transferToMinter']]),
+        },
+    }
     top = senders.most_common(5)
     res = {'generated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-           'window': {'fromBlock': from_b, 'toBlock': to_b},
-           'scope': {'collectionsRequested': sorted(want) if want else 'market-wide'},
+           'window': {'fromBlock': from_b, 'toBlock': to_b,
+                      'blocks': to_b - from_b + 1,
+                      'approxMinutes': round((to_b - from_b) / 8000 * 60, 1)},
+           'scope': {'collections': sorted(want) if want else 'market-wide',
+                     'rawEventsMarketWide': total_logs,
+                     'collectionCount': len(want) if want else None},
            'coverage': {'chunks': chunks, 'skipped': skipped, 'dataComplete': skipped == 0},
-           'counts': {'mintTxs': len(mints), 'replayed': len(rows), **tally},
+           'layers': layers, 'outcomes': dict(tally),
+           'senderKind': dict(sender_kind),
            'senderConcentration': {'uniqueSenders': len(senders), 'top5': top,
                                    'top1Share': round(top[0][1] / len(rows), 4) if rows and top else None},
            'rpc': {'calls': R.calls, 'errors': R.errors, 'sources': dict(R.sources)},
            'rows': rows}
     json.dump(res, open(a.output, 'w'), ensure_ascii=False, indent=1)
-    print('回放 %d 笔：%s' % (len(rows), dict(tally)))
-    print('发送者 %d 个，top1 占比 %s，top5 %s' % (
-        len(senders), res['senderConcentration']['top1Share'], top))
-    print('耗时 %.1fs → %s' % (time.time() - t0, a.output))
+
+    print('窗口 %d..%d（≈%.0f 分钟，%d 块）分片 %d skipped %d'
+          % (from_b, to_b, res['window']['approxMinutes'], res['window']['blocks'], chunks, skipped))
+    print('五层：rawEvents %d → uniqueTx %d → receiptSuccess %d → confirmedTransfer %d → cohortIncluded %d'
+          % (layers['rawEvents'], layers['uniqueTx'], layers['receiptSuccess'],
+             layers['confirmedTransfer'], layers['cohortIncluded']))
+    print('排除：%s' % json.dumps(layers['excluded'], ensure_ascii=False))
+    print('分类：%s；senderKind %s' % (dict(tally), dict(sender_kind)))
+    print('发送者 %d 个，top1 %s，top5 %s' % (len(senders),
+                                          res['senderConcentration']['top1Share'], top))
+    print('耗时 %.0fs → %s' % (time.time() - t0, a.output))
 
 
 if __name__ == '__main__':
