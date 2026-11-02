@@ -36,6 +36,7 @@ const ARCHIVE_GLOBS = [
   ['analysis', '.py'],
   ['analysis', '.md'],
   ['deploy', '.sh'],
+  ['deploy', '.md'],
 ];
 
 function sha256(file) {

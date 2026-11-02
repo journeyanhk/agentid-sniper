@@ -1,11 +1,11 @@
 {
  "schema": "agentid-release/2",
  "scope": "runtime",
- "generated": "2026-11-02T09:07:25.213Z",
- "gitHead": "733134e29199e8165202af62d94b31d70c227289",
+ "generated": "2026-11-02T13:28:40.369Z",
+ "gitHead": "1ec4f6fdfbc498a67ab33c7a2d76e8d749791c21",
  "fileCount": 2,
  "files": {
-  "shadow/probe.mjs": "3a1040b2e2df8062eae1f64615f624f6524cd48e7ee14176f9f437b6e502cc87",
+  "shadow/probe.mjs": "0b9c786f314a2f10331f9aa6c4f8811ec88f375e77df4e3c5389c37d69ba22c0",
   "deploy/systemd/agentid-shadow.service": "c9e6d52bd5804692149a659a4678e39821558d306f1cff0675e35e9f7feaa015"
  }
 }

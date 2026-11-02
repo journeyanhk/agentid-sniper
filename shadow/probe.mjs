@@ -13,12 +13,18 @@ import {
   openSync, writeSync, fsyncSync, closeSync, renameSync, copyFileSync, existsSync,
 } from 'node:fs';
 import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const DIR = process.env.SHADOW_DIR ?? new URL('.', import.meta.url).pathname;
 mkdirSync(DIR, { recursive: true });
 const VERSION = 'probe-4.0.0';
-let BUILD = 'unknown';
-try { BUILD = execSync('git -C ' + DIR + '/.. rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch {}
+// build 是 epoch 归因主键：取本文件自身 SHA-256 前 12 位，文档提交不再改变它。
+// gitHead 单独记录，仅作溯源；两者不得混用。
+let BUILD = 'unknown', GITHEAD = 'unknown';
+try {
+  BUILD = 'sha256:' + createHash('sha256').update(readFileSync(new URL(import.meta.url))).digest('hex').slice(0, 12);
+} catch {}
+try { GITHEAD = execSync('git -C ' + DIR + '/.. rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch {}
 const SIG = DIR + '/signals.jsonl', MET = DIR + '/metrics.jsonl', GAPF = DIR + '/gaps.jsonl';
 const PENDF = DIR + '/pending_overflow.jsonl', STF = DIR + '/state.json';
 
@@ -348,7 +354,7 @@ async function selftest() {
 }
 
 async function main() {
-  log('[' + ts() + '] ' + VERSION + ' build=' + BUILD + ' start; resume lastBlock=' + lastBlock + ' pending=' + pending.length + (stateCorrupt ? ' [STATE CORRUPT]' : ''));
+  log('[' + ts() + '] ' + VERSION + ' build=' + BUILD + ' gitHead=' + GITHEAD + ' start; resume lastBlock=' + lastBlock + ' pending=' + pending.length + (stateCorrupt ? ' [STATE CORRUPT]' : ''));
   if (process.env.SHADOW_SELFTEST === '1') { await selftest(); return; }
 
   // state 损坏：只读告警，不冷启动、不扫描；systemd 保持 active 但探针 BLOCKED，等人工恢复
@@ -437,7 +443,7 @@ async function main() {
       }));
       const saved = saveState();
       appendFileSync(MET, JSON.stringify({
-        t: ts(), v: VERSION, build: BUILD, head, scannedTo: to, lagBlocks: head - to, fromBlock, fresh,
+        t: ts(), v: VERSION, build: BUILD, gitHead: GITHEAD, head, scannedTo: to, lagBlocks: head - to, fromBlock, fresh,
         hadGap: gapFlag, gapCount: gapRanges.length, pending: pending.length,
         pendingAgeMaxMin: ages.length ? +Math.max(...ages).toFixed(1) : 0,
         pendingOverflow, stateCorrupt, stateSaved: saved,
