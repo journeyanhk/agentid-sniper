@@ -1,0 +1,30 @@
+{
+ "schema": "agentid-release/1",
+ "generated": "2026-11-02T06:59:27.169Z",
+ "gitHead": "c3b33d953bc18b3073a98c29409546fb0ec3ff2a",
+ "fileCount": 22,
+ "files": {
+  "shadow/probe.mjs": "3a1040b2e2df8062eae1f64615f624f6524cd48e7ee14176f9f437b6e502cc87",
+  "analysis/aggregator-check.py": "fc5daced6c28e298f5af4d51df634e24a3fee3af5b299355213f4be8a6ddffca",
+  "analysis/baseline-selftest.py": "b0124397d0ca294fea8ec393a3301f2e59bc1bfb522f7e76122b3a034c789b84",
+  "analysis/buyer-quality.py": "9c46a38afb8021cf5ff999421cf24e8471f3c7aa81be2d1738feb5fab5b0a998",
+  "analysis/cohort.py": "bd252cf467d8b247f7bb4edb2b5b175e3babf94873bd1ff876164b2a22644980",
+  "analysis/curve-exit.py": "3c3f4b2f4942849ac8d462f17cc3778c27e889610d58e7f9c8af3edb320fb0a0",
+  "analysis/element-archive.py": "c8ef3eb8c5f1fb3225cf537292c259a248662fa3ca2672acae393c1641a73a32",
+  "analysis/element-watch.py": "31e57f6ecc0e74e1f74bb4611ed0d56b412648aba04c0a86d734da8469302732",
+  "analysis/ev-report.py": "581cf009e9d2d4ac2a1902d65bf368934124c567a597fbb191a3c8108559379a",
+  "analysis/gated-recall.py": "07c8a1711ed3d5f97d576651c1a89759b304406a7133da55f40cd2f1dc2d0a8e",
+  "analysis/market-watch.py": "58823420013980075af84a440452aa0149475d7856531c1d33c428b3ee8c1800",
+  "analysis/merge-windows.py": "56d9bcab0eda89874a6d5b44adeebd8733568c82c9b3cfc0f3494cb46d7f6622",
+  "analysis/mint-ev.py": "a0df48fa02c71983a7cf150b1484804131f52500f919b793c0fc7dc45db261a2",
+  "analysis/mint-replay.py": "f27ec30072be6f0e264c8bec2306ef643896cdb550476692adbf3ad2e21a62cc",
+  "analysis/proxy-trace.py": "a8ebd42d0bd17588f73557b491b4aa8a40b47c274ddb02f7345df3de37f6fb44",
+  "analysis/recheck-pools.py": "339e4c3371cb53e30cb3452913cccee181b20092f72398cfda74000b32bd6786",
+  "analysis/restart-audit.py": "0736f7022f2149a1c0158da9d3d77811d77f4467a141303037243bfda2d094f8",
+  "analysis/verify-fill-decode.py": "64b5b254777edc6cbdabf0a9f380b5236703976581a20180bd356d36de2bc72c",
+  "analysis/w0-baseline.py": "f6ac54e1c5e4c41903b1dcf8e1d848bd1d25540081f8bad7b5511fbb8e21523b",
+  "analysis/w0-verdict.py": "160d2aacc4b1a509b7efb4e939698a64d3503be0fca7e4b994469d32a4be177d",
+  "deploy/check-consistency.sh": "b88ae7138cb83ee16b502aa33b7d83b3a10b70143ea6c7e06a034b132603ec23",
+  "deploy/verify-release.sh": "715d348416610f4e1d35e388694b31a639d928d512a03614d264fc35902abcd2"
+ }
+}
