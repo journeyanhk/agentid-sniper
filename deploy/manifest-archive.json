@@ -1,10 +1,10 @@
 {
- "schema": "agentid-release/1",
- "generated": "2026-11-02T08:37:53.402Z",
- "gitHead": "fa9baf5f9dd49436f737913b1626f83fa2eda3fd",
- "fileCount": 23,
+ "schema": "agentid-release/2",
+ "scope": "archive",
+ "generated": "2026-11-02T09:07:07.053Z",
+ "gitHead": "733134e29199e8165202af62d94b31d70c227289",
+ "fileCount": 28,
  "files": {
-  "shadow/probe.mjs": "3a1040b2e2df8062eae1f64615f624f6524cd48e7ee14176f9f437b6e502cc87",
   "analysis/aggregator-check.py": "fc5daced6c28e298f5af4d51df634e24a3fee3af5b299355213f4be8a6ddffca",
   "analysis/baseline-selftest.py": "b0124397d0ca294fea8ec393a3301f2e59bc1bfb522f7e76122b3a034c789b84",
   "analysis/buyer-quality.py": "111c8d7a9000d8930cfc2c2cc3d7a5f6af00651cbd38fc9b4ae9b6a50e03392e",
@@ -25,7 +25,13 @@
   "analysis/verify-fill-decode.py": "64b5b254777edc6cbdabf0a9f380b5236703976581a20180bd356d36de2bc72c",
   "analysis/w0-baseline.py": "f6ac54e1c5e4c41903b1dcf8e1d848bd1d25540081f8bad7b5511fbb8e21523b",
   "analysis/w0-verdict.py": "160d2aacc4b1a509b7efb4e939698a64d3503be0fca7e4b994469d32a4be177d",
+  "analysis/EPOCH-post-release-verification.md": "b0c8ee2f7f9103d1b35e016d5d18f40d76d6d6a78d9c56e67f5d0e4e9bf8075a",
+  "analysis/FINDINGS.md": "dcf4124424745f287ad911b32e23d2214cf137c4fb84b7ec3cd2e67d31647acd",
+  "analysis/FREEZE.md": "3137be7cf8bc58175ab1e2be4aa50fd0c6bb1811f42cd8faea7963939812055f",
+  "analysis/W0-48H.md": "2837ea95697cb85bd47dce3c27c69ead135a72db7df28fa1a7afa81c29b3e49a",
+  "analysis/W0-END-PLAN.md": "9b3245f6f98eafcb1f2eef7163ef4ee8cf630f1eb74d3194286c1c93ba8c815d",
+  "analysis/W0-FINAL-REPORT.md": "a0bb8fadebc8d8cd171262a56be3672913e6d5c82046a850f4105bc9c1e0852f",
   "deploy/check-consistency.sh": "b88ae7138cb83ee16b502aa33b7d83b3a10b70143ea6c7e06a034b132603ec23",
-  "deploy/verify-release.sh": "715d348416610f4e1d35e388694b31a639d928d512a03614d264fc35902abcd2"
+  "deploy/verify-release.sh": "5d2cfc06bdb845734e0bbe11bf5b01e14aeedb5f0e7c072b4014780d8860b0ec"
  }
 }

@@ -1,8 +1,8 @@
 {
  "schema": "agentid-release/2",
  "scope": "runtime",
- "generated": "2026-11-02T09:05:42.127Z",
- "gitHead": "c3330e86d34a6603c2622ee5acfdcf2769ad9ada",
+ "generated": "2026-11-02T09:07:25.213Z",
+ "gitHead": "733134e29199e8165202af62d94b31d70c227289",
  "fileCount": 2,
  "files": {
   "shadow/probe.mjs": "3a1040b2e2df8062eae1f64615f624f6524cd48e7ee14176f9f437b6e502cc87",

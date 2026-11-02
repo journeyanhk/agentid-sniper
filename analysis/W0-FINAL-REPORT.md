@@ -176,11 +176,17 @@ python3 analysis/w0-verdict.py
 ## 9. 发布完整性（工程 A 收尾）
 
 ```
-私钥：/data/.secrets/agentid_release_key.pem（memoh 工作区，600），不在部署机、不在仓库
-公钥：deploy/release_pubkey.pem     签名：deploy/release-manifest.sig     清单：deploy/release-manifest.json
-流程：部署机只做 hash → 本地签名 → 回传 sig → 部署机 verify
+闸门        systemd ExecStartPre=/usr/local/libexec/agentid-shadow/verify-release.sh
+runtime     2 个文件（shadow/probe.mjs、deploy/systemd/agentid-shadow.service），变化即阻断启动
+archive     analysis/*.py、analysis/*.md、deploy/*.sh，只用于归档复现，不阻断启动
+可信输入    /etc/agentid-shadow/ 下 manifest-runtime.json、.sig、release-pubkey.pem（root:root 644）
+私钥        /data/.secrets/agentid_release_key.pem（memoh 工作区，600），不在部署机、不在仓库
+流程        部署机 hash → 本地签名 → 安装 sig → 部署机 verify
 ```
 
-覆盖 23 个文件（`shadow/probe.mjs`、`analysis/*.py`、`deploy/*.sh`）。三种篡改实测 `exit 1`。
-尚未接 systemd `ExecStartPre`（改 unit 需重启服务，未获批准）。
-残留下限：部署机被完全控制时可同时替换代码与公钥，只能防带外修改，不能防宿主沦陷。
+实测退出码：正常 0 / 改 probe 13 / 删 probe 12 / 改 unit 13 / 改已安装 unit 14 / 改签名 11；
+只改 analysis 文档仍为 0（拆分生效）。2026-11-02 17:06:31 CST 受控重启，新 epoch 见
+`analysis/EPOCH-post-release-verification.md`，W0 结论未改。
+
+残留下限：部署机被完全控制时可连同 `/etc/agentid-shadow/` 的公钥一起替换（需 root），
+本闸门防误改与带外修改，不防 root 沦陷。
