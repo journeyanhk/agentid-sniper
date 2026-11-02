@@ -1,7 +1,7 @@
 {
  "schema": "agentid-release/1",
- "generated": "2026-11-02T06:59:27.169Z",
- "gitHead": "c3b33d953bc18b3073a98c29409546fb0ec3ff2a",
+ "generated": "2026-11-02T07:00:09.916Z",
+ "gitHead": "7c59329d1695bbfad597ead6dea6aba7d492cff3",
  "fileCount": 22,
  "files": {
   "shadow/probe.mjs": "3a1040b2e2df8062eae1f64615f624f6524cd48e7ee14176f9f437b6e502cc87",

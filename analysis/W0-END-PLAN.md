@@ -337,4 +337,26 @@ window B: 131122055..131170055 → rawEvents 149 / uniqueTx 139 / confirmed 139
 
 免费 RPC 无 archive，`eth_getTransactionCount(buyer, fillBlock-1)` 不可用，
 `historySource=unavailable`，`buyerWithHistoryCount/freshBuyerCount` 保持 null，
-**不做推断**；`currentNonceProxy` 仅作标注，不参与任何判定。
+**不做推断**；`currentNonceProxy` 仅作标注，不参与任何判定。---
+
+## 发布闸门（A 类收尾最后一项，2026-11-02）
+
+```
+deploy/release-manifest.mjs   keygen / sign / verify
+deploy/verify-release.sh      set -eu + exec verify（非 0 即拒绝启动/拒绝归档）
+deploy/release_pubkey.pem     公钥入库；私钥在 ~/.agentid_release_key.pem (600)，绝不入库
+受控范围                      shadow/probe.mjs、analysis/*.py、deploy/*.sh
+```
+
+三种篡改都实测 exit 1：新增未登记文件、改已登记文件内容、改签名；恢复后 ✅。
+
+与作者 v3.0.0 的差异：他的 `officialCheck()` 只把结果写进 UI 状态，`watch.mjs` 全文不引用签名结果——
+签名不阻断执行。这里的 `verify` 是硬失败闸门。
+
+三处纪律：
+
+1. **`gitHead` 只作溯源**：清单里的 commit 是「签名时的 HEAD」，天然比入库晚一个提交，
+   校验只比「文件 SHA-256 + 签名」，不看 gitHead。
+2. **新增 `analysis/*.py` 或 `deploy/*.sh` 会让 verify 失败**，必须重新 `sign` 再提交——
+   这是预期的：闸门的价值就在于「新文件必须被显式纳入签名」。
+3. 尚未接 systemd `ExecStartPre`：改 unit 需要重启服务，未获批准，因此当前只在归档/巡检链路里调用。
