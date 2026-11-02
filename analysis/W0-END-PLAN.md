@@ -102,3 +102,81 @@ G5 probe 文件 SHA-256 与 git 提交可溯源；G6 四个输入文件 hash 齐
    当前基线用「工作树 SHA-256 + git 提交」溯源，来源已标注 `working-tree-at-baseline-time`；
    解冻后第一件事是给 metrics 加这四个字段。
 2. 分支 `feat/gated-indirect`（probe-5.2.1）不合并，等 A/B/C 判定后单独评审。
+---
+
+## W0 终局归档口径（2026-11-02 定稿）
+
+### 一、结论
+
+```
+商业路线：C —— 停止自动盈利开发，不接钱包，不做 W1 执行器
+工程收尾：A —— 继续做纯只读工具（mint 回放 / 证据归档 / 买家质量 / manifest）
+```
+
+判 C 不等于「没有市场」，而是：
+
+```
+成交存在（48h 1350 笔 / 2.028 BNB / 55 个集合）
+但集合集中、独立买家不足、正 EV 样本不足，退出仍是核心瓶颈
+```
+
+### 二、三层分母（禁止混用）
+
+| 范围 | 成交 | 集合 | 用途 |
+|---|---:|---:|---|
+| ① Element 全扫描范围 | 1350（原生 1267 / ERC20 83） | 55 | 市场基线，**不可外推给任一 gated 集合** |
+| ② 跟踪集合内有成交 | 242 | 21 | cohort 分析 |
+| ③ 可算 EV（supply 可得） | — | 12 | 经济性判定 |
+| ③′ 缺 totalSupply | — | 9（CZID/SNAKEID/RUNE/DWG/MUSE/GLAD/AGENT/FREAK/ENIG） | 标 `evUnknown`，不纳入正 EV |
+
+### 三、EV 命名纪律
+
+- `grossEvPerMint` = 卖出率 × 均价，**未扣费，不得称 net**。
+- `netEvPerMint` = 卖出率 × 均价 × (1 − Element fee 2% − royalty) − mintGas − 卖出率 × sellGas。
+- royalty 未知按 0 计 → 结果偏乐观，输出中必须带 `royaltyNote`。
+- 48h 实测：MORI gross +$0.0715 → **net +$0.0626**；FARMER 由 gross +$0.0064 翻为 net −$0.0011。
+- net EV>0 的集合：1 个（MORI，买家 12）；net EV>0 且买家≥20、成交≥20：**0 个**。
+
+### 四、重启恢复证据（`analysis/restart-audit.json`）
+
+5 处时间断层（两次 dev 期重启 + 三次含 11-01 05:04Z/06:24Z），**全部 Δ=+1 连续**：
+
+```
+空洞 0 块、回扫重叠 0 次、崩溃前 pending=0、重启后 stateCorrupt=false、signal 前后 10 分钟连续
+→ restartRecovery = verified
+```
+
+归档措辞：`dataComplete=true, dataFresh=false, restartRecovery=verified`。
+
+### 五、mint 回放口径（`analysis/mint-replay.py`）
+
+- 判据：`receipt.status==1` ∧ 同 receipt 内 `Transfer(from=0x0, to=收款人, tokenId, 目标集合)`。
+- **不能把 `tx.from` 当 minter**：全市场 90 分钟样本里 73/120 笔是合约/中继代发（`mediated`）；
+  21 个有成交集合的近 6h 样本 150/150 全为 `direct`，141 个发送者、top1 仅 1.3%。
+- 字段：`sender / recipients / mediated / receivedTokenIds / transferToMinter / paymentValue /
+  gasUsed / gasCostNative / mintOutcome(direct|mediated|failed|reverted_no_token)`。
+
+### 六、7 日复查触发条件（修订版）
+
+必须**同时**满足，且「7 日」只是复查节奏，不替代窗口标准：
+
+```
+连续两个完整 12h/24h 窗口，dataComplete=true（dataFresh 降级需记录）
+≥2 个 collection
+每个 collection unique buyers ≥20 且有 ≥20 笔 marketplace fills
+非自成交、repeat pair 占比 <20%、buyer/seller overlap 低
+扣 Gas、平台费、版税后 net EV > 0
+无严重数据缺口（gap/pending/skipped 全 0）
+```
+
+### 七、买家指标命名纪律
+
+统一用 `buyerQualitySignals` 分组，**禁止**叫 `realBuyers`：
+
+```
+buyerCount / uniqueBuyerCount / buyerWithHistoryCount / buyerWithNonceAboveThreshold /
+freshBuyerCount / repeatBuyerCount / buyerSellerOverlap / top1BuyerShare / top10BuyerShare /
+repeatPairCount / selfTradeCount
+```
+
+真实含义是 heuristic classification，不是身份验证。

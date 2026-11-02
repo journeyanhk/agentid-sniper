@@ -1,247 +1,258 @@
 {
- "at": "2026-11-02T02:22:18Z",
- "gasBnb": 9.72e-06,
- "bnbUsd": 717.0,
+ "at": "2026-11-02T02:46:55Z",
+ "assumptions": {
+  "mintGasBnb": 9.72e-06,
+  "mintGasSource": "measured_29_mints",
+  "sellGasBnb": 5e-05,
+  "sellGasSource": "assumed_5e-5",
+  "marketplaceFee": 0.02,
+  "royalty": 0.0,
+  "royaltyNote": "未知，按 0 计，结果偏乐观",
+  "bnbUsd": 717.0
+ },
+ "denominators": {
+  "marketWide": {
+   "fills": 1350,
+   "collections": 55,
+   "trackedCollections": 2331
+  },
+  "trackedWithSales": {
+   "fills": 242,
+   "collections": 21
+  },
+  "evComputable": 12,
+  "supplyMissing": 9
+ },
  "rows": [
   {
    "collection": "0x5eb9936f910b1cfaa9994fbc7ae98a279a3d0f89",
    "sym": "MORI",
    "sales": 50,
-   "buyers": 12,
+   "uniqueBuyerCount": 12,
    "vol": 0.40802,
-   "avgBnb": 0.0081604,
+   "avgPriceBnb": 0.0081604,
    "supply": 4093,
    "sellThrough": 0.0122,
-   "evPerMintBnb": 8.9967e-05,
-   "evPerMintUsd": 0.0645
+   "grossEvPerMintBnb": 9.96873e-05,
+   "netEvPerMintBnb": 8.73627e-05,
+   "netEvPerMintUsd": 0.0626
   },
   {
    "collection": "0x039ad3cd794b1af0323ebeacf7404252336ba81f",
    "sym": "FARMER",
    "sales": 10,
-   "buyers": 7,
+   "uniqueBuyerCount": 7,
    "vol": 0.008054,
-   "avgBnb": 0.0008054,
+   "avgPriceBnb": 0.0008054,
    "supply": 904,
    "sellThrough": 0.0111,
-   "evPerMintBnb": -8.11e-07,
-   "evPerMintUsd": -0.0006
+   "grossEvPerMintBnb": 8.9093e-06,
+   "netEvPerMintBnb": -1.542e-06,
+   "netEvPerMintUsd": -0.0011
   },
   {
    "collection": "0x48b5e5573e76caaa41a893496de6c857720e6b40",
    "sym": "NOMIO",
    "sales": 13,
-   "buyers": 3,
+   "uniqueBuyerCount": 3,
    "vol": 0.002259,
-   "avgBnb": 0.00017377,
+   "avgPriceBnb": 0.00017377,
    "supply": 4444,
    "sellThrough": 0.0029,
-   "evPerMintBnb": -9.212e-06,
-   "evPerMintUsd": -0.0066
+   "grossEvPerMintBnb": 5.083e-07,
+   "netEvPerMintBnb": -9.3681e-06,
+   "netEvPerMintUsd": -0.0067
   },
   {
    "collection": "0x1cf9e60218493149ace7dc953497c07175aa625e",
    "sym": "OWLS",
    "sales": 1,
-   "buyers": 1,
+   "uniqueBuyerCount": 1,
    "vol": 0.000505,
-   "avgBnb": 0.000505,
-   "supply": 2616,
+   "avgPriceBnb": 0.000505,
+   "supply": 2617,
    "sellThrough": 0.0004,
-   "evPerMintBnb": -9.527e-06,
-   "evPerMintUsd": -0.0068
-  },
-  {
-   "collection": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
-   "sym": "ASSETAI",
-   "sales": 9,
-   "buyers": 1,
-   "vol": 0.000634,
-   "avgBnb": 7.044e-05,
-   "supply": 4484,
-   "sellThrough": 0.002,
-   "evPerMintBnb": -9.579e-06,
-   "evPerMintUsd": -0.0069
+   "grossEvPerMintBnb": 1.93e-07,
+   "netEvPerMintBnb": -9.55e-06,
+   "netEvPerMintUsd": -0.0068
   },
   {
    "collection": "0x096243e665083c7628923d7db71805b15c4a6054",
    "sym": "HALLOW",
    "sales": 3,
-   "buyers": 2,
+   "uniqueBuyerCount": 2,
    "vol": 0.000558,
-   "avgBnb": 0.000186,
+   "avgPriceBnb": 0.000186,
    "supply": 5600,
    "sellThrough": 0.0005,
-   "evPerMintBnb": -9.62e-06,
-   "evPerMintUsd": -0.0069
+   "grossEvPerMintBnb": 9.96e-08,
+   "netEvPerMintBnb": -9.6491e-06,
+   "netEvPerMintUsd": -0.0069
   },
   {
    "collection": "0xa75526d63bd5e3b3e8a65a5f2efef45072904d04",
    "sym": "BOUND",
    "sales": 3,
-   "buyers": 2,
+   "uniqueBuyerCount": 2,
    "vol": 0.000752,
-   "avgBnb": 0.00025067,
+   "avgPriceBnb": 0.00025067,
    "supply": 10000,
    "sellThrough": 0.0003,
-   "evPerMintBnb": -9.645e-06,
-   "evPerMintUsd": -0.0069
+   "grossEvPerMintBnb": 7.52e-08,
+   "netEvPerMintBnb": -9.6613e-06,
+   "netEvPerMintUsd": -0.0069
+  },
+  {
+   "collection": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sym": "ASSETAI",
+   "sales": 9,
+   "uniqueBuyerCount": 1,
+   "vol": 0.000634,
+   "avgPriceBnb": 7.044e-05,
+   "supply": 4484,
+   "sellThrough": 0.002,
+   "grossEvPerMintBnb": 1.414e-07,
+   "netEvPerMintBnb": -9.6818e-06,
+   "netEvPerMintUsd": -0.0069
   },
   {
    "collection": "0x4515787b43d930ce6af3b446fcb19c77513da281",
    "sym": "WUSE",
    "sales": 8,
-   "buyers": 5,
+   "uniqueBuyerCount": 5,
    "vol": 0.00064,
-   "avgBnb": 8e-05,
+   "avgPriceBnb": 8e-05,
    "supply": 9677,
    "sellThrough": 0.0008,
-   "evPerMintBnb": -9.654e-06,
-   "evPerMintUsd": -0.0069
+   "grossEvPerMintBnb": 6.61e-08,
+   "netEvPerMintBnb": -9.6965e-06,
+   "netEvPerMintUsd": -0.007
   },
   {
    "collection": "0x828e7073ef57ed778e4acf82cc45bc43ef760b54",
    "sym": "ORE",
    "sales": 8,
-   "buyers": 4,
+   "uniqueBuyerCount": 4,
    "vol": 0.000606,
-   "avgBnb": 7.575e-05,
+   "avgPriceBnb": 7.575e-05,
    "supply": 10000,
    "sellThrough": 0.0008,
-   "evPerMintBnb": -9.659e-06,
-   "evPerMintUsd": -0.0069
+   "grossEvPerMintBnb": 6.06e-08,
+   "netEvPerMintBnb": -9.7006e-06,
+   "netEvPerMintUsd": -0.007
   },
   {
-   "collection": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
-   "sym": "TREE",
-   "sales": 29,
-   "buyers": 7,
-   "vol": 0.000698,
-   "avgBnb": 2.407e-05,
-   "supply": 19005,
-   "sellThrough": 0.0015,
-   "evPerMintBnb": -9.683e-06,
-   "evPerMintUsd": -0.0069
+   "collection": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sym": "TREEHAUS",
+   "sales": 1,
+   "uniqueBuyerCount": 1,
+   "vol": 3e-05,
+   "avgPriceBnb": 3e-05,
+   "supply": 2249,
+   "sellThrough": 0.0004,
+   "grossEvPerMintBnb": 1.33e-08,
+   "netEvPerMintBnb": -9.7292e-06,
+   "netEvPerMintUsd": -0.007
   },
   {
    "collection": "0x2cff830264343f29d4924160096f1271a8a14ace",
    "sym": "PDRAGON",
    "sales": 3,
-   "buyers": 2,
+   "uniqueBuyerCount": 2,
    "vol": 3.4e-05,
-   "avgBnb": 1.133e-05,
+   "avgPriceBnb": 1.133e-05,
    "supply": 7000,
    "sellThrough": 0.0004,
-   "evPerMintBnb": -9.715e-06,
-   "evPerMintUsd": -0.007
+   "grossEvPerMintBnb": 4.9e-09,
+   "netEvPerMintBnb": -9.7367e-06,
+   "netEvPerMintUsd": -0.007
   },
+  {
+   "collection": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sym": "TREE",
+   "sales": 29,
+   "uniqueBuyerCount": 7,
+   "vol": 0.000698,
+   "avgPriceBnb": 2.407e-05,
+   "supply": 19010,
+   "sellThrough": 0.0015,
+   "grossEvPerMintBnb": 3.67e-08,
+   "netEvPerMintBnb": -9.7603e-06,
+   "netEvPerMintUsd": -0.007
+  }
+ ],
+ "evUnknown": [
   {
    "collection": "0xb3bc98fb678a99fa890f6242cb332d08fef3104b",
    "sym": "CZID",
    "sales": 37,
-   "buyers": 24,
+   "uniqueBuyerCount": 24,
    "vol": 0.019082,
-   "avgBnb": 0.00051573,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
-  },
-  {
-   "collection": "0x74164ed868bfad68eaaffa36f828019456d520da",
-   "sym": "RUNE",
-   "sales": 20,
-   "buyers": 12,
-   "vol": 0.009256,
-   "avgBnb": 0.0004628,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "reason": "totalSupply_unavailable"
   },
   {
    "collection": "0xafc6bca0e191e396306343213b04ff9a8d717263",
    "sym": "SNAKEID",
    "sales": 33,
-   "buyers": 13,
+   "uniqueBuyerCount": 13,
    "vol": 0.005781,
-   "avgBnb": 0.00017518,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "reason": "totalSupply_unavailable"
   },
   {
-   "collection": "0x213a879d11a85b54483cea2cdec5d9026958add3",
-   "sym": "ENIG",
-   "sales": 1,
-   "buyers": 1,
-   "vol": 0.00175,
-   "avgBnb": 0.00175,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "collection": "0x74164ed868bfad68eaaffa36f828019456d520da",
+   "sym": "RUNE",
+   "sales": 20,
+   "uniqueBuyerCount": 12,
+   "vol": 0.009256,
+   "reason": "totalSupply_unavailable"
   },
   {
    "collection": "0x2106674431f6672d71777356bd7ab2999562d5b1",
    "sym": "DWG",
    "sales": 6,
-   "buyers": 3,
+   "uniqueBuyerCount": 3,
    "vol": 0.000472,
-   "avgBnb": 7.867e-05,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "reason": "totalSupply_unavailable"
   },
   {
    "collection": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
    "sym": "MUSE",
    "sales": 3,
-   "buyers": 1,
+   "uniqueBuyerCount": 1,
    "vol": 0.000263,
-   "avgBnb": 8.767e-05,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "reason": "totalSupply_unavailable"
   },
   {
    "collection": "0x2bbad2a3421a0bbd62a319a9db70122047839483",
    "sym": "GLAD",
    "sales": 2,
-   "buyers": 1,
+   "uniqueBuyerCount": 1,
    "vol": 0.0002,
-   "avgBnb": 0.0001,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "reason": "totalSupply_unavailable"
   },
   {
    "collection": "0x02a3ac26012cc7017f5cf4e4d481ee243f9cceb4",
    "sym": "AGENT",
    "sales": 1,
-   "buyers": 1,
+   "uniqueBuyerCount": 1,
    "vol": 0.00015,
-   "avgBnb": 0.00015,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "reason": "totalSupply_unavailable"
   },
   {
    "collection": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
    "sym": "FREAK",
    "sales": 1,
-   "buyers": 1,
+   "uniqueBuyerCount": 1,
    "vol": 0.0001,
-   "avgBnb": 0.0001,
-   "supply": null,
-   "sellThrough": null,
-   "evPerMintBnb": null,
-   "evPerMintUsd": null
+   "reason": "totalSupply_unavailable"
+  },
+  {
+   "collection": "0x213a879d11a85b54483cea2cdec5d9026958add3",
+   "sym": "ENIG",
+   "sales": 1,
+   "uniqueBuyerCount": 1,
+   "vol": 0.00175,
+   "reason": "totalSupply_unavailable"
   }
  ]
 }

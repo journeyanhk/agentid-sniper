@@ -1,0 +1,3092 @@
+{
+ "generated": "2026-11-02T02:49:54Z",
+ "window": {
+  "fromBlock": 131115477,
+  "toBlock": 131163477
+ },
+ "scope": {
+  "collectionsRequested": [
+   "0x02a3ac26012cc7017f5cf4e4d481ee243f9cceb4",
+   "0x039ad3cd794b1af0323ebeacf7404252336ba81f",
+   "0x096243e665083c7628923d7db71805b15c4a6054",
+   "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "0x2106674431f6672d71777356bd7ab2999562d5b1",
+   "0x213a879d11a85b54483cea2cdec5d9026958add3",
+   "0x2bbad2a3421a0bbd62a319a9db70122047839483",
+   "0x2cff830264343f29d4924160096f1271a8a14ace",
+   "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "0x4515787b43d930ce6af3b446fcb19c77513da281",
+   "0x48b5e5573e76caaa41a893496de6c857720e6b40",
+   "0x5eb9936f910b1cfaa9994fbc7ae98a279a3d0f89",
+   "0x74164ed868bfad68eaaffa36f828019456d520da",
+   "0x828e7073ef57ed778e4acf82cc45bc43ef760b54",
+   "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "0xa75526d63bd5e3b3e8a65a5f2efef45072904d04",
+   "0xafc6bca0e191e396306343213b04ff9a8d717263",
+   "0xb3bc98fb678a99fa890f6242cb332d08fef3104b",
+   "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "0xfc60cdd577759bd2af7f3351917e80672a91d540"
+  ]
+ },
+ "coverage": {
+  "chunks": 97,
+  "skipped": 0,
+  "dataComplete": true
+ },
+ "counts": {
+  "mintTxs": 174,
+  "replayed": 150,
+  "direct": 150
+ },
+ "senderConcentration": {
+  "uniqueSenders": 141,
+  "top5": [
+   [
+    "0x75bc23dcbecefe1fe79f10066ce907be220a662f",
+    2
+   ],
+   [
+    "0x53440515d92beb09c6baa8e06b9cda6492280aec",
+    2
+   ],
+   [
+    "0x0825af722a1c26f294d7e2c4c3f52ae5a4643cb6",
+    2
+   ],
+   [
+    "0xa50ea57b64f999d09fcd8f080d47714f3fd99cd3",
+    2
+   ],
+   [
+    "0xdaa6eb5a4d8ea76f40d07cb6e7d42dead34809e7",
+    2
+   ]
+  ],
+  "top1Share": 0.0133
+ },
+ "rpc": {
+  "calls": 398,
+  "errors": 0,
+  "sources": {
+   "https://rpc.48.club": 398
+  }
+ },
+ "rows": [
+  {
+   "txHash": "0xd6fd1f3f9828d45e00f3f4e318577e4d12c7c50ea2abbcb826a91feb62b8c2af",
+   "contract": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "sender": "0x33b9ebd450767c6fb8a5014ce293bc9b7692add0",
+   "minter": "0x33b9ebd450767c6fb8a5014ce293bc9b7692add0",
+   "recipients": [
+    "0x33b9ebd450767c6fb8a5014ce293bc9b7692add0"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2362
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 131149,
+   "gasCostNative": "15834039758290",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x05254662e2a7be8b54f582e511a206cba14ba4505ba90cae3a649adbe6d86b0b",
+   "contract": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "sender": "0x1644d8259e25dfcc9dee9c1aec42e11bb14bfb40",
+   "minter": "0x1644d8259e25dfcc9dee9c1aec42e11bb14bfb40",
+   "recipients": [
+    "0x1644d8259e25dfcc9dee9c1aec42e11bb14bfb40"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2363
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 131149,
+   "gasCostNative": "13727863933902",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd69162db86ae89a3fd827398cd585c131ff6b26d1a0ca280de93262c74123cb0",
+   "contract": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "sender": "0xc18cc771a54b61bbec05eca90c6351c3aacda392",
+   "minter": "0xc18cc771a54b61bbec05eca90c6351c3aacda392",
+   "recipients": [
+    "0xc18cc771a54b61bbec05eca90c6351c3aacda392"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2364
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 131149,
+   "gasCostNative": "14316443071936",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xdd71d368e41dc05207f00044eeebdb5334d49445fa5a912d9abd56fbf12964dc",
+   "contract": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "sender": "0x5f450efefc7927c48315ad75ccd4d7f67e3cdae6",
+   "minter": "0x5f450efefc7927c48315ad75ccd4d7f67e3cdae6",
+   "recipients": [
+    "0x5f450efefc7927c48315ad75ccd4d7f67e3cdae6"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2365
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 131149,
+   "gasCostNative": "13772382330803",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xe55a8f8d4e8030d82ca423d78298d5935bc4d56711f6cee2f13bd9cf2c311f1d",
+   "contract": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "sender": "0x3b1210315335b9ffd69f5d5de302ac50c91cb435",
+   "minter": "0x3b1210315335b9ffd69f5d5de302ac50c91cb435",
+   "recipients": [
+    "0x3b1210315335b9ffd69f5d5de302ac50c91cb435"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2366
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 131149,
+   "gasCostNative": "13772382330803",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x2613e059cb8141e63c3cb1dacb8e62875f0d7b49e1891178c906a63f52465761",
+   "contract": "0x02a3ac26012cc7017f5cf4e4d481ee243f9cceb4",
+   "sender": "0x22f952df92166eb7d8c2c3d769332fee4669e458",
+   "minter": "0x22f952df92166eb7d8c2c3d769332fee4669e458",
+   "recipients": [
+    "0x22f952df92166eb7d8c2c3d769332fee4669e458"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4245
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 187246,
+   "gasCostNative": "11688346395614",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x25704dbb32c8f44d71ea0ce2372b681452c04532da62cc022b9e5debc27d10aa",
+   "contract": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "sender": "0xf2273eb4afbe8c988c749e7df757fbe912f5d02a",
+   "minter": "0xf2273eb4afbe8c988c749e7df757fbe912f5d02a",
+   "recipients": [
+    "0xf2273eb4afbe8c988c749e7df757fbe912f5d02a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2367
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 131389,
+   "gasCostNative": "7059722272384",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x2739d0c1697ce9345c773bd62c92c304bbfa5a4e330e635e9ac37bd45edc3037",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb6467c7e413854cc4940464ec347690eca6a8dcb",
+   "minter": "0xb6467c7e413854cc4940464ec347690eca6a8dcb",
+   "recipients": [
+    "0xb6467c7e413854cc4940464ec347690eca6a8dcb"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2333,
+    2334
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "10210398402980",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x668258294a3bf3dd9b721d0136bb2ac3e1fc709d406908d3da5f5a1acb14ee3f",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x83c79ca575c7d74803a429876a906348a27866f7",
+   "minter": "0x83c79ca575c7d74803a429876a906348a27866f7",
+   "recipients": [
+    "0x83c79ca575c7d74803a429876a906348a27866f7"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2602
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145111,
+   "gasCostNative": "9434640820587",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x24ef193b5b0c5d180d59fd8e0c5ab0c7cdb7454d84374f9b8a3f803f46964701",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x75bc23dcbecefe1fe79f10066ce907be220a662f",
+   "minter": "0x75bc23dcbecefe1fe79f10066ce907be220a662f",
+   "recipients": [
+    "0x75bc23dcbecefe1fe79f10066ce907be220a662f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2335
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11022697215144",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x46e3e04629593cd7e16a697ed990ee42d200d53d0ef517596b7501238987678c",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xd570577ce6b5a1dce26de54d7c37f12058152cfb",
+   "minter": "0xd570577ce6b5a1dce26de54d7c37f12058152cfb",
+   "recipients": [
+    "0xd570577ce6b5a1dce26de54d7c37f12058152cfb"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2336
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10168089445248",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xa409f6cc9ac32e353e72dec2f2d24f5d5cb6694bca25777732ce3b1e59d7da31",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x9a3b605be1aab6fe819085dfece5f00f3df4d532",
+   "minter": "0x9a3b605be1aab6fe819085dfece5f00f3df4d532",
+   "recipients": [
+    "0x9a3b605be1aab6fe819085dfece5f00f3df4d532"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2337,
+    2338
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "12364885818636",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xcfa7b3bd14b9e6ab699ea89f594dee41ff657e2214041d6f7021e0bd8a2bdee8",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x3d30a8695dfcfbf37a13fd5f8f30c50d0c21ba35",
+   "minter": "0x3d30a8695dfcfbf37a13fd5f8f30c50d0c21ba35",
+   "recipients": [
+    "0x3d30a8695dfcfbf37a13fd5f8f30c50d0c21ba35"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2339,
+    2340
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "12753952454952",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xafcc987ddeaaa739e2c1d36ff661ac819f41db58ec16058a5ee77a0098aa21a3",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb79e1bfae09c7c541c9e8bd06fb94116fb04c41e",
+   "minter": "0xb79e1bfae09c7c541c9e8bd06fb94116fb04c41e",
+   "recipients": [
+    "0xb79e1bfae09c7c541c9e8bd06fb94116fb04c41e"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2341
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10710415830744",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x11369cf1c2268d60d61eeb806ad7fd2dd9d189fc22d72b0858eaca7b36c98c63",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x40ccb2bb1934027013f8d2ec1fa1d575cc8e8920",
+   "minter": "0x40ccb2bb1934027013f8d2ec1fa1d575cc8e8920",
+   "recipients": [
+    "0x40ccb2bb1934027013f8d2ec1fa1d575cc8e8920"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2342,
+    2343
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "12919619823072",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x8ac17db29961144c959ec9ae18990f6fdeedb664a50787813d55cdde84d400d0",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb0a4418fc906533f58058748e8f73fe8a36b4585",
+   "minter": "0xb0a4418fc906533f58058748e8f73fe8a36b4585",
+   "recipients": [
+    "0xb0a4418fc906533f58058748e8f73fe8a36b4585"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2344,
+    2345
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "12522965946012",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x7bf9fdb48d1b30a9d4b2a863fdc6eaeec9923e89f69a69100334c8771549d061",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb081c506e9875c71b93d75ee6e2be777247abb09",
+   "minter": "0xb081c506e9875c71b93d75ee6e2be777247abb09",
+   "recipients": [
+    "0xb081c506e9875c71b93d75ee6e2be777247abb09"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2346
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10808480977560",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x777e3ebbeae3eac9ef8dff4c67dd3c8f8cd3ebba5c359ad2f13dcab82d181c2f",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x5e0fb502dbf5779b3acc8f007b7036637175dc97",
+   "minter": "0x5e0fb502dbf5779b3acc8f007b7036637175dc97",
+   "recipients": [
+    "0x5e0fb502dbf5779b3acc8f007b7036637175dc97"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2347
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "13458490803540",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x52d23a78e9982b23c9a7d6e11a4e07ef3502f2dd8b6ccd787474fc0291fe5d99",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xe8d81a52a95cc3b2dfbdfa936f319934c8d121b8",
+   "minter": "0xe8d81a52a95cc3b2dfbdfa936f319934c8d121b8",
+   "recipients": [
+    "0xe8d81a52a95cc3b2dfbdfa936f319934c8d121b8"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2348
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10383371894748",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x14b7ff457097ecaf9f009aa63562e9d46d0956621f057b8ef56206373f69a9fc",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x131eca75dc232abd5f4bb875e1581a31b63e0ed0",
+   "minter": "0x131eca75dc232abd5f4bb875e1581a31b63e0ed0",
+   "recipients": [
+    "0x131eca75dc232abd5f4bb875e1581a31b63e0ed0"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2349
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10296023044800",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x52dfa9d33febafda66659ff08972a067b7e2302d84f2270b3343b938244fdffd",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x74346523fde39df673f879ca2a7ce6eb6c587c86",
+   "minter": "0x74346523fde39df673f879ca2a7ce6eb6c587c86",
+   "recipients": [
+    "0x74346523fde39df673f879ca2a7ce6eb6c587c86"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2350
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9867769638384",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd210f76c12253b43b1da73c34d1fc8dcbf2f42623fa1845473d8741803f8a1cb",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x71eb0a12bf20f11a98a6710ce454d7541b6f1ce0",
+   "minter": "0x71eb0a12bf20f11a98a6710ce454d7541b6f1ce0",
+   "recipients": [
+    "0x71eb0a12bf20f11a98a6710ce454d7541b6f1ce0"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2351
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11242256477112",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x9b1206eeb54e476b53c5efa5d591ad3caac09dc3692ddcc4f5bba0812045f192",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x64bd7d0b87ec0c7a9cc590bb4068b0097901306e",
+   "minter": "0x64bd7d0b87ec0c7a9cc590bb4068b0097901306e",
+   "recipients": [
+    "0x64bd7d0b87ec0c7a9cc590bb4068b0097901306e"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2352
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10233653344704",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x0d40e915ed363ee0d8ec1f8b6304ed9041c281ab4da44a41529b9b13b66d81be",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x606d54974dae8898bad5866a990869a70a877f86",
+   "minter": "0x606d54974dae8898bad5866a990869a70a877f86",
+   "recipients": [
+    "0x606d54974dae8898bad5866a990869a70a877f86"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2353
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10980087052764",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xf7e40fe52811534eee6934e9eaf6a4bfed5a1327d9e717e53ed262bc9e19044f",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xad6495f827865474272c99eb906405a39b2ecb99",
+   "minter": "0xad6495f827865474272c99eb906405a39b2ecb99",
+   "recipients": [
+    "0xad6495f827865474272c99eb906405a39b2ecb99"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2354
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "22875076152552",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xc5bd9f3a07d754f3220e2cce49f07c652d99c35a3d4ab79ca99b6c6bb99f2bf7",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xa251f05829a4bfd16d7ddabab5d6e772bc856447",
+   "minter": "0xa251f05829a4bfd16d7ddabab5d6e772bc856447",
+   "recipients": [
+    "0xa251f05829a4bfd16d7ddabab5d6e772bc856447"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2355
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9722725024752",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x64debbc362273e343644c709a1e515ae3cb0a7e7ef041b90a64b518bfaf45968",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xe3314205b92bcca3dfb7645f2a0409fa14aad043",
+   "minter": "0xe3314205b92bcca3dfb7645f2a0409fa14aad043",
+   "recipients": [
+    "0xe3314205b92bcca3dfb7645f2a0409fa14aad043"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2356
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "12487618210020",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xa62f722a055a79e2cae4bac1ec1a83c8e7a7c5a1e37bb973eca537e7b7afc388",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x4f68e2459e26564f6c1a83515678e45f8450bcd0",
+   "minter": "0x4f68e2459e26564f6c1a83515678e45f8450bcd0",
+   "recipients": [
+    "0x4f68e2459e26564f6c1a83515678e45f8450bcd0"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2357
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11714095647960",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xaa51be39e7448f7c32e81b52bf858c8cee0fc373bf8bcfb680334c394b0c912c",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x99e79a7ad1a99d514f8cde8fd6ce051a99d02563",
+   "minter": "0x99e79a7ad1a99d514f8cde8fd6ce051a99d02563",
+   "recipients": [
+    "0x99e79a7ad1a99d514f8cde8fd6ce051a99d02563"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2358
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10624399241556",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xddf7bd30aa28ca0b4a29aaa12988356e42c1022edbd356ac89112fc1bc875cae",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb66dc365f4b60142563f2ff508ae1e30d15f3cca",
+   "minter": "0xb66dc365f4b60142563f2ff508ae1e30d15f3cca",
+   "recipients": [
+    "0xb66dc365f4b60142563f2ff508ae1e30d15f3cca"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2359
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11486745147612",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xe4d9c51f3910e196cd8f044abc8a8f998c933752365f198c60808c788e4e88a7",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x72484d92548d0ac84bd9e39f3103c504e5273159",
+   "minter": "0x72484d92548d0ac84bd9e39f3103c504e5273159",
+   "recipients": [
+    "0x72484d92548d0ac84bd9e39f3103c504e5273159"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2360
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10835682354492",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x78cd9a3314b5d9d73377af2293df2c41a4270e4a2f65216f93264997ebbcda0f",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x2977ae154d6f08c60e31fd3937657a28ad2643a0",
+   "minter": "0x2977ae154d6f08c60e31fd3937657a28ad2643a0",
+   "recipients": [
+    "0x2977ae154d6f08c60e31fd3937657a28ad2643a0"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2361
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "13020809131572",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xad752efdda820c6704b5244cdfbff92d908e9a4a4c5c082136b700726d556706",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x39cb5c58b5e45244022fca15f514f7defeca34e3",
+   "minter": "0x39cb5c58b5e45244022fca15f514f7defeca34e3",
+   "recipients": [
+    "0x39cb5c58b5e45244022fca15f514f7defeca34e3"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2362
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10812911181504",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x1e64447430b2fe97232037c90c02e0fad3ca1e82e08dee706eb4942f8e208fce",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xc6f9b295a417e79550be7f0c62f215ecb5af0eea",
+   "minter": "0xc6f9b295a417e79550be7f0c62f215ecb5af0eea",
+   "recipients": [
+    "0xc6f9b295a417e79550be7f0c62f215ecb5af0eea"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2363
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11131556093964",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x162d1bc203a6e3b062fb86f2b3b208bb9ae4cb485f9ef8571fead60b01a00043",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb66bf5fda744a89ba02929ea9b36429541b7db34",
+   "minter": "0xb66bf5fda744a89ba02929ea9b36429541b7db34",
+   "recipients": [
+    "0xb66bf5fda744a89ba02929ea9b36429541b7db34"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2364
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11923550700168",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xbcdcd65e3c451792a88be008a7678deffff3949c740bad6cd49d447161683fac",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x5aba1f5fd26d402b2af1e54bb45b8bbfa575ab52",
+   "minter": "0x5aba1f5fd26d402b2af1e54bb45b8bbfa575ab52",
+   "recipients": [
+    "0x5aba1f5fd26d402b2af1e54bb45b8bbfa575ab52"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2365
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11099288630808",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x6b2e3ef13341c0c7475f74a621bef583d09219385eb8cdbc602592f1154de17f",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x7d2883b8b6ff491bd98ce2ffa2df89f6c6c5b0b1",
+   "minter": "0x7d2883b8b6ff491bd98ce2ffa2df89f6c6c5b0b1",
+   "recipients": [
+    "0x7d2883b8b6ff491bd98ce2ffa2df89f6c6c5b0b1"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2366
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10739119664412",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xdbb66bfe571c484d3b25460ee9e280f4eed1d5a9749078edc4150eada4498492",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x8359177edfba13c8313e593daf9a44d59afd7598",
+   "minter": "0x8359177edfba13c8313e593daf9a44d59afd7598",
+   "recipients": [
+    "0x8359177edfba13c8313e593daf9a44d59afd7598"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2367
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10047026197476",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x8f048b45288ae4c545b4af14d7c2fb807f3768543b37b857912ec46d30c5a832",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xd05e644d937301716f5ecd306ad374761311b5b7",
+   "minter": "0xd05e644d937301716f5ecd306ad374761311b5b7",
+   "recipients": [
+    "0xd05e644d937301716f5ecd306ad374761311b5b7"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2368
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9306594250200",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x667588bf5d9440200cdd320871fbda90e28ffe12f5cca0295adaaaface735f82",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xd304e37adeaee027d4f6ed7ed592327e8018809c",
+   "minter": "0xd304e37adeaee027d4f6ed7ed592327e8018809c",
+   "recipients": [
+    "0xd304e37adeaee027d4f6ed7ed592327e8018809c"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2369
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10256635447776",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x5a58258a9ac09d4a7abcbd1e26aefe6380dfb577d84c0b8cefade9267c0583b2",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x3e7924b72002e5df0982d866ee36a475530719c4",
+   "minter": "0x3e7924b72002e5df0982d866ee36a475530719c4",
+   "recipients": [
+    "0x3e7924b72002e5df0982d866ee36a475530719c4"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2370
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "13766993998596",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xf22fceaae2809c2f3ade94e3fadb5dd46d2dced03b368018c72173d21ca8418c",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xf44f89769aee654fa8292d2930322709840d48bb",
+   "minter": "0xf44f89769aee654fa8292d2930322709840d48bb",
+   "recipients": [
+    "0xf44f89769aee654fa8292d2930322709840d48bb"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2371
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10160369054640",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xa92923640368a2d42dfaafd2e99cc59619c97693bac3ee8702de03f7b0d8d5d6",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x4ffcdef98705fc53212c963f835de59acaa37a43",
+   "minter": "0x4ffcdef98705fc53212c963f835de59acaa37a43",
+   "recipients": [
+    "0x4ffcdef98705fc53212c963f835de59acaa37a43"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2372
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "19815858199404",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x8c73488121405c5633b9feb569a4b4754ade43ea6c27c294c25a15225186058a",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xbebf99c42b2367d85060c0583b10f9fd10f98f42",
+   "minter": "0xbebf99c42b2367d85060c0583b10f9fd10f98f42",
+   "recipients": [
+    "0xbebf99c42b2367d85060c0583b10f9fd10f98f42"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2373
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9770003477232",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd1c13d2a8524faa06bab50036c556b79eef032249437af509bf4b137c11edc2d",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x51505d7532c68e6de42e8be74c5e2f8730509004",
+   "minter": "0x51505d7532c68e6de42e8be74c5e2f8730509004",
+   "recipients": [
+    "0x51505d7532c68e6de42e8be74c5e2f8730509004"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2374
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9401034464712",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x1eb4164f2c0725eabf50b2ed919bee8dbe9a5d27cc7c64aa89bf9ae986475ec4",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x8b0edaaef715010302818d6fbb94c6fc1ce90a00",
+   "minter": "0x8b0edaaef715010302818d6fbb94c6fc1ce90a00",
+   "recipients": [
+    "0x8b0edaaef715010302818d6fbb94c6fc1ce90a00"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2375
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9904918607136",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x9f7e702608f95077e19448f4077c0c65a5e73d6c802cb72aad08735ea2a266bd",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x8bb989ca309bbae632520bb7423ee7d248d17bfe",
+   "minter": "0x8bb989ca309bbae632520bb7423ee7d248d17bfe",
+   "recipients": [
+    "0x8bb989ca309bbae632520bb7423ee7d248d17bfe"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2376
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "16809607626948",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x4c0ed47957c19905f31f26262723faba1194acc4034b71f1029030553e994c85",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb0d018ca727b56b54468f80af341494c3006a9e7",
+   "minter": "0xb0d018ca727b56b54468f80af341494c3006a9e7",
+   "recipients": [
+    "0xb0d018ca727b56b54468f80af341494c3006a9e7"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2377
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8511266034504",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x1efbd00bd25b772451cd9dfd914b01817f627495ea7db8a6152c5ff883b66918",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x864a2a72cf8f6196fe873cabbaf31eaf8018017c",
+   "minter": "0x864a2a72cf8f6196fe873cabbaf31eaf8018017c",
+   "recipients": [
+    "0x864a2a72cf8f6196fe873cabbaf31eaf8018017c"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2603
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145187,
+   "gasCostNative": "8603849712703",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xf382cafa8ba3d95c7658436069b5b5f7b815b3cf42fbe4f18370f4eef45f41cf",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x4afcfac64a853f5b4cf62adb2d165f2bb049f4c8",
+   "minter": "0x4afcfac64a853f5b4cf62adb2d165f2bb049f4c8",
+   "recipients": [
+    "0x4afcfac64a853f5b4cf62adb2d165f2bb049f4c8"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2378
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8043638205792",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xf59147baa268cdcf2569bfa934deb390e5a01fda214a809073abc75c17aa1bf1",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xe819b1941a277cb2428ea478d81ca9af1405839d",
+   "minter": "0xe819b1941a277cb2428ea478d81ca9af1405839d",
+   "recipients": [
+    "0xe819b1941a277cb2428ea478d81ca9af1405839d"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2379
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8236564082928",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x289b20b7d0f1736e97c1d1db5bebcde4d831bb99af1e460f78547e0909e30cce",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x361e4f57531061eefdf5c00ae0bf92d913b55245",
+   "minter": "0x361e4f57531061eefdf5c00ae0bf92d913b55245",
+   "recipients": [
+    "0x361e4f57531061eefdf5c00ae0bf92d913b55245"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2380
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8563655878140",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x52c9cbf141a459a71df7c42f86a52d602c6a200755e08353c85e0e7c01120559",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x7a3d5095c3569a29bce6ee39c65c15675e62e5c3",
+   "minter": "0x7a3d5095c3569a29bce6ee39c65c15675e62e5c3",
+   "recipients": [
+    "0x7a3d5095c3569a29bce6ee39c65c15675e62e5c3"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2381
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8523816038412",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x1460efbe37a2ffd2ff7bea4657969abf1802d88b0c430d94485268406c86575a",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xf7b41b2b77b69af33fbb92b0ab0017bf8e383a9c",
+   "minter": "0xf7b41b2b77b69af33fbb92b0ab0017bf8e383a9c",
+   "recipients": [
+    "0xf7b41b2b77b69af33fbb92b0ab0017bf8e383a9c"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2382
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9018099702768",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x2ce7f98b16c4ee04f181f925aaec77d45a309c606d0c43b65b010ba5c37a01e7",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x3aadd4c851bce790dfa883ef6ca72268e2fd6fa4",
+   "minter": "0x3aadd4c851bce790dfa883ef6ca72268e2fd6fa4",
+   "recipients": [
+    "0x3aadd4c851bce790dfa883ef6ca72268e2fd6fa4"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2383
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "14589690829608",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x649800851645cb26d925c27687d73665b9abf4836427538f361f9282c83260fb",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x7e208a08c745a1adb6cb9d110b58f8de78a85c84",
+   "minter": "0x7e208a08c745a1adb6cb9d110b58f8de78a85c84",
+   "recipients": [
+    "0x7e208a08c745a1adb6cb9d110b58f8de78a85c84"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2384
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11543443933920",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x3c98ae7d499fd2be52d026c4ec4e877954cf6bb4c8e9da34067d7cb961fdd492",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x3ec9a41cb4c81bc7d9d3f0b86d85d70b1d94bdcd",
+   "minter": "0x3ec9a41cb4c81bc7d9d3f0b86d85d70b1d94bdcd",
+   "recipients": [
+    "0x3ec9a41cb4c81bc7d9d3f0b86d85d70b1d94bdcd"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2385
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9621428170932",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x69b8ffb13b6d3d48cc8324bef13247e0e0cadff3a8b104b110b682f1d1c5a2b9",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x81d5e4fe1f6c145fbbcab93688251130b683fee2",
+   "minter": "0x81d5e4fe1f6c145fbbcab93688251130b683fee2",
+   "recipients": [
+    "0x81d5e4fe1f6c145fbbcab93688251130b683fee2"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2386
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9092471176764",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xe5ed9efa4958535d2a5d3a3bc9eeba5f3f55e179dd84fd1fddd898b549cb8421",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x02666958dfff131819da428761b33929e282be20",
+   "minter": "0x02666958dfff131819da428761b33929e282be20",
+   "recipients": [
+    "0x02666958dfff131819da428761b33929e282be20"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2387
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9133213485360",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xa8ece70a6185ebf7fe26e7b8ee09139f998d11f4ae7930b558485b5a579c0583",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x81166ebce4e7c9a20ed0e3f950850f94ce427500",
+   "minter": "0x81166ebce4e7c9a20ed0e3f950850f94ce427500",
+   "recipients": [
+    "0x81166ebce4e7c9a20ed0e3f950850f94ce427500"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2388
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8116465144584",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd992844361b595b4b64189dbba600294a816c3affbb9425bf980232c83675215",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xd25cc1d1f78fa25dc193f61a7d93d618580db87c",
+   "minter": "0xd25cc1d1f78fa25dc193f61a7d93d618580db87c",
+   "recipients": [
+    "0xd25cc1d1f78fa25dc193f61a7d93d618580db87c"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2389,
+    2390
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "9117731328668",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x986925702bdeae8d03e006b5c6cb044a10a136c680071b347fedf0988845afc7",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb4e66d9408adb6a78f34518f856ff4ca75e6ef9f",
+   "minter": "0xb4e66d9408adb6a78f34518f856ff4ca75e6ef9f",
+   "recipients": [
+    "0xb4e66d9408adb6a78f34518f856ff4ca75e6ef9f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2391
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "16753730110164",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x6007bd73d6868fa8f4fba320908cfe2f45868ffaa88fd79552b164013c7ecfdc",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x8589a389ebbb0f7e884f31a59686ba1297b33e6a",
+   "minter": "0x8589a389ebbb0f7e884f31a59686ba1297b33e6a",
+   "recipients": [
+    "0x8589a389ebbb0f7e884f31a59686ba1297b33e6a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2392
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8278641744312",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xebe4cfbdf5287104ce6595e5c2b8552b07d027151947729d369f935a2a8463f5",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x7090be4c066a4fc2dda61a06609d3eba27902d39",
+   "minter": "0x7090be4c066a4fc2dda61a06609d3eba27902d39",
+   "recipients": [
+    "0x7090be4c066a4fc2dda61a06609d3eba27902d39"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2393
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8633382319464",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x2108fd89c852ccd3b9bbbb721deeba39c74b5d3010be36a85631e43dc42a1baf",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x5300a0d5a8c6d7f78571952ad35ec4ef49db3db6",
+   "minter": "0x5300a0d5a8c6d7f78571952ad35ec4ef49db3db6",
+   "recipients": [
+    "0x5300a0d5a8c6d7f78571952ad35ec4ef49db3db6"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2394
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "7417069114128",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x709ed43bf76eb87e1fffca55b8ecc2c8b42adb4e84b63d06419a813bb8e9bb59",
+   "contract": "0x74164ed868bfad68eaaffa36f828019456d520da",
+   "sender": "0xd127755b16de37cb22baf59c4a025ff266485d6f",
+   "minter": "0xd127755b16de37cb22baf59c4a025ff266485d6f",
+   "recipients": [
+    "0xd127755b16de37cb22baf59c4a025ff266485d6f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    8108
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 190207,
+   "gasCostNative": "12790801626215",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x551ee1dacce20f03ec04866be4c759c7ea4845b15b2d5875175d0119b3d66fb3",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xdc3bef524df5eeb0b65b4c7f099aa17fedf0e0f7",
+   "minter": "0xdc3bef524df5eeb0b65b4c7f099aa17fedf0e0f7",
+   "recipients": [
+    "0xdc3bef524df5eeb0b65b4c7f099aa17fedf0e0f7"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22483
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214897,
+   "gasCostNative": "13898519348220",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xbc9f3ca40af3dd70d8088ac3d63cb38901e12ab1509d759b2f634c1eabfdebfe",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x53440515d92beb09c6baa8e06b9cda6492280aec",
+   "minter": "0x53440515d92beb09c6baa8e06b9cda6492280aec",
+   "recipients": [
+    "0x53440515d92beb09c6baa8e06b9cda6492280aec"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4469
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "9470265214984",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x476bceba9510ff216350874a4c815d376953967b677c4a229d0740a4edde3fe6",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x0825af722a1c26f294d7e2c4c3f52ae5a4643cb6",
+   "minter": "0x0825af722a1c26f294d7e2c4c3f52ae5a4643cb6",
+   "recipients": [
+    "0x0825af722a1c26f294d7e2c4c3f52ae5a4643cb6"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4470
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "9175085063424",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd7112dea50752a1ba2e2253fede565b232642cedda9ad735d6739bdf758cd805",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x070fd7e28b4b8a69f9ceb2204890181fd0ddfb67",
+   "minter": "0x070fd7e28b4b8a69f9ceb2204890181fd0ddfb67",
+   "recipients": [
+    "0x070fd7e28b4b8a69f9ceb2204890181fd0ddfb67"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2395
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8600965632348",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x9aeae75ebae1f593f9ad92eec8a978e7efa9449ae329637fe3fe8748e4388592",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xd4edd9a317a4cff65ebb9bb147b81921bdaf229b",
+   "minter": "0xd4edd9a317a4cff65ebb9bb147b81921bdaf229b",
+   "recipients": [
+    "0xd4edd9a317a4cff65ebb9bb147b81921bdaf229b"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2396
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9656072193696",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x4a65df20c68826bdac971a44f6cb156effcc5368dcbdf9f063307bf90ce1fbea",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xfa12c93878f36e684b27205f3ce648e55900c175",
+   "minter": "0xfa12c93878f36e684b27205f3ce648e55900c175",
+   "recipients": [
+    "0xfa12c93878f36e684b27205f3ce648e55900c175"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2397
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "11912279182620",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x49315a79bef971e200d0ac5f48c93cbd5573a14992054381b4c535fcfeb92d00",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xa1e7c40337869d8c544c0f20285741e33ab332e9",
+   "minter": "0xa1e7c40337869d8c544c0f20285741e33ab332e9",
+   "recipients": [
+    "0xa1e7c40337869d8c544c0f20285741e33ab332e9"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22484
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214701,
+   "gasCostNative": "36039074774442",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd2afeaa6af73c14a2e3fd48c34a788dc0a842e0540acebd73e7fd9eea3050f21",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xa50ea57b64f999d09fcd8f080d47714f3fd99cd3",
+   "minter": "0xa50ea57b64f999d09fcd8f080d47714f3fd99cd3",
+   "recipients": [
+    "0xa50ea57b64f999d09fcd8f080d47714f3fd99cd3"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22485
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214897,
+   "gasCostNative": "13129808066065",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x60b684d88a6d520c44df1ba83c3cc43edbcdd50038df034a70d30dabba439a32",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xa56fc31a691515a074b9a2fc0ed0381638b5b4a5",
+   "minter": "0xa56fc31a691515a074b9a2fc0ed0381638b5b4a5",
+   "recipients": [
+    "0xa56fc31a691515a074b9a2fc0ed0381638b5b4a5"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2398,
+    2399
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "12086682042392",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xa6b72eeb3861028f00791f6efce2f7c9260f3a20788dc4d18f17f87f1e1149fd",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x1fa77ca96fbdb26cc8ea777e77768e6a0bb4e12a",
+   "minter": "0x1fa77ca96fbdb26cc8ea777e77768e6a0bb4e12a",
+   "recipients": [
+    "0x1fa77ca96fbdb26cc8ea777e77768e6a0bb4e12a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2604
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145111,
+   "gasCostNative": "21665168653704",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x379b3ffe3c17714e62e09dace0155bd0aaa3f62c7efb90dd7a6802e321eddd93",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xe2bfddc3e13406dacef993c407fe19235fbe1c05",
+   "minter": "0xe2bfddc3e13406dacef993c407fe19235fbe1c05",
+   "recipients": [
+    "0xe2bfddc3e13406dacef993c407fe19235fbe1c05"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22486
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214603,
+   "gasCostNative": "17745370560282",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x358fb6909aa4148bac988a95777079934b48a9a373a142ecf223b9a4dbe8b0a9",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x29d1ca562f5b4f3d9e0d36d7c28339175e3a77b4",
+   "minter": "0x29d1ca562f5b4f3d9e0d36d7c28339175e3a77b4",
+   "recipients": [
+    "0x29d1ca562f5b4f3d9e0d36d7c28339175e3a77b4"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2605
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145147,
+   "gasCostNative": "9985033561173",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x25c281c5cea3091ee81ebde0962f373c75a871787779b263a9c66c509b4438b9",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xc20251e6f4816ea6420e53db601d382470d482a2",
+   "minter": "0xc20251e6f4816ea6420e53db601d382470d482a2",
+   "recipients": [
+    "0xc20251e6f4816ea6420e53db601d382470d482a2"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2400
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "7763736673044",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x86802758fdb9972321803b505f8cd61c18d366dc9de25451a835c2b0dbc0bda5",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xa4878d75e104f7d14c190bf6a14ee6923ddf0608",
+   "minter": "0xa4878d75e104f7d14c190bf6a14ee6923ddf0608",
+   "recipients": [
+    "0xa4878d75e104f7d14c190bf6a14ee6923ddf0608"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2401
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "10250443728924",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x99f064d87a8c964ad8a3b44a6edcb86b02b4e53082d8fc0cf8c30617f8aa511b",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x3c849cf2806268cc863024928e593b3b10c1fd01",
+   "minter": "0x3c849cf2806268cc863024928e593b3b10c1fd01",
+   "recipients": [
+    "0x3c849cf2806268cc863024928e593b3b10c1fd01"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2402,
+    2403
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "11103173947740",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xda7b5e6d0c0d95dca9a861649e78b865a9d9de447c649bf28f4efe06be029257",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0xa50ea57b64f999d09fcd8f080d47714f3fd99cd3",
+   "minter": "0xa50ea57b64f999d09fcd8f080d47714f3fd99cd3",
+   "recipients": [
+    "0xa50ea57b64f999d09fcd8f080d47714f3fd99cd3"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2606
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145159,
+   "gasCostNative": "15390725826007",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xce20c1d0e33a6764c74dde6d6f7bd8e286c1fe54e22f9cf19f5bba1b0ea4c588",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x07b763e3fb32348ddebabd8c64cc7580b8c08e69",
+   "minter": "0x07b763e3fb32348ddebabd8c64cc7580b8c08e69",
+   "recipients": [
+    "0x07b763e3fb32348ddebabd8c64cc7580b8c08e69"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2607
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145223,
+   "gasCostNative": "9844757063037",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x57f343e3ecb789f931dffd863b833de8140f85d83e69351a58fee4de9122aad7",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x7007ec62ea316f451ffc5eded5847fc881a10a68",
+   "minter": "0x7007ec62ea316f451ffc5eded5847fc881a10a68",
+   "recipients": [
+    "0x7007ec62ea316f451ffc5eded5847fc881a10a68"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4471
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "11449423674584",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xc351e09a957a02893835d98a9136045eaba8cbaade21b71f3c6d6e0f8cc065ea",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x53440515d92beb09c6baa8e06b9cda6492280aec",
+   "minter": "0x53440515d92beb09c6baa8e06b9cda6492280aec",
+   "recipients": [
+    "0x53440515d92beb09c6baa8e06b9cda6492280aec"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2232
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 136136,
+   "gasCostNative": "9983354813432",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x88fffa1d804c28c0096bafb05940bba625d0a88d2d0ca75b44c3dc333823eda9",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0xdaa6eb5a4d8ea76f40d07cb6e7d42dead34809e7",
+   "minter": "0xdaa6eb5a4d8ea76f40d07cb6e7d42dead34809e7",
+   "recipients": [
+    "0xdaa6eb5a4d8ea76f40d07cb6e7d42dead34809e7"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4472
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10908369173016",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x63b7236851bb0aec7daf1680c5ef69cb3b58fbc57a45be621e65e2473a417fc9",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x4d03122ce487002969e43bf16c677d9a02a7b259",
+   "minter": "0x4d03122ce487002969e43bf16c677d9a02a7b259",
+   "recipients": [
+    "0x4d03122ce487002969e43bf16c677d9a02a7b259"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4473
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "11969043566200",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd1077b8035dbb468c0a6de15601723e04de692384d3c3009ac1ce335b3b44eb7",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x4d03122ce487002969e43bf16c677d9a02a7b259",
+   "minter": "0x4d03122ce487002969e43bf16c677d9a02a7b259",
+   "recipients": [
+    "0x4d03122ce487002969e43bf16c677d9a02a7b259"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22487
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214701,
+   "gasCostNative": "13309112956359",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x3b5841ab11966f10c5cbdbcb5bfad365616a5865d0a045095d666831071b0c15",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x1dbc15f9d8ccafcfb64ffe0299e7304b83efbc29",
+   "minter": "0x1dbc15f9d8ccafcfb64ffe0299e7304b83efbc29",
+   "recipients": [
+    "0x1dbc15f9d8ccafcfb64ffe0299e7304b83efbc29"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22488
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 215093,
+   "gasCostNative": "14386025972074",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x834fa03cab04785469a523e69a2c83560ac3c6c19065fbba16918b2132ae72ac",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xbf7339795668216fc125382a1e11ac95ccecbe6a",
+   "minter": "0xbf7339795668216fc125382a1e11ac95ccecbe6a",
+   "recipients": [
+    "0xbf7339795668216fc125382a1e11ac95ccecbe6a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2404,
+    2405
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "9812860736736",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xdfd0f14bd019393f95ea612613567d6a0d0f7e812e96388c5c22a2bbbf8a67bb",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x2985db74d88307a6fe60d195584796d1f501c826",
+   "minter": "0x2985db74d88307a6fe60d195584796d1f501c826",
+   "recipients": [
+    "0x2985db74d88307a6fe60d195584796d1f501c826"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22489
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214799,
+   "gasCostNative": "15140016869822",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x35723c8f89875fb4386ad92c616c07bc604a85d9d0d91e42aaa75d61d7d7e238",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x886e5d76f55562352e43b38f92ba1d6660745dc9",
+   "minter": "0x886e5d76f55562352e43b38f92ba1d6660745dc9",
+   "recipients": [
+    "0x886e5d76f55562352e43b38f92ba1d6660745dc9"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2608
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145111,
+   "gasCostNative": "10659747113193",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x34631fa63e307ec9c94ab0b28006994383a2f8b53f789c0744bde7ab0c007133",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xee07446bfc8b0e8c67827425b86efc044fef7995",
+   "minter": "0xee07446bfc8b0e8c67827425b86efc044fef7995",
+   "recipients": [
+    "0xee07446bfc8b0e8c67827425b86efc044fef7995"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22490
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214701,
+   "gasCostNative": "34223474017527",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x90e1abbc56b65661815de3af8e89b43aa30872deaeb16d0c870fc5b0f2ce4280",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x7119ffe22df4546e3d86014dbaa647bb99fdd6e0",
+   "minter": "0x7119ffe22df4546e3d86014dbaa647bb99fdd6e0",
+   "recipients": [
+    "0x7119ffe22df4546e3d86014dbaa647bb99fdd6e0"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4474
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10397222761744",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x08444572ba52c6791e6d67b1b01fd1613f62ffc5306b46a373f5bfee78c03a6f",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x2c4558ca9101ee68ef89356ea2c2d32cdf93dddc",
+   "minter": "0x2c4558ca9101ee68ef89356ea2c2d32cdf93dddc",
+   "recipients": [
+    "0x2c4558ca9101ee68ef89356ea2c2d32cdf93dddc"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2609
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145111,
+   "gasCostNative": "18916699272422",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x23e15bdbcd8de9937e6d2063ea3d621e97849118199317110c9186cfc513edb7",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x36100e71d7f5add5bfa6fc368a27a70cd0ecf0c5",
+   "minter": "0x36100e71d7f5add5bfa6fc368a27a70cd0ecf0c5",
+   "recipients": [
+    "0x36100e71d7f5add5bfa6fc368a27a70cd0ecf0c5"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2406
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9640377731748",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x7d3d17d9ee69b6214d6a4761d2073f4c65212970623ea0a44d70485d6f252264",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x36100e71d7f5add5bfa6fc368a27a70cd0ecf0c5",
+   "minter": "0x36100e71d7f5add5bfa6fc368a27a70cd0ecf0c5",
+   "recipients": [
+    "0x36100e71d7f5add5bfa6fc368a27a70cd0ecf0c5"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2407
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 83116,
+   "gasCostNative": "5814299656176",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xfae7cf76727075fc8ec512edff4ed8f534ed5ee7f82993e17056ad959eb82c1e",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x3724ce570c9f90b120047b1e9d31e23b3756d206",
+   "minter": "0x3724ce570c9f90b120047b1e9d31e23b3756d206",
+   "recipients": [
+    "0x3724ce570c9f90b120047b1e9d31e23b3756d206"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22491
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214603,
+   "gasCostNative": "15248837206090",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xf5f71981cd88f69d7e06a000cfb33a142113c742dc41934ddd7cbfce11a18e61",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x749bcd322012fdd4688bc880546e872419f270fe",
+   "minter": "0x749bcd322012fdd4688bc880546e872419f270fe",
+   "recipients": [
+    "0x749bcd322012fdd4688bc880546e872419f270fe"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2408,
+    2409
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "10284549848100",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x05aa5de613cc080b3544c100b0931816190786a5b72889e1f5ba722f11174cd6",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x10ee130af36a8bb59b5c644ef12eccf65219fefc",
+   "minter": "0x10ee130af36a8bb59b5c644ef12eccf65219fefc",
+   "recipients": [
+    "0x10ee130af36a8bb59b5c644ef12eccf65219fefc"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2610
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145262,
+   "gasCostNative": "9781458195444",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd832f07834afaa74a4fa6d64512814af58da48cd3224aa7b92675e56509112d1",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x281736692baede1c4a96bab308b20ca0e26c1d20",
+   "minter": "0x281736692baede1c4a96bab308b20ca0e26c1d20",
+   "recipients": [
+    "0x281736692baede1c4a96bab308b20ca0e26c1d20"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2611
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145147,
+   "gasCostNative": "10293255828319",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x9753675bc075840b77b15c40cae83c5831ebaa638c416d0756ced11bc403715b",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xb2012d03cecde9ddc27e57a63d84b41e9ea274e8",
+   "minter": "0xb2012d03cecde9ddc27e57a63d84b41e9ea274e8",
+   "recipients": [
+    "0xb2012d03cecde9ddc27e57a63d84b41e9ea274e8"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2410,
+    2411
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "11334300943400",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x75a9264a64ee7bf955e04708dc9fd4d39533657ea787ca663c4b8a3d057181ec",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x250be78674eea5ba4e81043eb015f97e7e0f1aef",
+   "minter": "0x250be78674eea5ba4e81043eb015f97e7e0f1aef",
+   "recipients": [
+    "0x250be78674eea5ba4e81043eb015f97e7e0f1aef"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22492
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214995,
+   "gasCostNative": "22891436753625",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd7daa9e23f46e8828ae598c746a0a3686fe15ca00feb07da95893a3471ea2fe8",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xe3eade36370ec61f48aca58f47c251c2a9d29538",
+   "minter": "0xe3eade36370ec61f48aca58f47c251c2a9d29538",
+   "recipients": [
+    "0xe3eade36370ec61f48aca58f47c251c2a9d29538"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22493
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214603,
+   "gasCostNative": "15462656905140",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xca215b18a71497e21c399df4d3623f4afc4170b5e6bba82c7dcea328fca04849",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x04a7e0fbed66457eacd7b04ab707520a175ccfd2",
+   "minter": "0x04a7e0fbed66457eacd7b04ab707520a175ccfd2",
+   "recipients": [
+    "0x04a7e0fbed66457eacd7b04ab707520a175ccfd2"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22494
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214897,
+   "gasCostNative": "17153419366642",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x3cb1a4d2803a70bb7b1a5b2846436025cedc76b9239424130964e96be44f1205",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x0056d391f6d39a13dc0ad1a6f186d37e9e52227f",
+   "minter": "0x0056d391f6d39a13dc0ad1a6f186d37e9e52227f",
+   "recipients": [
+    "0x0056d391f6d39a13dc0ad1a6f186d37e9e52227f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4475
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10536980265448",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xf02c9fddd301543b61d989d40b54323d49b6ae2256f8eeb2ee0a45a1950e143e",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x0808367b4582c668e572cf3bc6815b302f776621",
+   "minter": "0x0808367b4582c668e572cf3bc6815b302f776621",
+   "recipients": [
+    "0x0808367b4582c668e572cf3bc6815b302f776621"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22495
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214897,
+   "gasCostNative": "15327671861299",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x7d7c6bf1ceaad3771c183a2ac3a377cd89e593d949bb50f749490251eda1aef8",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x3fa84c64cafd1d5302827ea80bd7089074235c11",
+   "minter": "0x3fa84c64cafd1d5302827ea80bd7089074235c11",
+   "recipients": [
+    "0x3fa84c64cafd1d5302827ea80bd7089074235c11"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2412
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "9738230738556",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x0a9caa04bf3184c26badf4f46c626e7e22daf005d23d578c9f049b61d14dbe09",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x0056d391f6d39a13dc0ad1a6f186d37e9e52227f",
+   "minter": "0x0056d391f6d39a13dc0ad1a6f186d37e9e52227f",
+   "recipients": [
+    "0x0056d391f6d39a13dc0ad1a6f186d37e9e52227f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2612
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145115,
+   "gasCostNative": "10151511698560",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x90ba45583647a5a11553a0a587ff8724d63c462d262335f1bd9a7ecc1426228b",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x3fa84c64cafd1d5302827ea80bd7089074235c11",
+   "minter": "0x3fa84c64cafd1d5302827ea80bd7089074235c11",
+   "recipients": [
+    "0x3fa84c64cafd1d5302827ea80bd7089074235c11"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4476
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10741303219024",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x67bcf506d320b31a2f241e9cb3bd60263e5fe40ab8406b8969d403a371402874",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x57882480e4d6c5c9b3759db6effa784735a31eb3",
+   "minter": "0x57882480e4d6c5c9b3759db6effa784735a31eb3",
+   "recipients": [
+    "0x57882480e4d6c5c9b3759db6effa784735a31eb3"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4477
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10836538526184",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x5c3d2d4a80c1147cce0dda5e273e4e8529925d41cdec51eeca40ffc0934e5c69",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0xb10e1023c873b3cee963b61a8096297c437e5ed3",
+   "minter": "0xb10e1023c873b3cee963b61a8096297c437e5ed3",
+   "recipients": [
+    "0xb10e1023c873b3cee963b61a8096297c437e5ed3"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4478
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "11124579277168",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x572fe798fb7aedf4b010690b655c71731ffba152be0b01eb8b905addb212ef78",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x9499bd36b5b6b0d7277d2f5a2404be19d7c5a1d8",
+   "minter": "0x9499bd36b5b6b0d7277d2f5a2404be19d7c5a1d8",
+   "recipients": [
+    "0x9499bd36b5b6b0d7277d2f5a2404be19d7c5a1d8"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22496
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214995,
+   "gasCostNative": "17297850780045",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x66d49ee9ca5fd2b6d9997fe4f43791eadff890119d9859b9a452e49a2f513b31",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0xf2c920ac77c99f94e0b88fb1954befd64fa9ad21",
+   "minter": "0xf2c920ac77c99f94e0b88fb1954befd64fa9ad21",
+   "recipients": [
+    "0xf2c920ac77c99f94e0b88fb1954befd64fa9ad21"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4479
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10989783438088",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x002c04690e024777d7738147f0180324cdae40045a4076537cff3515a6f76760",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x7d7a0a541e5879234761933a256f7744b62340bc",
+   "minter": "0x7d7a0a541e5879234761933a256f7744b62340bc",
+   "recipients": [
+    "0x7d7a0a541e5879234761933a256f7744b62340bc"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4480
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10878266159096",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xab42d142e7a3203f3707ca7bf2aaffe70cbb32c335a968af0c7d54bd970ffb88",
+   "contract": "0x02a3ac26012cc7017f5cf4e4d481ee243f9cceb4",
+   "sender": "0x20d05aa8a2a120d6f534c50b4676fd429ea588a6",
+   "minter": "0x20d05aa8a2a120d6f534c50b4676fd429ea588a6",
+   "recipients": [
+    "0x20d05aa8a2a120d6f534c50b4676fd429ea588a6"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4246
+   ],
+   "transferToMinter": true,
+   "paymentValue": "704987811324733",
+   "gasUsed": 150329,
+   "gasCostNative": "15733235307036",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x860bd73f4d0637a69d5238939ce5d41828c6ee6f66e849db36c10669433e9919",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x895f24c601f6b20817f8ad538da8a4055787bb12",
+   "minter": "0x895f24c601f6b20817f8ad538da8a4055787bb12",
+   "recipients": [
+    "0x895f24c601f6b20817f8ad538da8a4055787bb12"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22497
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 215289,
+   "gasCostNative": "15995165581539",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xb01c5477debe0153232e188b179bffe6abdeefce5f7dae321e970c34b7abb925",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x0825af722a1c26f294d7e2c4c3f52ae5a4643cb6",
+   "minter": "0x0825af722a1c26f294d7e2c4c3f52ae5a4643cb6",
+   "recipients": [
+    "0x0825af722a1c26f294d7e2c4c3f52ae5a4643cb6"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2613
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145123,
+   "gasCostNative": "10070166093757",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x5e1a219bf7bfe40f8e58848965c811b02c07b46afbc7cd82b2b4c165fe4ffdde",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x1a10f09435a9dab8df9c5a988a27c5714d0a58f2",
+   "minter": "0x1a10f09435a9dab8df9c5a988a27c5714d0a58f2",
+   "recipients": [
+    "0x1a10f09435a9dab8df9c5a988a27c5714d0a58f2"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22498
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214701,
+   "gasCostNative": "14712374431146",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xcd07e743fff7011add639640500abac228913ba597223f699201d4c9561efe43",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x68ca292cbca2069290cede2254edc736f04c79de",
+   "minter": "0x68ca292cbca2069290cede2254edc736f04c79de",
+   "recipients": [
+    "0x68ca292cbca2069290cede2254edc736f04c79de"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22499
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214897,
+   "gasCostNative": "14886536887021",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xe788a85cd105c666d2bb1a7ba9a21560f13db4d79529b3005dc8d561de8fb041",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x157d19328d8f1c090c412397ee1bf5733f3762dd",
+   "minter": "0x157d19328d8f1c090c412397ee1bf5733f3762dd",
+   "recipients": [
+    "0x157d19328d8f1c090c412397ee1bf5733f3762dd"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2614
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145235,
+   "gasCostNative": "9433359199770",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x93f0c7249958e631987befd462df60ceed85633d17601041046744c1d92e1efc",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xc757f5f91a24f5fb4e08c2e2dc6b7dcd5dc5f85e",
+   "minter": "0xc757f5f91a24f5fb4e08c2e2dc6b7dcd5dc5f85e",
+   "recipients": [
+    "0xc757f5f91a24f5fb4e08c2e2dc6b7dcd5dc5f85e"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2413,
+    2414
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "10850704465008",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xdea9b3f289042851811f95ff6e3db06793ad07c27bc4918f538e6ee389a7b6d6",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x8962c48e83b149f781263a42b222c73e2fb76e1b",
+   "minter": "0x8962c48e83b149f781263a42b222c73e2fb76e1b",
+   "recipients": [
+    "0x8962c48e83b149f781263a42b222c73e2fb76e1b"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2233,
+    2234,
+    2235
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 191862,
+   "gasCostNative": "13126318352730",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xd310919c7f569f128f260158ae0421e299388536a5ca7e6ca1aff55edc7b4676",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xa5889fa90e0ceebc8e7ea353668822cf0f5c010f",
+   "minter": "0xa5889fa90e0ceebc8e7ea353668822cf0f5c010f",
+   "recipients": [
+    "0xa5889fa90e0ceebc8e7ea353668822cf0f5c010f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22500
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214799,
+   "gasCostNative": "14073029257599",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xebed02446cd6786e74872c8649274a0f8caaf5386eb5fd7301dccc9ae5921ff1",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x7f7cd41baef1d18641a181a4a82b0c435f58fd50",
+   "minter": "0x7f7cd41baef1d18641a181a4a82b0c435f58fd50",
+   "recipients": [
+    "0x7f7cd41baef1d18641a181a4a82b0c435f58fd50"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22501
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214603,
+   "gasCostNative": "15268585617959",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x9f4147d03944750624b2deef7527664ab9b4b5d61626d3a67112733aecd167f1",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xf76f7788349dc422dc130b6344e594e17d5ba1f2",
+   "minter": "0xf76f7788349dc422dc130b6344e594e17d5ba1f2",
+   "recipients": [
+    "0xf76f7788349dc422dc130b6344e594e17d5ba1f2"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22502
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 215289,
+   "gasCostNative": "13457698597458",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x2b4bd9cf85bb0cc7ff4e3ffc29ed3eea8f9a5921c7d4fa1e3c1a64fada687de4",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0xe77d2b0f11d9b63f80b8c793c0f8beed8d439094",
+   "minter": "0xe77d2b0f11d9b63f80b8c793c0f8beed8d439094",
+   "recipients": [
+    "0xe77d2b0f11d9b63f80b8c793c0f8beed8d439094"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2236
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 136136,
+   "gasCostNative": "9832698139264",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xbad258b957b830825c2293275dc1d98ec2b30ea511b5bda34b26c00d9b72c3a2",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xc33f568fe2cdbe96e7150817d38ca40a46c3f93a",
+   "minter": "0xc33f568fe2cdbe96e7150817d38ca40a46c3f93a",
+   "recipients": [
+    "0xc33f568fe2cdbe96e7150817d38ca40a46c3f93a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22503
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 215387,
+   "gasCostNative": "16306512534390",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x521c30ef53165fc20e61458cde99ca75523f95f6f3f75a895dd72502a1b1091a",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0xaab97ccea84a212236db844edc530e47bf605e4b",
+   "minter": "0xaab97ccea84a212236db844edc530e47bf605e4b",
+   "recipients": [
+    "0xaab97ccea84a212236db844edc530e47bf605e4b"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4481
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10662971573072",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x14f0e25559844de71d90fdb701b4bf475e13c5c8a2a33628edc606f00a9349b8",
+   "contract": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+   "sender": "0x77c17e833fc91f0c1553eb9d203342ead86d6b14",
+   "minter": "0x77c17e833fc91f0c1553eb9d203342ead86d6b14",
+   "recipients": [
+    "0x77c17e833fc91f0c1553eb9d203342ead86d6b14"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2368
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 131149,
+   "gasCostNative": "8969315126783",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x9b2c7347f573536218b198a30a7596f13788e8e45ffadf4cc3d891503d4ab3e7",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0x46bd9871d4e26a7c853f39c96f73d5ee017ff95e",
+   "minter": "0x46bd9871d4e26a7c853f39c96f73d5ee017ff95e",
+   "recipients": [
+    "0x46bd9871d4e26a7c853f39c96f73d5ee017ff95e"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2615
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145111,
+   "gasCostNative": "9778390930934",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xef64631ef768d7b96214a21d4a848ce02e3e87da086c2e4aeb2df2d8c656446b",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xa1c250ab24484f21ee6578b93a66b73e25648141",
+   "minter": "0xa1c250ab24484f21ee6578b93a66b73e25648141",
+   "recipients": [
+    "0xa1c250ab24484f21ee6578b93a66b73e25648141"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22504
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 215191,
+   "gasCostNative": "15958424470659",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x4f3ad1d51dbb85e0db4acd83995a4f1cbd4bb8bb06abd8c0d479ab999e075fd6",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0xa72229553b2a4ca0aa2f6275ba4cbc9938f90ee4",
+   "minter": "0xa72229553b2a4ca0aa2f6275ba4cbc9938f90ee4",
+   "recipients": [
+    "0xa72229553b2a4ca0aa2f6275ba4cbc9938f90ee4"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22505
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 214799,
+   "gasCostNative": "15821653787251",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xba26cb6a70edd024ab1202b765b84e81dc4e5dd6d9dcdaf9d6076df21a5115af",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0xdaa6eb5a4d8ea76f40d07cb6e7d42dead34809e7",
+   "minter": "0xdaa6eb5a4d8ea76f40d07cb6e7d42dead34809e7",
+   "recipients": [
+    "0xdaa6eb5a4d8ea76f40d07cb6e7d42dead34809e7"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2415,
+    2416
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 159644,
+   "gasCostNative": "12329671385472",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xcedd4d155ea81d16ad36f640a078b89705023144cb6af47e07f67b2e2209b086",
+   "contract": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+   "sender": "0x41c0d15b5c724d91c1f91262d87ce6454402caf9",
+   "minter": "0x41c0d15b5c724d91c1f91262d87ce6454402caf9",
+   "recipients": [
+    "0x41c0d15b5c724d91c1f91262d87ce6454402caf9"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    22506
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 215289,
+   "gasCostNative": "15481679141772",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xf9ff7b6fa0d73952fe3aa64d28c96428acfa0aa0284190dbf0895a68b506fe5e",
+   "contract": "0x74164ed868bfad68eaaffa36f828019456d520da",
+   "sender": "0xcbafd22e5f5385a1f89e27bee5da789f0f9dc32f",
+   "minter": "0xcbafd22e5f5385a1f89e27bee5da789f0f9dc32f",
+   "recipients": [
+    "0xcbafd22e5f5385a1f89e27bee5da789f0f9dc32f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    8109
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 173131,
+   "gasCostNative": "12245989150024",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x446bb5a4b76e2138802f1b9255101d36a2fbcf774e822181d8cb36d60fc415e0",
+   "contract": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+   "sender": "0xb07b263ffb129575142537fa307f24e6a435f78a",
+   "minter": "0xb07b263ffb129575142537fa307f24e6a435f78a",
+   "recipients": [
+    "0xb07b263ffb129575142537fa307f24e6a435f78a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2616
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 145262,
+   "gasCostNative": "10479485393520",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x2d2443f81f8449c08b2721baa4db2efa08477b753cdb430da834a8056ec37ffd",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0x6c867d8440129e65972c941eb2fcb24b60e1d686",
+   "minter": "0x6c867d8440129e65972c941eb2fcb24b60e1d686",
+   "recipients": [
+    "0x6c867d8440129e65972c941eb2fcb24b60e1d686"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4482
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "11383623505856",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x82f569d10b52dc288dc1226e0841947541153f9d992ffb2ebc1a83fa82481ff1",
+   "contract": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+   "sender": "0xfd328d182c6b3652b198bf120d2ba36e8b5acfa2",
+   "minter": "0xfd328d182c6b3652b198bf120d2ba36e8b5acfa2",
+   "recipients": [
+    "0xfd328d182c6b3652b198bf120d2ba36e8b5acfa2"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    4483
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 151928,
+   "gasCostNative": "10702657901376",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x45fa798ce82c1b5f9821d08de34e03d82609f289c9bedc9d8e174766117b6d00",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x75bc23dcbecefe1fe79f10066ce907be220a662f",
+   "minter": "0x75bc23dcbecefe1fe79f10066ce907be220a662f",
+   "recipients": [
+    "0x75bc23dcbecefe1fe79f10066ce907be220a662f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2237
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 136136,
+   "gasCostNative": "9000447311856",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x35ba6d08f4f3eb3699c2f395a672a3890809146a8c9c8c337edaf5d1b7bac434",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x8ae4a93b6f426cf75aa389e3f7a19eb59f0a412a",
+   "minter": "0x8ae4a93b6f426cf75aa389e3f7a19eb59f0a412a",
+   "recipients": [
+    "0x8ae4a93b6f426cf75aa389e3f7a19eb59f0a412a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2238
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 84836,
+   "gasCostNative": "6273349791604",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x5e3512f3379d36554fc4496c07cb5c97963e2c5e4a82bc86f222baaa42dc8a36",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x1198dfc76372d641a9cd071758accfb168fe201f",
+   "minter": "0x1198dfc76372d641a9cd071758accfb168fe201f",
+   "recipients": [
+    "0x1198dfc76372d641a9cd071758accfb168fe201f"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2239
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 84836,
+   "gasCostNative": "5267638099704",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x1cfbd721dcad0bf60faee8fd9254352be53e668a7a0de150a4d48af956444c07",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x92c0394a99b8d99a0a14c4265692058b6b35c387",
+   "minter": "0x92c0394a99b8d99a0a14c4265692058b6b35c387",
+   "recipients": [
+    "0x92c0394a99b8d99a0a14c4265692058b6b35c387"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2240
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 84836,
+   "gasCostNative": "5998090481824",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xde3b19aaaab49464c3f0c09873b919400862d5d7608dda253aca6b7e7010afa5",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0xf5f5428e99a3208ec05c6a84a8f5492777f45ed3",
+   "minter": "0xf5f5428e99a3208ec05c6a84a8f5492777f45ed3",
+   "recipients": [
+    "0xf5f5428e99a3208ec05c6a84a8f5492777f45ed3"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2241
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 84836,
+   "gasCostNative": "5576769455024",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x04589303b91f4b375fa8559d19e8e112ae8e1ba06d852a06b5609e4c895cc2d6",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x1715fe2fe1dfe9b01cdb32b8d16348a11b3c5b26",
+   "minter": "0x1715fe2fe1dfe9b01cdb32b8d16348a11b3c5b26",
+   "recipients": [
+    "0x1715fe2fe1dfe9b01cdb32b8d16348a11b3c5b26"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2242
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 84836,
+   "gasCostNative": "5265244451964",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xc53da91d7c79ccbf07b20d6e094dec254e4f5a7acd0ec1cdcc818b28f31a14ef",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x7774b08c6d479e93e9b57a807ca756a1e8beb24a",
+   "minter": "0x7774b08c6d479e93e9b57a807ca756a1e8beb24a",
+   "recipients": [
+    "0x7774b08c6d479e93e9b57a807ca756a1e8beb24a"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2243
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 84836,
+   "gasCostNative": "8136654524728",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x651fa2be7a428abddf35881af493838d0ffd73ff9784c89272ad0088bd47aad7",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0xc0ebaf3615256c6b7ef0805b2abd115e10b24e9d",
+   "minter": "0xc0ebaf3615256c6b7ef0805b2abd115e10b24e9d",
+   "recipients": [
+    "0xc0ebaf3615256c6b7ef0805b2abd115e10b24e9d"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2244
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 84836,
+   "gasCostNative": "5494673148808",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xc10369c9033de7f30fea5e7592935775ea57bdd3f5039305d2ed40d3517c7b17",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0x60f9ef23ce91a822d618c85c929652714c69e868",
+   "minter": "0x60f9ef23ce91a822d618c85c929652714c69e868",
+   "recipients": [
+    "0x60f9ef23ce91a822d618c85c929652714c69e868"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2245
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 136136,
+   "gasCostNative": "11702876785600",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0xcb7dbb09daa7f7d378cdd0d6dc89993c7d7ff06ea4e1b3a65a4b4c378b7aee1a",
+   "contract": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+   "sender": "0xd77c54bae61b888eda1ed8a5d1f2b46356db665c",
+   "minter": "0xd77c54bae61b888eda1ed8a5d1f2b46356db665c",
+   "recipients": [
+    "0xd77c54bae61b888eda1ed8a5d1f2b46356db665c"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2246
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 136136,
+   "gasCostNative": "10186896920200",
+   "mintOutcome": "direct"
+  },
+  {
+   "txHash": "0x56782a035eb7e27ee59f2ef269b35752d9a3651d7fa6c49b3f96e6f324ea08e6",
+   "contract": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+   "sender": "0x86dc7028f53c27d407b15c2e7ce49d91dae98771",
+   "minter": "0x86dc7028f53c27d407b15c2e7ce49d91dae98771",
+   "recipients": [
+    "0x86dc7028f53c27d407b15c2e7ce49d91dae98771"
+   ],
+   "recipientCount": 1,
+   "receiptStatus": 1,
+   "mediated": false,
+   "receivedTokenIds": [
+    2417
+   ],
+   "transferToMinter": true,
+   "paymentValue": "0",
+   "gasUsed": 134436,
+   "gasCostNative": "8667339374268",
+   "mintOutcome": "direct"
+  }
+ ]
+}

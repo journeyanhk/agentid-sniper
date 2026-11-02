@@ -1,0 +1,154 @@
+{
+ "generated": "2026-11-02T02:33:11Z",
+ "rounds": 20392,
+ "breaks": [
+  {
+   "gapSeconds": 100.0,
+   "lastRoundBefore": "2026-10-30T06:51:29.687Z",
+   "firstRoundAfter": "2026-10-30T06:53:09.671Z",
+   "blockBefore": 130619726,
+   "blockAfter": 130619727,
+   "deltaBlocks": 1,
+   "kind": "continuous",
+   "holeBlocks": 0,
+   "overlapBlocks": 0,
+   "pendingBefore": 0,
+   "hadGapBefore": false,
+   "stateCorruptAfter": false,
+   "cursorPausedAfter": false,
+   "buildBefore": "49e7a6a",
+   "buildAfter": "49e7a6a",
+   "signalBefore": {
+    "rows": 116,
+    "gated": 74,
+    "contracts": 111
+   },
+   "signalAfter": {
+    "rows": 249,
+    "gated": 148,
+    "contracts": 130
+   }
+  },
+  {
+   "gapSeconds": 124.7,
+   "lastRoundBefore": "2026-10-30T06:53:09.671Z",
+   "firstRoundAfter": "2026-10-30T06:55:14.404Z",
+   "blockBefore": 130619786,
+   "blockAfter": 130619787,
+   "deltaBlocks": 1,
+   "kind": "continuous",
+   "holeBlocks": 0,
+   "overlapBlocks": 0,
+   "pendingBefore": 0,
+   "hadGapBefore": false,
+   "stateCorruptAfter": false,
+   "cursorPausedAfter": false,
+   "buildBefore": "49e7a6a",
+   "buildAfter": "8e34b8c",
+   "signalBefore": {
+    "rows": 117,
+    "gated": 75,
+    "contracts": 107
+   },
+   "signalAfter": {
+    "rows": 230,
+    "gated": 125,
+    "contracts": 141
+   }
+  },
+  {
+   "gapSeconds": 109.7,
+   "lastRoundBefore": "2026-10-30T06:55:35.505Z",
+   "firstRoundAfter": "2026-10-30T06:57:25.179Z",
+   "blockBefore": 130619966,
+   "blockAfter": 130619967,
+   "deltaBlocks": 1,
+   "kind": "continuous",
+   "holeBlocks": 0,
+   "overlapBlocks": 0,
+   "pendingBefore": 0,
+   "hadGapBefore": false,
+   "stateCorruptAfter": false,
+   "cursorPausedAfter": false,
+   "buildBefore": "8e34b8c",
+   "buildAfter": "d0d27bc",
+   "signalBefore": {
+    "rows": 164,
+    "gated": 117,
+    "contracts": 87
+   },
+   "signalAfter": {
+    "rows": 166,
+    "gated": 89,
+    "contracts": 136
+   }
+  },
+  {
+   "gapSeconds": 136.5,
+   "lastRoundBefore": "2026-11-01T05:04:45.667Z",
+   "firstRoundAfter": "2026-11-01T05:07:02.211Z",
+   "blockBefore": 130989424,
+   "blockAfter": 130989425,
+   "deltaBlocks": 1,
+   "kind": "continuous",
+   "holeBlocks": 0,
+   "overlapBlocks": 0,
+   "pendingBefore": 0,
+   "hadGapBefore": false,
+   "stateCorruptAfter": false,
+   "cursorPausedAfter": false,
+   "buildBefore": "4353130",
+   "buildAfter": "4353130",
+   "signalBefore": {
+    "rows": 52,
+    "gated": 37,
+    "contracts": 40
+   },
+   "signalAfter": {
+    "rows": 137,
+    "gated": 126,
+    "contracts": 90
+   }
+  },
+  {
+   "gapSeconds": 119.5,
+   "lastRoundBefore": "2026-11-01T06:24:14.300Z",
+   "firstRoundAfter": "2026-11-01T06:26:13.819Z",
+   "blockBefore": 131000315,
+   "blockAfter": 131000316,
+   "deltaBlocks": 1,
+   "kind": "continuous",
+   "holeBlocks": 0,
+   "overlapBlocks": 0,
+   "pendingBefore": 0,
+   "hadGapBefore": false,
+   "stateCorruptAfter": false,
+   "cursorPausedAfter": false,
+   "buildBefore": "fa09631",
+   "buildAfter": "fa09631",
+   "signalBefore": {
+    "rows": 303,
+    "gated": 237,
+    "contracts": 279
+   },
+   "signalAfter": {
+    "rows": 238,
+    "gated": 143,
+    "contracts": 161
+   }
+  }
+ ],
+ "stateNow": {
+  "lastBlock": 131161595,
+  "pending": 0,
+  "dupCount": 0,
+  "pendingOverflow": 0,
+  "version": "probe-4.0.0"
+ },
+ "verdict": {
+  "holes": 0,
+  "holeBlocks": 0,
+  "overlaps": 0,
+  "restartRecovery": "verified"
+ }
+}
