@@ -25,9 +25,11 @@
  },
  "dedupeKey": "txHash+logIndex+collection+tokenId",
  "transferVerification": {
-  "sampled": 169,
-  "ok": 200,
-  "coverage": 0.1252,
+  "sampledFills": 542,
+  "okFills": 542,
+  "okRate": 1.0,
+  "uniqueTxs": 169,
+  "coverage": 0.4015,
   "method": "receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)"
  },
  "aggregates": {

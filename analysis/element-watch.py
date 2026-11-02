@@ -282,7 +282,7 @@ def main():
             if x['block'] not in bts:
                 bts[x['block']] = block_ts(x['block'])
         nver = int(arg('--verify-transfers', 0))
-        verified, vok = {}, 0
+        verified, vok, vsampled = {}, 0, 0
         if nver > 0 and fills:
             stepn = max(1, len(fills) // nver)
             for x in fills[::stepn][:nver]:
@@ -296,6 +296,7 @@ def main():
                                 and int(lg['topics'][3], 16) == x['tokenId']):
                             ok = True; break
                 verified[x['tx']] = ok
+                vsampled += 1
                 vok += 1 if ok else 0
         with open(dump, 'w') as f:
             for x in fills:
@@ -319,8 +320,10 @@ def main():
                                                       'coverageRatio': cov['coverageRatio']},
                 'decoder': agg['decoder'],
                 'dedupeKey': 'txHash+logIndex+collection+tokenId',
-                'transferVerification': {'sampled': len(verified), 'ok': vok,
-                                         'coverage': round(len(verified) / max(1, len(fills)), 4),
+                'transferVerification': {'sampledFills': vsampled, 'okFills': vok,
+                                         'okRate': round(vok / max(1, vsampled), 4),
+                                         'uniqueTxs': len(verified),
+                                         'coverage': round(vsampled / max(1, len(fills)), 4),
                                          'method': 'receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)'},
                 'aggregates': {k: agg[k] for k in ('fills_total', 'fills_native_bnb', 'fills_erc20_pay',
                                                    'collections_traded', 'volumeBnb',
@@ -328,7 +331,8 @@ def main():
                 'command': ' '.join(sys.argv),
                 'rpcCalls': R.calls}
         json.dump(meta, open(dump.rstrip('/') + '.meta.json', 'w'), ensure_ascii=False, indent=1)
-        print('已写逐笔 rows %d 行 → %s（转账抽检 %d 笔，成功 %d）' % (len(fills), dump, len(verified), vok))
+        print('已写逐笔 rows %d 行 → %s（抽检 %d 笔 / %d 个 tx，成功 %d）'
+              % (len(fills), dump, vsampled, len(verified), vok))
 
     out = {'agg': agg, 'tracked': rows[:120],
            'top_collections': [{'collection': k, 'sales': v['sales'],
