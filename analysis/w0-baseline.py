@@ -196,8 +196,23 @@ def main():
     probe_shas = sorted({r.get('probeSha256') for r in metrics if r.get('probeSha256')})
     if len(versions) != 1:
         blk('G3_VERSION_MIX', {'versions': versions})
+    build_drift = None
     if len(builds) != 1:
-        blk('G3_BUILD_MIX', {'builds': builds})
+        # build 变化未必代表探针代码变化：提交文档/analysis 后重启，BUILD 会跟着变。
+        # 只有「探针文件在两个 build 之间无差异」才允许放行，并记录证据。
+        ok_drift = False
+        if len(builds) == 2 and all(builds):
+            try:
+                r = subprocess.run(['git', '-C', root, 'diff', '--quiet', builds[0], builds[1],
+                                    '--', 'shadow/probe.mjs'], timeout=20)
+                ok_drift = (r.returncode == 0)
+            except Exception:
+                ok_drift = False
+        if ok_drift:
+            build_drift = {'from': builds[0], 'to': builds[1], 'probeChanged': False,
+                           'why': '两个 build 之间 shadow/probe.mjs 无差异（只提交了 analysis/文档）'}
+        else:
+            blk('G3_BUILD_MIX', {'builds': builds})
     if len(schemas) > 1 or len(collectors) > 1 or len(probe_shas) > 1:
         blk('G3_META_MIX', {'schema': schemas, 'collector': collectors, 'probeSha': [x[:12] for x in probe_shas]})
 
@@ -301,6 +316,7 @@ def main():
             'toTimestamp': to_dt.strftime('%Y-%m-%dT%H:%M:%SZ') if to_dt else None,
             'windowMinutes': round((to_dt - from_dt).total_seconds() / 60, 1) if from_dt and to_dt else None,
         },
+        'buildDrift': build_drift,
         'versions': {'probe': versions, 'build': builds, 'schemaVersion': schemas,
                      'collectorVersion': collectors, 'probeSha256Rounds': [x[:16] for x in probe_shas]},
         'provenance': {'probeFileSha256': (probe_sig or {}).get('sha256'),
@@ -343,6 +359,8 @@ def main():
         print('已写 %s' % out_path)
     print('STATUS=%s 窗口 %s..%s（%s 分钟）' % (out['status'], from_block, to_block, out['window']['windowMinutes']))
     print('版本 %s / build %s / probe %s…' % (versions, builds, (probe_sig or {}).get('sha256', '')[:12]))
+    if build_drift:
+        print('build 漂移已放行：%s → %s（shadow/probe.mjs 无差异）' % (build_drift['from'], build_drift['to']))
     print('完整性: 轮次=%s incomplete=%s gap=%s pending=%s zeroDis=%s' % (
         integ['rounds'], integ['incompleteRounds'], integ['gapCountSum'], integ['pendingMax'], integ['zeroDisagreements']))
     print('实时性: lagMax=%s 块（%s 分钟）dataFresh=%s' % (fresh['maxLagBlocks'], fresh['maxLagMinutes'], fresh['dataFresh']))

@@ -1,0 +1,119 @@
+{
+ "status": "READY_FOR_DECISION",
+ "blocked": [],
+ "generated": "2026-11-02T02:21:49Z",
+ "window": {
+  "source": "element-fills",
+  "fromBlock": 130769296,
+  "toBlock": 131153193,
+  "fromTimestamp": "2026-10-31T01:30:00Z",
+  "toTimestamp": "2026-11-02T01:30:00Z",
+  "windowMinutes": 2880.0
+ },
+ "buildDrift": {
+  "from": "4353130",
+  "to": "fa09631",
+  "probeChanged": false,
+  "why": "两个 build 之间 shadow/probe.mjs 无差异（只提交了 analysis/文档）"
+ },
+ "versions": {
+  "probe": [
+   "probe-4.0.0"
+  ],
+  "build": [
+   "4353130",
+   "fa09631"
+  ],
+  "schemaVersion": [],
+  "collectorVersion": [],
+  "probeSha256Rounds": []
+ },
+ "provenance": {
+  "probeFileSha256": "3a1040b2e2df8062eae1f64615f624f6524cd48e7ee14176f9f437b6e502cc87",
+  "probeFileBytes": 24310,
+  "probeGitCommit": "d0d27bc01797addfea75f295d1ab14fbca5f3895",
+  "probeSha256Source": "working-tree-at-baseline-time",
+  "note": "冻结期不能在探针里加 probeSha256 字段，故按工作树 hash + git 提交溯源"
+ },
+ "integrity": {
+  "rounds": 14241,
+  "incompleteRounds": 0,
+  "hadGapRounds": 0,
+  "gapCountSum": 0,
+  "gapsInWindow": 0,
+  "pendingMax": 0,
+  "pendingOverflowMax": 0,
+  "stateCorruptRounds": 0,
+  "cursorPausedRounds": 0,
+  "zeroDisagreements": 0,
+  "msAvg": 1787.0,
+  "msP95": 7416
+ },
+ "dataFresh": {
+  "maxLagBlocks": 1705,
+  "maxLagMinutes": 12.8,
+  "lagLast": 2,
+  "dataFresh": false,
+  "degraded": true,
+  "realtimeFailed": false,
+  "note": "lag 高但已追平 = 数据完整、实时性降级；不等于扫描正常"
+ },
+ "signals": {
+  "signalRows": 14275,
+  "uniqueContracts": 5269,
+  "uniqueEvents": 7528,
+  "duplicateRows": 6747,
+  "gatedRows": 11089,
+  "gatedContracts": 4383,
+  "gatedErc721Rows": 7405,
+  "gatedErc721Contracts": 2199,
+  "byClass": {
+   "B": 10471,
+   "D": 3186,
+   "C": 618
+  },
+  "byAssetType": {
+   "erc721": 8630,
+   "erc20": 5645
+  }
+ },
+ "sales": {
+  "generatedAt": "2026-11-02T02:18:06Z",
+  "fills": 1350,
+  "fillsNative": 1267,
+  "collectionsTraded": 55,
+  "volumeBnb": 2.028348,
+  "trackedCollections": 2331,
+  "trackedWithSales": 21,
+  "trackedSales": 242,
+  "trackedVolumeBnb": 0.459844
+ },
+ "elementCoverage": {
+  "dataComplete": true,
+  "requestedRanges": 768,
+  "scannedRanges": 768,
+  "skippedRanges": 0,
+  "retryCount": 0,
+  "coverageRatio": 1.0,
+  "rpcSources": 1
+ },
+ "inputs": {
+  "metrics.jsonl": {
+   "sha256": "d2dd3071b220e17022e6b2661286ae753155ddb9627d5a06d1bd4b76f17ec6ec",
+   "bytes": 19367226
+  },
+  "signals.jsonl": {
+   "sha256": "70ade491e0e9e6e0c2c8edfca1d9dc0715156ab36ef7eed72983691a03790fc3",
+   "bytes": 16204543
+  },
+  "element-fills": {
+   "sha256": "f5c3a218552a85fa0b9c69d0e2dacaafbeba8614c17b8b0f5966202341903d2e",
+   "bytes": 30981
+  }
+ },
+ "thresholds": {
+  "dataFreshLagWarn": 600,
+  "dataFreshLagDegraded": 1200,
+  "dataFreshLagFail": 2400
+ }
+}
