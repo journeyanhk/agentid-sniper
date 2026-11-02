@@ -1,7 +1,7 @@
 {
  "generated": "2026-11-02T04:01:42Z",
  "rows": 1350,
- "sha256": "5e36e199a83f87b92182fb7fa4f853e8ae664380f0433c2e74f541ae79bc339e",
+ "sha256": "5a873d7ec75dc53f9241eb078cf86f486808854e10e3a020dc3b954ba6185d6a",
  "window": {
   "fromBlock": 130769296,
   "toBlock": 131153193,
@@ -25,12 +25,18 @@
  },
  "dedupeKey": "txHash+logIndex+collection+tokenId",
  "transferVerification": {
-  "sampledFills": 542,
-  "okFills": 542,
+  "sampleMethod": "deterministic_hash",
+  "sampleSeed": "w0-transfer-v1",
+  "sampleSize": 200,
+  "sampleTxs": 200,
+  "sampleFills": 548,
+  "transferOk": 200,
+  "transferFailed": 0,
   "okRate": 1.0,
-  "uniqueTxs": 169,
-  "coverage": 0.4015,
-  "method": "receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)"
+  "coverage": 0.4059,
+  "method": "receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)",
+  "reproduce": "python3 analysis/transfer-verify.py --n 200 --seed w0-transfer-v1",
+  "scope": "抽检覆盖的行由同 tx 共享证据；未抽中行 transferEvidence=null，不外推"
  },
  "aggregates": {
   "fills_total": 1350,

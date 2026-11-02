@@ -1,37 +1,63 @@
 {
- "generated": "2026-11-02T04:02:57Z",
+ "generated": "2026-11-02T08:35:31Z",
+ "windows": {
+  "sale": {
+   "window": {
+    "fromBlock": 130769296,
+    "toBlock": 131153193,
+    "blocks": 383898,
+    "fromTimestamp": "2026-10-31T01:30:00Z",
+    "toTimestamp": "2026-11-02T01:30:00Z",
+    "windowMinutes": 2880.0
+   },
+   "lengthHours": 48
+  },
+  "mint": {
+   "window": {
+    "fromBlock": 131122055,
+    "toBlock": 131170055,
+    "blocks": 48001,
+    "approxMinutes": 360.0
+   },
+   "lengthHours": 6
+  },
+  "discipline": "两个窗口不同，禁止跨窗口比较或合成单一总分"
+ },
  "inputs": {
   "rows": "analysis/element-fills-w0-rows.jsonl",
-  "rowsSha256": "5e36e199a83f87b92182fb7fa4f853e8ae664380f0433c2e74f541ae79bc339e",
-  "meta": "analysis/element-fills-w0-rows.jsonl.meta.json",
-  "dedupeKey": "txHash+logIndex+collection+tokenId",
+  "rowsSha256": "5a873d7ec75dc53f9241eb078cf86f486808854e10e3a020dc3b954ba6185d6a",
   "transferVerification": {
-   "sampled": 169,
-   "ok": 200,
-   "coverage": 0.1252,
-   "method": "receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)"
+   "sampleMethod": "deterministic_hash",
+   "sampleSeed": "w0-transfer-v1",
+   "sampleSize": 200,
+   "sampleTxs": 200,
+   "sampleFills": 548,
+   "transferOk": 200,
+   "transferFailed": 0,
+   "okRate": 1.0,
+   "coverage": 0.4059,
+   "method": "receipt 内 ERC-721 Transfer(collection, tokenId, to=buyer)",
+   "reproduce": "python3 analysis/transfer-verify.py --n 200 --seed w0-transfer-v1",
+   "scope": "抽检覆盖的行由同 tx 共享证据；未抽中行 transferEvidence=null，不外推"
   }
  },
  "positions": {
-  "note": "buyerQualitySignals 只是结构信号，不是真人身份验证",
-  "flags": [
-   "repeatPairShare_high"
+  "can_assert": [
+   "no direct self-trade detected",
+   "no single-address concentration (top1 8%, top10 33%)"
   ],
-  "verdict": "mixed_signals",
-  "cannot_conclude": [
-   "真实需求不足/充足",
-   "退出规模是否足够"
-  ]
+  "cannot_assert": [
+   "wash-trade risk excluded",
+   "these fills are independent real demand",
+   "buyers are unique humans"
+  ],
+  "materialRisks": [
+   "repeatPairShare=0.382 ≥ 0.30",
+   "buyerSellerOverlap=0.291 ≥ 0.25"
+  ],
+  "verdict": "wash_risk_unresolved"
  },
  "saleBuyerQuality": {
-  "window": {
-   "fromBlock": 130769296,
-   "toBlock": 131153193,
-   "blocks": 383898,
-   "fromTimestamp": "2026-10-31T01:30:00Z",
-   "toTimestamp": "2026-11-02T01:30:00Z",
-   "windowMinutes": 2880.0
-  },
   "all": {
    "fills": 1350,
    "uniqueBuyerCount": 265,
@@ -144,7 +170,7 @@
     ],
     "clusterFillsShare": 0.8407,
     "suspiciousClusterFillsShare": 0.1459,
-    "note": "同价重复在同集合地板价场景很常见，需看 suspicious（≥5 笔且 ≤2 个买家）"
+    "note": "同价重复在地板价场景常见；判别力在 suspicious（≥5 笔且 ≤2 个买家）"
    }
   },
   "native": {
@@ -259,7 +285,7 @@
     ],
     "clusterFillsShare": 0.8414,
     "suspiciousClusterFillsShare": 0.1231,
-    "note": "同价重复在同集合地板价场景很常见，需看 suspicious（≥5 笔且 ≤2 个买家）"
+    "note": "同价重复在地板价场景常见；判别力在 suspicious（≥5 笔且 ≤2 个买家）"
    }
   },
   "erc20": {
@@ -374,9 +400,734 @@
     ],
     "clusterFillsShare": 0.8313,
     "suspiciousClusterFillsShare": 0.494,
-    "note": "同价重复在同集合地板价场景很常见，需看 suspicious（≥5 笔且 ≤2 个买家）"
+    "note": "同价重复在地板价场景常见；判别力在 suspicious（≥5 笔且 ≤2 个买家）"
    }
-  }
+  },
+  "byCollection": [
+   {
+    "collection": "0x3048e07c057ef694d4e431154dafad473d1aa18b",
+    "fills": 489,
+    "uniqueBuyers": 66,
+    "uniqueSellers": 191,
+    "buyerSellerOverlap": 0.3636,
+    "repeatPairShare": 0.4785,
+    "top1BuyerShare": 0.2127,
+    "top10BuyerShare": 0.6687,
+    "suspiciousClusterShare": 0.0634,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xb777c52296f0d7d3c5cab7ae0c1aaac6b014b256",
+    "fills": 177,
+    "uniqueBuyers": 31,
+    "uniqueSellers": 158,
+    "buyerSellerOverlap": 0.3226,
+    "repeatPairShare": 0.0904,
+    "top1BuyerShare": 0.2712,
+    "top10BuyerShare": 0.7458,
+    "suspiciousClusterShare": 0.0282,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x68869d4edc15ec2fba0eacfe1486caf9d0c37572",
+    "fills": 80,
+    "uniqueBuyers": 19,
+    "uniqueSellers": 21,
+    "buyerSellerOverlap": 0.1579,
+    "repeatPairShare": 0.675,
+    "top1BuyerShare": 0.3125,
+    "top10BuyerShare": 0.8875,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x053259a3d30e63d9447e3d90813c6a494bcb398a",
+    "fills": 58,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 24,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.8103,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.5517,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x5eb9936f910b1cfaa9994fbc7ae98a279a3d0f89",
+    "fills": 50,
+    "uniqueBuyers": 12,
+    "uniqueSellers": 33,
+    "buyerSellerOverlap": 0.0833,
+    "repeatPairShare": 0.24,
+    "top1BuyerShare": 0.68,
+    "top10BuyerShare": 0.96,
+    "suspiciousClusterShare": 0.38,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xbc2d8b6f4c4e2803c5e842e6e8250b79ee442b78",
+    "fills": 45,
+    "uniqueBuyers": 16,
+    "uniqueSellers": 11,
+    "buyerSellerOverlap": 0.1875,
+    "repeatPairShare": 0.7111,
+    "top1BuyerShare": 0.2444,
+    "top10BuyerShare": 0.8667,
+    "suspiciousClusterShare": 0.2444,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xc4059d2f9f6f86695896e68f3e73e1e6cc3791c8",
+    "fills": 42,
+    "uniqueBuyers": 11,
+    "uniqueSellers": 36,
+    "buyerSellerOverlap": 0.0909,
+    "repeatPairShare": 0.0952,
+    "top1BuyerShare": 0.4048,
+    "top10BuyerShare": 0.9762,
+    "suspiciousClusterShare": 0.4286,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xb3bc98fb678a99fa890f6242cb332d08fef3104b",
+    "fills": 37,
+    "uniqueBuyers": 24,
+    "uniqueSellers": 28,
+    "buyerSellerOverlap": 0.1667,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.0811,
+    "top10BuyerShare": 0.6216,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xafc6bca0e191e396306343213b04ff9a8d717263",
+    "fills": 33,
+    "uniqueBuyers": 13,
+    "uniqueSellers": 29,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.1818,
+    "top1BuyerShare": 0.2424,
+    "top10BuyerShare": 0.9091,
+    "suspiciousClusterShare": 0.1818,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x2ed9e0a6992ba22b48c2fc2def6bb2365301a0d0",
+    "fills": 31,
+    "uniqueBuyers": 9,
+    "uniqueSellers": 14,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.6774,
+    "top1BuyerShare": 0.2903,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.5161,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x4addbd796edf3d4d186fb5aa314caff3f98984a6",
+    "fills": 26,
+    "uniqueBuyers": 2,
+    "uniqueSellers": 26,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.6923,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xdaf379e1f0a51cb9faaaeff243f26b33ca8bdded",
+    "fills": 25,
+    "uniqueBuyers": 2,
+    "uniqueSellers": 19,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.48,
+    "top1BuyerShare": 0.8,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.48,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xadc466855ebe8d1402c5f7e6706fccc3aedb44a0",
+    "fills": 21,
+    "uniqueBuyers": 7,
+    "uniqueSellers": 10,
+    "buyerSellerOverlap": 0.2857,
+    "repeatPairShare": 0.5238,
+    "top1BuyerShare": 0.4286,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.2381,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x74164ed868bfad68eaaffa36f828019456d520da",
+    "fills": 20,
+    "uniqueBuyers": 12,
+    "uniqueSellers": 19,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.3,
+    "top10BuyerShare": 0.9,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x4c5f33653f447229e85e52a238da826f1b3299fa",
+    "fills": 20,
+    "uniqueBuyers": 5,
+    "uniqueSellers": 20,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.3,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.3,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xe6f772346d9fc44942d6cbc92682d497d5b86665",
+    "fills": 16,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 6,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.8125,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.5625,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x8d3c75729435981dee992160b31e832b002b83b3",
+    "fills": 14,
+    "uniqueBuyers": 2,
+    "uniqueSellers": 6,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.6429,
+    "top1BuyerShare": 0.9286,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.7857,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x48b5e5573e76caaa41a893496de6c857720e6b40",
+    "fills": 13,
+    "uniqueBuyers": 3,
+    "uniqueSellers": 13,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.7692,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xab21d6291f4635917945b0cf3b50c1c2dc3266ab",
+    "fills": 11,
+    "uniqueBuyers": 3,
+    "uniqueSellers": 2,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.7273,
+    "top1BuyerShare": 0.8182,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.8182,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xf9e4f7810dbb6dd4a85ff521ca86a65a8250aa6a",
+    "fills": 11,
+    "uniqueBuyers": 5,
+    "uniqueSellers": 11,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.4545,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x039ad3cd794b1af0323ebeacf7404252336ba81f",
+    "fills": 10,
+    "uniqueBuyers": 7,
+    "uniqueSellers": 9,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.2,
+    "top1BuyerShare": 0.3,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x2106674431f6672d71777356bd7ab2999562d5b1",
+    "fills": 10,
+    "uniqueBuyers": 4,
+    "uniqueSellers": 8,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.4,
+    "top1BuyerShare": 0.4,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0xea3ef06b3b6b1e8720cea6c17647bba6743db160",
+    "fills": 10,
+    "uniqueBuyers": 4,
+    "uniqueSellers": 9,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.5,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x00fbc656caa753a5280835bf9e849c4c0aff9bf4",
+    "fills": 10,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 3,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.9,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.7,
+    "selfTradeCount": 0,
+    "riskClass": "low-independence-risk"
+   },
+   {
+    "collection": "0x828e7073ef57ed778e4acf82cc45bc43ef760b54",
+    "fills": 9,
+    "uniqueBuyers": 4,
+    "uniqueSellers": 6,
+    "buyerSellerOverlap": 0.25,
+    "repeatPairShare": 0.4444,
+    "top1BuyerShare": 0.4444,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xfc60cdd577759bd2af7f3351917e80672a91d540",
+    "fills": 9,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 9,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x4515787b43d930ce6af3b446fcb19c77513da281",
+    "fills": 8,
+    "uniqueBuyers": 5,
+    "uniqueSellers": 8,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.25,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xdd8bdfc91cbd572935b09863a742d8296fed0acf",
+    "fills": 8,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 6,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.5,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xa81b3dcd5c181c0e2e1603e49487ca4acc814974",
+    "fills": 6,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 5,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.3333,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xe397a4776f9e7cdc016c332b15756325e4aac84b",
+    "fills": 4,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 3,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.5,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xea404392be487b90f45b8436a52623bc7dbd8515",
+    "fills": 4,
+    "uniqueBuyers": 3,
+    "uniqueSellers": 4,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.5,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x5e6ec40e540cf9231fede1e27144fee252cbe205",
+    "fills": 4,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 3,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.5,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x34ec38a5edab4477b80a137169ee46ea56613e8c",
+    "fills": 4,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 3,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.5,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x096243e665083c7628923d7db71805b15c4a6054",
+    "fills": 3,
+    "uniqueBuyers": 2,
+    "uniqueSellers": 3,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.6667,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xa522c9257bb00b832f49f550e25e790ace0be585",
+    "fills": 3,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 1.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x2cff830264343f29d4924160096f1271a8a14ace",
+    "fills": 3,
+    "uniqueBuyers": 2,
+    "uniqueSellers": 2,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.6667,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xcbf6c4c0d46bd858fd384a484e343cb8cd0c50e5",
+    "fills": 3,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 2,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.6667,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xa75526d63bd5e3b3e8a65a5f2efef45072904d04",
+    "fills": 3,
+    "uniqueBuyers": 2,
+    "uniqueSellers": 3,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.6667,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x2bbad2a3421a0bbd62a319a9db70122047839483",
+    "fills": 2,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 2,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xab0baadfa7c7bc12bb5e19b1be253c434b04fd99",
+    "fills": 2,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 2,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x7638bf791c601152a0e21899b1192cf2f7fe2348",
+    "fills": 2,
+    "uniqueBuyers": 2,
+    "uniqueSellers": 2,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 0.5,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xfbbf371c9b0b994eebfcc977cef603f7f31c070d",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x39c084227b8f0caf0f2231707b608b6b7fa424bd",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x944e4acb296133e14a451baeabca5faf42e271e3",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xdef69304793ed90a3b788182c0a7201e2f0aab93",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x783a3fcdb4ef41d37ccd017b2726c739ad123deb",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0xa9ecbd052941c9e310e68525aa62671729b84446",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x8ee8754f9715f227f3d282366045b0b467273f10",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x4e8c7a14d47d68c0631bc02c8c5817aa434957dd",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x213a879d11a85b54483cea2cdec5d9026958add3",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x3026c7d5d41d65ae13e6ae6d0b39dc7afae941ab",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x02a3ac26012cc7017f5cf4e4d481ee243f9cceb4",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x5101e55fb32b1e55ccfff8307cc3f54baf28ed42",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x1cf9e60218493149ace7dc953497c07175aa625e",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   },
+   {
+    "collection": "0x1adf4454912f4ae77507f5c17f6aa987c1282ae2",
+    "fills": 1,
+    "uniqueBuyers": 1,
+    "uniqueSellers": 1,
+    "buyerSellerOverlap": 0.0,
+    "repeatPairShare": 0.0,
+    "top1BuyerShare": 1.0,
+    "top10BuyerShare": 1.0,
+    "suspiciousClusterShare": 0.0,
+    "selfTradeCount": 0,
+    "riskClass": "insufficient-sample"
+   }
+  ],
+  "riskThresholds": {
+   "repeatPairShare": 0.3,
+   "buyerSellerOverlap": 0.25,
+   "top10BuyerShare": 0.5,
+   "suspiciousClusterShare": 0.2,
+   "minFillsForClass": 10
+  },
+  "riskClassCaveat": "riskClass 是筛选标签，不是诈骗证明；样本<10 笔不作分类"
  },
  "mintSenderQuality": {
   "window": {
@@ -385,6 +1136,7 @@
    "blocks": 48001,
    "approxMinutes": 360.0
   },
+  "windowLengthHours": 6,
   "sampleSize": 139,
   "directMintShare": 1.0,
   "relayLikeShare": 0.0,
@@ -392,30 +1144,14 @@
   "failedShare": 0.0,
   "uniqueSenderCount": 113,
   "top1SenderShare": 0.0288,
-  "layers": {
-   "rawEventsMarketWide": 323035,
-   "rawEvents": 149,
-   "uniqueTx": 139,
-   "receiptSuccess": 139,
-   "confirmedTransfer": 139,
-   "cohortIncluded": 139,
-   "excluded": {
-    "notReplayed_dueToLimit": 0,
-    "rpcMissing": 0,
-    "receiptFailed": 0,
-    "noTransferToSender": 0
-   }
-  },
-  "note": "mint 交易指标，窗口与成交分析不同，禁止与 saleBuyerQuality 合并为总分"
+  "note": "direct 100% 只说明无明显 relay 集中，不等于 113 个发送者是 113 个真人"
  },
  "historyProxy": {
   "historySource": "not_requested",
   "historyWindowBlocks": 100000,
+  "historyAvailability": "not_requested",
+  "freshBuyerMetric": "not_computed",
   "buyerWithHistoryCount": null,
   "freshBuyerCount": null
- },
- "rpc": {
-  "ok": 0,
-  "err": 0
  }
 }

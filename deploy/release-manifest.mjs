@@ -135,10 +135,25 @@ function verify() {
 }
 
 const cmd = process.argv[2];
-if (cmd === 'keygen') keygen();
+
+if (cmd === 'hash') {
+  const files = collect();
+  const body = Buffer.from(JSON.stringify({
+    schema: 'agentid-release/1', generated: new Date().toISOString(),
+    gitHead: gitHead(), fileCount: Object.keys(files).length, files,
+  }, null, 1));
+  fs.writeFileSync(MAN, body);
+  console.log('已生成未签名清单', path.relative(ROOT, MAN), '→', Object.keys(files).length, '个文件');
+} else if (cmd === 'signfile') {
+  const inp = process.argv[3], outp = process.argv[4];
+  const priv = crypto.createPrivateKey(fs.readFileSync(PRIV));
+  const sig = crypto.sign(null, fs.readFileSync(inp), priv);
+  fs.writeFileSync(outp, sig.toString('base64') + '\n');
+  console.log('已签名', inp, '→', outp, sig.toString('base64').slice(0, 24) + '…');
+} else if (cmd === 'keygen') keygen();
 else if (cmd === 'sign') process.exit(sign());
 else if (cmd === 'verify') process.exit(verify());
 else {
-  console.log('用法: node deploy/release-manifest.mjs keygen|sign|verify');
+  console.log('用法: node deploy/release-manifest.mjs keygen|hash|signfile|sign|verify');
   process.exit(2);
 }
