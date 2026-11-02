@@ -1,5 +1,3 @@
 #!/bin/sh
-# 发布完整性闸门：签名或文件不符即 exit 1，调用方据此拒绝启动/归档
-set -eu
-cd "$(dirname "$0")/.."
-exec node deploy/release-manifest.mjs verify
+# 固定路径闸门：只读本地文件、不联网、不访问私钥、不自动修复
+exec /usr/bin/node /usr/local/libexec/agentid-shadow/verify-runtime.mjs

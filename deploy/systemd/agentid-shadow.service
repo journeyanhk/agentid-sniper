@@ -10,6 +10,8 @@ After=network-online.target
 Type=simple
 User=laoda
 WorkingDirectory=/home/laoda/agentid-sniper/shadow
+# 发布闸门：签名或 hash 失败 → exit 非 0 → systemd 拒绝启动（fail closed）
+ExecStartPre=/usr/local/libexec/agentid-shadow/verify-release.sh
 ExecStart=/usr/bin/node /home/laoda/agentid-sniper/shadow/probe.mjs
 Restart=always
 RestartSec=10
