@@ -1,0 +1,27 @@
+{
+  "candidates": [],
+  "caveats": [
+    "same_deployer 需要 trace/创建交易，免费 RPC 不可得 → 不做，不臆造",
+    "symbol_only 是弱证据，不能当同一 collection；只列出供人工确认",
+    "netKnownCostEV 只有在 --ev-table 提供时才有值，否则为 null"
+  ],
+  "collections": 55,
+  "collectionsWithSymbol": 55,
+  "generatedAt": "2026-11-03T09:42:27Z",
+  "inputs": {
+    "pools": "out/w0-init/pools.json",
+    "rows": "w0-rows.jsonl"
+  },
+  "poolCount": 371,
+  "strictCriterion": {
+    "definition": "tier==exact_address 且 V4 先于 Element 且 fills>=20 且 buyers>=20",
+    "ids": [],
+    "matched": 0
+  },
+  "tierCounts": {
+    "exact_address": 0,
+    "same_deployer": 0,
+    "symbol_only": 0,
+    "unlinked": 371
+  }
+}

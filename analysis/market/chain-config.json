@@ -1,0 +1,30 @@
+{
+  "version": "1",
+  "chains": {
+    "bsc": {
+      "chain": "bsc",
+      "chainId": 56,
+      "rpc": [
+        "https://bsc-rpc.publicnode.com",
+        "https://bsc-dataseed.bnbchain.org",
+        "https://bsc-dataseed1.defibit.io"
+      ],
+      "poolManager": "0xa0ffb9c1ce1fe56963b0321b32e7a0302114058b",
+      "topics": {
+        "initialize": "0x426cc62fe6a33a40ba2788c2c87a9c34ee4582b95bc9fa5a7bb7ae70b750b99c",
+        "swap": "0x04206ad2b7c0f463bff3dd4f33c5735b0f2957a351e4f79763a4fa9e775dd237"
+      },
+      "initLayout": {"hookWord": 0, "sqrtFromEnd": 2, "tickFromEnd": 1},
+      "swapLayout": {"amount0": 0, "amount1": 1, "sqrtPriceX96": 2, "liquidity": 3, "tick": 4, "feeWord": 5, "protocolFeeWord": 6},
+      "quoteAssets": {
+        "0x0000000000000000000000000000000000000000": {"symbol": "BNB", "decimals": 18, "usd": "bnb"},
+        "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c": {"symbol": "WBNB", "decimals": 18, "usd": "bnb"},
+        "0x55d398326f99059ff775485246999027b3197955": {"symbol": "USDT", "decimals": 18, "usd": 1},
+        "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d": {"symbol": "USDC", "decimals": 18, "usd": 1}
+      },
+      "effectiveFromBlock": 130000000,
+      "decoderVersion": "v4-decoder-v1",
+      "layoutEvidence": "P0 probe: init 101/101 tick-consistent & currency0<currency1; swap 27,976/27,976 tick-consistent, 27,973/27,976 opposite-sign amounts"
+    }
+  }
+}
