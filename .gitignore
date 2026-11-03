@@ -11,3 +11,12 @@ analysis/*.jsonl
 analysis/*.json
 analysis/*.jsonl
 analysis/*.json
+
+# core dump：不提交，也不允许误收（见 analysis/market/CORE-CLEANUP.md）
+core
+core.*
+*.core
+shadow/core
+shadow/core.*
+data/core
+data/core.*
