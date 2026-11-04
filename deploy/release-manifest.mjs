@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 /**
- * release-manifest.mjs v2 —— 双清单（runtime / archive）+ Ed25519
+ * release-manifest.mjs v3 —— 双清单（runtime / archive）+ Ed25519
  *
  * runtime 只覆盖「启动与运行必需」：probe、systemd unit。
  *   任何 analysis 文档变化都不会影响它 → 不会阻断 shadow 启动。
  * archive 覆盖分析脚本与文档，只用于归档复现，不参与启动闸门。
+ *
+ * v3（2026-11-04）：archive 不再用「目录 + 单一扩展名」的模糊规则，改为
+ * 显式 allowlist（root + 扩展名，只收该目录第一层）+ 显式 exclude
+ * （*.jsonl / *.log / *.tmp / *.cache / core* / artifacts/ / raw/ / cache/）。
+ * 目的是把 analysis/market（P0 V4 研究代码与报告）纳入归档签名，同时
+ * 不把原始 RPC 输出、动态快照、日志塞进 manifest。规则本身写进 manifest
+ * 并参与 verify 比对：改了规则却没重签，验证会失败。
  *
  * 私钥只在 memoh 工作区（AGENTID_PRIVKEY），部署机只 hash + signfile + verify。
  * 用法：
@@ -30,13 +37,18 @@ const RUNTIME = [
   'deploy/systemd/agentid-shadow.service',
 ];
 
-// 归档复现用：脚本与文档。生成物（*.json/*.jsonl）刻意排除——
-// 它们每次重跑都会变，纳入签名只会制造无意义漂移，且不参与启动。
-const ARCHIVE_GLOBS = [
-  ['analysis', '.py'],
-  ['analysis', '.md'],
-  ['deploy', '.sh'],
-  ['deploy', '.md'],
+// 归档复现用：脚本、配置与文档。每条规则只收该目录「第一层」的指定扩展名，
+// 子目录（artifacts/ raw/ cache/ …）不在 allowlist 内，天然不进入清单。
+const ARCHIVE_RULES = [
+  { root: 'analysis', exts: ['.py', '.md'] },
+  { root: 'deploy', exts: ['.sh', '.md', '.mjs'] },
+  { root: 'analysis/market', exts: ['.py', '.md', '.mjs', '.sh', '.yaml', '.toml', '.json'] },
+];
+
+// 防御性排除：即使将来 allowlist 放宽到子目录，这些也不会进签名。
+const ARCHIVE_EXCLUDE = [
+  '*.jsonl', '*.log', '*.tmp', '*.cache', 'core*',
+  'artifacts/', 'raw/', 'cache/',
 ];
 
 function sha256(file) {
@@ -61,37 +73,77 @@ function gitHead() {
   } catch { return 'unknown'; }
 }
 
+function fnmatch(name, pat) {
+  const re = new RegExp('^' + pat.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
+  return re.test(name);
+}
+
+function excluded(rel) {
+  const base = rel.split('/').pop();
+  for (const pat of ARCHIVE_EXCLUDE) {
+    if (pat.endsWith('/')) {
+      if (rel.includes('/' + pat.slice(0, -1) + '/')) return true;
+    } else if (fnmatch(base, pat) || fnmatch(rel, pat)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function collect(scope) {
-  const out = {};
+  const files = {};
+  const counts = { walked: 0, hashed: 0, excluded: 0, skippedByRule: 0 };
   if (scope === 'runtime') {
     for (const rel of RUNTIME) {
       const abs = path.join(ROOT, rel);
       if (!fs.existsSync(abs)) throw new Error('runtime 必需文件缺失: ' + rel);
-      out[rel] = sha256(abs);
+      files[rel] = sha256(abs);
+      counts.walked += 1;
+      counts.hashed += 1;
     }
-    return out;
+    return { files, counts };
   }
-  for (const [dir, ext] of ARCHIVE_GLOBS) {
-    const abs = path.join(ROOT, dir);
+  for (const rule of ARCHIVE_RULES) {
+    const abs = path.join(ROOT, rule.root);
     if (!fs.existsSync(abs)) continue;
     for (const f of fs.readdirSync(abs).sort()) {
-      if (!f.endsWith(ext)) continue;
-      out[path.posix.join(dir, f)] = sha256(path.join(abs, f));
+      const rel = path.posix.join(rule.root, f);
+      const full = path.join(abs, f);
+      let st;
+      try { st = fs.lstatSync(full); } catch { continue; }
+      if (!st.isFile()) continue;              // 子目录不在 allowlist
+      counts.walked += 1;
+      if (!rule.exts.some((e) => f.endsWith(e))) { counts.skippedByRule += 1; continue; }
+      if (excluded(rel)) { counts.excluded += 1; continue; }
+      files[rel] = sha256(full);
+      counts.hashed += 1;
     }
   }
-  return out;
+  return { files, counts };
 }
 
 function build(scope) {
-  const files = collect(scope);
-  return Buffer.from(JSON.stringify({
+  const { files, counts } = collect(scope);
+  const doc = {
     schema: 'agentid-release/2',
     scope,
     generated: new Date().toISOString(),
     gitHead: gitHead(),
     fileCount: Object.keys(files).length,
     files,
-  }, null, 1));
+  };
+  if (scope === 'archive') {
+    doc.rules = { include: ARCHIVE_RULES, exclude: ARCHIVE_EXCLUDE, depth: 'first-level-only' };
+    doc.counts = counts;
+  }
+  return Buffer.from(JSON.stringify(doc, null, 1));
+}
+
+function rulesMatch(listed) {
+  if (!listed) return true; // 旧清单纯 archive（无 rules）：交由文件比对决定，不强制
+  return JSON.stringify(listed) === JSON.stringify({
+    include: ARCHIVE_RULES, exclude: ARCHIVE_EXCLUDE, depth: 'first-level-only',
+  });
 }
 
 function verify(scope) {
@@ -108,8 +160,13 @@ function verify(scope) {
     console.error(`❌ [${scope}] 签名无效`);
     return 1;
   }
-  const listed = JSON.parse(body.toString()).files || {};
-  const now = collect(scope);
+  const doc = JSON.parse(body.toString());
+  const listed = doc.files || {};
+  if (scope === 'archive' && !rulesMatch(doc.rules)) {
+    console.error(`❌ [archive] 清单里的收集规则与当前脚本不一致（规则变了但没重签）`);
+    return 1;
+  }
+  const { files: now, counts } = collect(scope);
   const bad = [];
   for (const [f, h] of Object.entries(listed)) {
     if (!(f in now)) bad.push('缺失 ' + f);
@@ -121,7 +178,8 @@ function verify(scope) {
     for (const b of bad) console.error('   -', b);
     return 1;
   }
-  console.log(`✅ [${scope}] 签名与 ${Object.keys(listed).length} 个文件一致`);
+  console.log(`✅ [${scope}] 签名与 ${Object.keys(listed).length} 个文件一致` +
+    (scope === 'archive' ? `（walked ${counts.walked} / hashed ${counts.hashed} / excluded ${counts.excluded} / skipped ${counts.skippedByRule}）` : ''));
   return 0;
 }
 
@@ -135,7 +193,9 @@ if (cmd === 'hash') {
   const body = build(scope);
   const dest = path.join(ROOT, OUT[scope].man);
   fs.writeFileSync(dest, body);
-  console.log(`已生成未签名清单 ${OUT[scope].man} → ${Object.keys(JSON.parse(body).files).length} 个文件`);
+  const doc = JSON.parse(body);
+  console.log(`已生成未签名清单 ${OUT[scope].man} → ${Object.keys(doc.files).length} 个文件` +
+    (scope === 'archive' ? `（walked ${doc.counts.walked} / hashed ${doc.counts.hashed} / excluded ${doc.counts.excluded} / skipped ${doc.counts.skippedByRule}）` : ''));
 } else if (cmd === 'signfile') {
   const inp = argv[1], outp = argv[2];
   if (!PRIV) throw new Error('需要 AGENTID_PRIVKEY');

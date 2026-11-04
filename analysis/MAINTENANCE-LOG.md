@@ -37,3 +37,22 @@
 ## 2026-11-04 — W1 未跟踪文件移出工作树
 
 `analysis/w1-bridge.py`、`analysis/w1-state-update.py`、`analysis/w1-verdict.py`（从未提交的一次性辅助脚本）移到仓库外隔离目录 `~/quarantine/agentid-w1-unused/`，附 `MANIFEST.md`（sha256 / 行数 / 用途 / 恢复方式）。未加 `.gitignore`，避免把未完成代码藏起来。
+## 2026-11-04 — archive 收集范围补齐 analysis/market
+
+`deploy/release-manifest.mjs` v3 把 archive 从「目录 + 单一扩展名」改为**显式 allowlist + 显式 exclude**：
+
+- 纳入：`analysis/*.py|*.md`、`deploy/*.sh|*.md|*.mjs`、`analysis/market/*.py|*.md|*.mjs|*.sh|*.yaml|*.toml|*.json`（只收该目录第一层）；
+- 排除：`*.jsonl`、`*.log`、`*.tmp`、`*.cache`、`core*`、`artifacts/`、`raw/`、`cache/`；
+- 清单内记录 `rules` 与 `counts`（walked / hashed / excluded / skipped），`verify` 会比对规则：改了规则不重签 → 直接失败；
+- 结果：archive 由 32 个文件扩到 **43 个**（新增 P0 的 5 个 py、2 个 md、1 个 chain-config.json，以及 deploy 的 2 个 mjs）。
+
+边界不变：archive 变化**只影响归档校验**，不改 runtime 清单（仍 2 文件）、不触发 systemd 重启、不改 probe build、不碰 W0 结论。
+
+配套测试 `deploy/test-archive-scope.sh`（6/6 通过）：新增 `analysis/market/*.py` → 未登记；新增 `*.jsonl`／`artifacts/*.json` → 排除；修改／删除已签名文件 → 被改／缺失。
+
+## 重启计数口径
+
+- `manualMaintenanceRestarts`：`analysis/MAINTENANCE-LOG.md` 里 `post-archive maintenance restart` 条目数（当前 1）；
+- `automaticRestarts`：systemd `NRestarts`（只统计 systemd 自动拉起，当前 0）。
+
+`deploy/check-consistency.sh` 同时打印两者，不把人工维护重启混进自动重启统计。

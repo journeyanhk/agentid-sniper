@@ -3,13 +3,15 @@
 # 用法: deploy/check-consistency.sh [repo_path] [service_name]
 #
 # 2026-11-04：加入 systemd 侧核对（User / WorkingDirectory / ExecStart / Restart /
-# LimitCORE / drop-in 路径与 hash）。原因是 LimitCORE=0 走的是 drop-in
-# （/etc/systemd/system/<svc>.service.d/limitcore.conf），不在签名清单里，
-# 只靠 release-gate 看不出来它是否仍在位或被改写。
+# LimitCORE / drop-in 路径与 hash），以及关键路径的 owner / mode / 符号链接核对。
+# 原因：LimitCORE=0 走的是 drop-in（不在签名清单里），release-gate 看不到它是否
+# 仍在位；而 probe / 验证器 / drop-in 一旦变成符号链接或被运行用户改写，
+# 闸门仍然会显示绿色。
 set -u
 REPO=${1:-$HOME/agentid-sniper}
 SVC=${2:-agentid-shadow}
 EXPECT_USER=${EXPECT_USER:-laoda}
+VERIFIER_DIR=/usr/local/libexec/agentid-shadow
 cd "$REPO" || exit 1
 
 LOCAL=$(git rev-parse --short HEAD)
@@ -27,10 +29,13 @@ SVC_WD=$(systemctl show -p WorkingDirectory --value "$SVC" 2>/dev/null)
 SVC_EXEC=$(systemctl show -p ExecStart --value "$SVC" 2>/dev/null | tr -s ' ' | sed 's/.*argv\[\]=\([^;]*\);.*/\1/' | sed 's/^ *//;s/ *$//')
 SVC_RESTART=$(systemctl show -p Restart --value "$SVC" 2>/dev/null)
 SVC_LIMITCORE=$(systemctl show -p LimitCORE --value "$SVC" 2>/dev/null)
+SVC_NRESTARTS=$(systemctl show -p NRestarts --value "$SVC" 2>/dev/null)
 DROPINS=$(systemctl show -p DropInPaths --value "$SVC" 2>/dev/null)
 DROPIN_CORE="/etc/systemd/system/${SVC}.service.d/limitcore.conf"
+UNIT_FILE="/etc/systemd/system/${SVC}.service"
 DROPIN_SHA=""
 [ -r "$DROPIN_CORE" ] && DROPIN_SHA=$(sha256sum "$DROPIN_CORE" | cut -c1-16)
+MANUAL_RESTARTS=$(grep -c 'post-archive maintenance restart' analysis/MAINTENANCE-LOG.md 2>/dev/null || true)
 
 echo "GitHub main       : ${REMOTE:-<unreachable>}"
 echo "repo HEAD         : $LOCAL"
@@ -48,12 +53,42 @@ echo "systemd Restart   : ${SVC_RESTART:-<none>}"
 echo "systemd LimitCORE : ${SVC_LIMITCORE:-<none>}"
 echo "drop-in path      : ${DROPINS:-<none>}"
 echo "drop-in sha256    : ${DROPIN_SHA:-<missing>} (${DROPIN_CORE})"
+echo "restarts          : manual=${MANUAL_RESTARTS:-0} automatic=${SVC_NRESTARTS:-?} (NRestarts 只统计自动拉起)"
 
 rc=0
+
+# 关键路径：必须存在、绝对路径、非符号链接、owner/mode 符合预期、group/other 不可写
+check_path() { # check_path <label> <path> <owner> <mode|-> <allow-symlink:0|1>
+  local label=$1 p=$2 owner=$3 mode=$4 allow_link=${5:-0}
+  if [ ! -e "$p" ]; then echo "FAIL: $label 不存在（$p）"; rc=1; return; fi
+  if [ -L "$p" ]; then
+    if [ "$allow_link" = "0" ]; then echo "FAIL: $label 是符号链接（$p → $(readlink "$p")）"; rc=1; fi
+  fi
+  local got go gmode oct
+  got=$(stat -c '%U:%G %a' "$p" 2>/dev/null) || { echo "FAIL: $label 无法 stat（$p）"; rc=1; return; }
+  go=${got% *}; gmode=${got##* }
+  echo "$label : $got  ($p)"
+  [ "$go" = "$owner" ] || { echo "FAIL: $label owner=$go，预期 $owner"; rc=1; }
+  if [ "$mode" != "-" ] && [ "$gmode" != "$mode" ]; then
+    echo "FAIL: $label mode=$gmode，预期 $mode"; rc=1
+  fi
+  oct=$(( 8#$gmode )) 2>/dev/null || oct=0
+  if (( (oct & 8#022) != 0 )); then echo "FAIL: $label 允许 group/other 写入（mode $gmode）"; rc=1; fi
+}
+
+check_path "probe file" "$REPO/shadow/probe.mjs" "$EXPECT_USER:$EXPECT_USER" "644" 0
+check_path "verifier sh" "$VERIFIER_DIR/verify-release.sh" "root:root" "755" 0
+check_path "verifier mjs" "$VERIFIER_DIR/verify-runtime.mjs" "root:root" "755" 0
+check_path "unit file" "$UNIT_FILE" "root:root" "644" 0
+check_path "drop-in file" "$DROPIN_CORE" "root:root" "644" 0
+check_path "runtime manifest" "/etc/agentid-shadow/manifest-runtime.json" "root:root" "644" 0
+check_path "runtime sig" "/etc/agentid-shadow/manifest-runtime.sig" "root:root" "644" 0
+
 [ -n "${REMOTE:-}" ] && [ "$LOCAL" != "$REMOTE" ] && { echo "FAIL: 运行目录 HEAD 与 GitHub main 不一致"; rc=1; }
 if [ -n "${RUNFILE:-}" ]; then
   RSH=$(sha256sum "$RUNFILE" 2>/dev/null | cut -c1-16)
   [ "$RSH" = "$SHA" ] || { echo "FAIL: 运行中的文件与仓库文件不一致（$RSH vs $SHA）"; rc=1; }
+  [ "$(readlink -f "$RUNFILE")" = "$(readlink -f "$REPO/shadow/probe.mjs")" ] || { echo "FAIL: 运行中的 probe 不是仓库里的那个文件"; rc=1; }
 else
   echo "FAIL: 服务未运行"; rc=1
 fi
