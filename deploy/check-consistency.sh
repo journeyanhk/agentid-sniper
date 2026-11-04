@@ -76,6 +76,26 @@ check_path() { # check_path <label> <path> <owner> <mode|-> <allow-symlink:0|1>
   if (( (oct & 8#022) != 0 )); then echo "FAIL: $label 允许 group/other 写入（mode $gmode）"; rc=1; fi
 }
 
+# 父目录：文件本身不可写还不够——父目录若对运行用户可写，可以删掉重建。
+# 这里逐级核对 owner:group 与 group/other 写位（等价于 namei -l 的关键部分）。
+check_dir() { # check_dir <path>
+  local p=$1
+  if [ ! -d "$p" ]; then echo "FAIL: 目录不存在（$p）"; rc=1; return; fi
+  local got go gmode oct
+  got=$(stat -c '%U:%G %a' "$p" 2>/dev/null) || { echo "FAIL: 无法 stat（$p）"; rc=1; return; }
+  go=${got% *}; gmode=${got##* }
+  echo "parent dir : $got  ($p)"
+  [ "$go" = "root:root" ] || { echo "FAIL: $p owner=$go，预期 root:root"; rc=1; }
+  oct=$(( 8#$gmode )) 2>/dev/null || oct=0
+  if (( (oct & 8#022) != 0 )); then echo "FAIL: $p 允许 group/other 写入（mode $gmode）"; rc=1; fi
+}
+
+for d in /usr/local/libexec/agentid-shadow /usr/local/libexec /usr/local \
+         /etc/agentid-shadow \
+         /etc/systemd/system/agentid-shadow.service.d /etc/systemd/system /etc/systemd; do
+  check_dir "$d"
+done
+
 check_path "probe file" "$REPO/shadow/probe.mjs" "$EXPECT_USER:$EXPECT_USER" "644" 0
 check_path "verifier sh" "$VERIFIER_DIR/verify-release.sh" "root:root" "755" 0
 check_path "verifier mjs" "$VERIFIER_DIR/verify-runtime.mjs" "root:root" "755" 0

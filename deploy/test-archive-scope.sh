@@ -9,6 +9,8 @@
 #   4 新增 analysis/market/artifacts/*.json  → 通过（子目录不在 allowlist）
 #   5 修改已签名文件 chain-config.json → 失败（被改）
 #   6 删除已签名文件（移走再放回）      → 失败（缺失）
+#   7 analysis/market/nested/test.py    → 通过，且输出明确「不纳入（first-level only）」
+#     （这一条是非阻断测试：证明 nested 源码是「被声明的范围排除」，不是漏收）
 #
 # 用法: deploy/test-archive-scope.sh [repo_path]
 set -u
@@ -20,10 +22,12 @@ FAIL=0
 TMP_NEW="analysis/market/_scope_test.py"
 TMP_JSONL="analysis/market/artifacts/_scope_test.jsonl"
 TMP_JSON="analysis/market/artifacts/_scope_test.json"
+TMP_NESTED="analysis/market/nested/_scope_test.py"
 SIGNED="analysis/market/chain-config.json"
 BACKUP=$(mktemp -d)
 cleanup() {
   rm -f "$TMP_NEW" "$TMP_JSONL" "$TMP_JSON"
+  rm -rf analysis/market/nested
   [ -f "$BACKUP/chain-config.json" ] && cp "$BACKUP/chain-config.json" "$SIGNED"
   git checkout -- "$SIGNED" 2>/dev/null
   rm -rf "$BACKUP"
@@ -67,6 +71,16 @@ git checkout -- "$SIGNED"
 mv "$SIGNED" "$BACKUP/moved.json"
 run 1 "删除已签名文件应被检出" "缺失 $SIGNED"
 mv "$BACKUP/moved.json" "$SIGNED"
+
+mkdir -p analysis/market/nested
+echo "# nested probe" > "$TMP_NESTED"
+out=$(node deploy/release-manifest.mjs verify --scope archive 2>&1); rc=$?
+if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q "不纳入（first-level only）" && printf '%s' "$out" | grep -q "$TMP_NESTED"; then
+  echo "PASS [nested 源码：不纳入但可见] rc=0"; PASS=$((PASS+1))
+else
+  echo "FAIL [nested 源码：不纳入但可见] rc=$rc"; echo "$out" | sed 's/^/     /'; FAIL=$((FAIL+1))
+fi
+rm -rf analysis/market/nested
 
 echo "== $PASS passed, $FAIL failed =="
 [ "$FAIL" = 0 ]

@@ -56,3 +56,11 @@
 - `automaticRestarts`：systemd `NRestarts`（只统计 systemd 自动拉起，当前 0）。
 
 `deploy/check-consistency.sh` 同时打印两者，不把人工维护重启混进自动重启统计。
+
+## 2026-11-04 — 收尾：first-level 说明、nested 可见性、父目录权限、数据 provenance
+
+- **first-level only 写进规则**：manifest 的 `rules.note` 明确 `analysis/market is intentionally first-level only`，并说明子目录源码不进入签名、但 `verify` 会以「不纳入（first-level only）」信息行列出，便于区分「按规则排除」与「漏收」。
+- **nested 非阻断测试**：`deploy/test-archive-scope.sh` 增加第 7 例——`analysis/market/nested/test.py` 存在时 verify 仍通过，但输出必须出现该路径与「不纳入（first-level only）」；现 7/7 通过。
+- **父目录权限**：`deploy/check-consistency.sh` 逐级核对 `/usr/local`、`/usr/local/libexec`、`/usr/local/libexec/agentid-shadow`、`/etc`、`/etc/systemd`、`/etc/systemd/system`、`/etc/systemd/system/agentid-shadow.service.d`、`/etc/agentid-shadow` 的 owner 与 group/other 写位——文件不可写但父目录可写时，仍可被删除重建。
+- **最小数据 provenance**：新增 `analysis/DATA-MANIFEST-W0.json`（9 个产物，记录 window / sha256 / size / mtime / decoderVersion / dataComplete / dataFresh / sourceCommit）。不重扫描、不进发布清单、不触发重启、不改变结论。
+  - 交叉核对发现：P0 的 `SHA256SUMS` 只登记 3 个真实文件并含一条合成行 `recordsHash`，且未登记 `links.json`；本清单重算全部 9 个文件哈希，不依赖该辅助文件（差异已记录在 `checks` 字段，未改动原证据文件）。

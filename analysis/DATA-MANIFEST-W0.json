@@ -1,0 +1,109 @@
+{
+ "schemaVersion": 1,
+ "scope": "W0+P0",
+ "generatedAt": "2026-11-04T07:26:43Z",
+ "generatedBy": "sha256 over listed files; no rescan, no network; does not enter release manifest",
+ "sourceCommit": "7bbdc79",
+ "window": {
+  "blockMinutes": 2880.0,
+  "fromBlock": 130769296,
+  "fromTimestamp": "2026-10-31T01:30:00Z",
+  "toBlock": 131153193,
+  "toTimestamp": "2026-11-02T01:30:00Z"
+ },
+ "decoderVersion": "v4-decoder-v1",
+ "dataComplete": true,
+ "dataFresh": {
+  "headBlock": 131410283,
+  "lagBlocks": 257090,
+  "lagMinutes": 1928.69,
+  "maxLagBlocks": 60,
+  "note": "滞后不等于数据缺口；缺口只看 chunks.skipped",
+  "ok": false
+ },
+ "runId": "v4-bsc-130769296-131153193",
+ "artifacts": [
+  {
+   "path": "analysis/market/artifacts/w0-init/envelope.json",
+   "role": "P0 run envelope：窗口、chunk hash、counts、decoderVersion",
+   "sha256": "b293132530f72c843008391231275e0e232b4da97e29281fee3d90b6b7417de9",
+   "size": 16604,
+   "mtimeUtc": "2026-11-03T09:47:05Z"
+  },
+  {
+   "path": "analysis/market/artifacts/w0-init/pools.json",
+   "role": "P0 Initialize 扫描输出（371 池 / 258 token）",
+   "sha256": "d3c870bd8c709368f3161f10d49d960d0e590dce08748763d0c68f2ee0be997b",
+   "size": 463567,
+   "mtimeUtc": "2026-11-03T09:47:05Z"
+  },
+  {
+   "path": "analysis/market/artifacts/w0-init/links.json",
+   "role": "P0 ERC-20 ↔ ERC-721 链接判定（exact/symbol/unlinked）",
+   "sha256": "67e5210cb2cdf6030aff73f63aa5b3870fb49584f3220d215685c415c1ac8165",
+   "size": 766,
+   "mtimeUtc": "2026-11-03T09:47:06Z"
+  },
+  {
+   "path": "analysis/market/artifacts/w0-init/records.jsonl",
+   "role": "P0 归一化池记录（逐条含 currency/hooks/price）",
+   "sha256": "f3ddf4d40253e4b75cb9f8087249ace6a8037db2fc0782f5bbba5e6875d3ed93",
+   "size": 242804,
+   "mtimeUtc": "2026-11-03T09:47:06Z"
+  },
+  {
+   "path": "analysis/market/artifacts/w0-init/SHA256SUMS",
+   "role": "P0 产物校验清单（对上述 4 个文件的 sha256）",
+   "sha256": "4fb0cb8d34187e780ef0360ea808286e759a801b36fc827c18d8719b178daf03",
+   "size": 315,
+   "mtimeUtc": "2026-11-03T09:47:06Z"
+  },
+  {
+   "path": "analysis/element-fills-w0-rows.jsonl",
+   "role": "W0 Element 成交明细（1350 笔，T_721_FILLED 口径）",
+   "sha256": "5a873d7ec75dc53f9241eb078cf86f486808854e10e3a020dc3b954ba6185d6a",
+   "size": 730581,
+   "mtimeUtc": "2026-11-02T08:35:31Z"
+  },
+  {
+   "path": "analysis/chunks-w0.jsonl",
+   "role": "W0 分片索引（768 分片，含每片 hash）",
+   "sha256": "8ff18d2e08428525d8020b98cf98fac891058ae60f69e3e673e815a336791e58",
+   "size": 82214,
+   "mtimeUtc": "2026-11-02T03:36:15Z"
+  },
+  {
+   "path": "analysis/cohort-latest.json",
+   "role": "W0 cohort 汇总（集合/买家/卖家/价格）",
+   "sha256": "c00079370efc33de4359095202398c6eabb46f4b160959395dcdc2c11ed6e176",
+   "size": 7022,
+   "mtimeUtc": "2026-11-04T01:07:13Z"
+  },
+  {
+   "path": "analysis/w0-verdict.json",
+   "role": "W0 每集合经济性判决（EV / 覆盖率 / evUnknown）",
+   "sha256": "e317e1d1fb21f76142946c9b4af3863c323f843e85b82e78bf5db0f40e832347",
+   "size": 9564,
+   "mtimeUtc": "2026-11-03T01:13:32Z"
+  }
+ ],
+ "checks": {
+  "sha256sumsEntries": 4,
+  "sha256sumsFileEntries": 3,
+  "sha256sumsMatched": 3,
+  "sha256sumsSyntheticEntries": [
+   "recordsHash"
+  ],
+  "sha256sumsUnlistedFiles": [
+   "links.json",
+   "SHA256SUMS"
+  ],
+  "note": "SHA256SUMS 是 P0 运行时写的辅助文件：含一条 recordsHash 合成行（不是文件），且未登记 links.json；本清单重算全部 9 个文件的 sha256，不依赖该文件。"
+ },
+ "boundaries": [
+  "只用于复现与审计，不进入 runtime/archive 发布清单",
+  "不触发 systemd 重启，不改 probe build",
+  "不改变 W0 判决与 P0 结论",
+  "不要求重新扫描；文件若被后续运行覆盖，以 sha256 判断是否仍是同一份证据"
+ ]
+}

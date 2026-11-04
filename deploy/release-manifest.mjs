@@ -90,6 +90,33 @@ function excluded(rel) {
   return false;
 }
 
+// 子目录里的源码：不进签名，但要让 verify 明确说出来，
+// 否则「first-level only」会被误读成「漏文件」。
+const SOURCE_EXTS = ['.py', '.mjs', '.sh', '.yaml', '.toml'];
+
+function outOfScopeSources() {
+  const found = [];
+  const walk = (rel, depth) => {
+    const abs = path.join(ROOT, rel);
+    let entries;
+    try { entries = fs.readdirSync(abs); } catch { return; }
+    for (const e of entries.sort()) {
+      const childRel = path.posix.join(rel, e);
+      let st;
+      try { st = fs.lstatSync(path.join(ROOT, childRel)); } catch { continue; }
+      if (st.isDirectory()) {
+        if (excluded(childRel + '/')) continue;
+        if (depth < 4) walk(childRel, depth + 1);
+      } else if (st.isFile() && depth > 0 && SOURCE_EXTS.some((x) => e.endsWith(x))) {
+        // depth 0 = analysis/market 第一层，本来就在签名范围内，不能算「不纳入」
+        if (!excluded(childRel)) found.push(childRel);
+      }
+    }
+  };
+  walk('analysis/market', 0);
+  return found;
+}
+
 function collect(scope) {
   const files = {};
   const counts = { walked: 0, hashed: 0, excluded: 0, skippedByRule: 0 };
@@ -133,7 +160,12 @@ function build(scope) {
     files,
   };
   if (scope === 'archive') {
-    doc.rules = { include: ARCHIVE_RULES, exclude: ARCHIVE_EXCLUDE, depth: 'first-level-only' };
+    doc.rules = {
+      include: ARCHIVE_RULES,
+      exclude: ARCHIVE_EXCLUDE,
+      depth: 'first-level-only',
+      note: 'analysis/market is intentionally first-level only: 子目录（tests/ fixtures/ artifacts/ …）不进入签名，verify 会以「不纳入」信息行列出其中的源码，便于区分「排除」与「漏收」',
+    };
     doc.counts = counts;
   }
   return Buffer.from(JSON.stringify(doc, null, 1));
@@ -142,7 +174,10 @@ function build(scope) {
 function rulesMatch(listed) {
   if (!listed) return true; // 旧清单纯 archive（无 rules）：交由文件比对决定，不强制
   return JSON.stringify(listed) === JSON.stringify({
-    include: ARCHIVE_RULES, exclude: ARCHIVE_EXCLUDE, depth: 'first-level-only',
+    include: ARCHIVE_RULES,
+    exclude: ARCHIVE_EXCLUDE,
+    depth: 'first-level-only',
+    note: 'analysis/market is intentionally first-level only: 子目录（tests/ fixtures/ artifacts/ …）不进入签名，verify 会以「不纳入」信息行列出其中的源码，便于区分「排除」与「漏收」',
   });
 }
 
@@ -177,6 +212,13 @@ function verify(scope) {
     console.error(`❌ [${scope}] 文件与清单不符：`);
     for (const b of bad) console.error('   -', b);
     return 1;
+  }
+  if (scope === 'archive') {
+    const skipped = outOfScopeSources();
+    if (skipped.length) {
+      console.log(`ℹ [archive] 不纳入（first-level only）：${skipped.length} 个源码文件未被签名`);
+      for (const f of skipped) console.log('   · ' + f);
+    }
   }
   console.log(`✅ [${scope}] 签名与 ${Object.keys(listed).length} 个文件一致` +
     (scope === 'archive' ? `（walked ${counts.walked} / hashed ${counts.hashed} / excluded ${counts.excluded} / skipped ${counts.skippedByRule}）` : ''));

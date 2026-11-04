@@ -1,15 +1,15 @@
 {
  "schema": "agentid-release/2",
  "scope": "archive",
- "generated": "2026-11-04T07:06:37.884Z",
- "gitHead": "86e86a37f097902f5bdb463a19bb99f12232ba56",
+ "generated": "2026-11-04T07:27:16.735Z",
+ "gitHead": "9299ee4c7afbd1be0c703558c0435752627ab734",
  "fileCount": 43,
  "files": {
   "analysis/CHAPTER-W1-DECISION.md": "073bcc3bb5b525aae1407c2c00cdc0b21914ab06890e99930f76f7a3d695a090",
   "analysis/EPOCH-post-release-verification.md": "2fab7a0ee8bf542b7a3c970bc87dce9e6d62494dcdb6ab1e2f47b87406c06374",
   "analysis/FINDINGS.md": "dcf4124424745f287ad911b32e23d2214cf137c4fb84b7ec3cd2e67d31647acd",
   "analysis/FREEZE.md": "3137be7cf8bc58175ab1e2be4aa50fd0c6bb1811f42cd8faea7963939812055f",
-  "analysis/MAINTENANCE-LOG.md": "27f071a97c68ed113849d7a6a58c16521f5e7d27ed0d07e055edda2cb8814233",
+  "analysis/MAINTENANCE-LOG.md": "1e217353775f881dacf08bf5d11606b4048c411523185944370ada2aa4c3ccb1",
   "analysis/W0-48H.md": "2837ea95697cb85bd47dce3c27c69ead135a72db7df28fa1a7afa81c29b3e49a",
   "analysis/W0-END-PLAN.md": "9b3245f6f98eafcb1f2eef7163ef4ee8cf630f1eb74d3194286c1c93ba8c815d",
   "analysis/W0-FINAL-REPORT.md": "a0bb8fadebc8d8cd171262a56be3672913e6d5c82046a850f4105bc9c1e0852f",
@@ -34,10 +34,10 @@
   "analysis/w0-baseline.py": "f6ac54e1c5e4c41903b1dcf8e1d848bd1d25540081f8bad7b5511fbb8e21523b",
   "analysis/w0-verdict.py": "160d2aacc4b1a509b7efb4e939698a64d3503be0fca7e4b994469d32a4be177d",
   "deploy/RELEASE-GATE.md": "cd9eb514ed0ba38d3748a8dcd1c0ffccf9b9187e305bf0467006ce6b4c305f43",
-  "deploy/check-consistency.sh": "8797d97d84ee7f58194bceda50d04e840d2f61dd7719f13c92d96404142f5752",
+  "deploy/check-consistency.sh": "b6e6fefa073f244fa9c8557e20a3ede1b4f639db772424016c81209bef30870a",
   "deploy/publish-runtime.sh": "2022dff34e3212c2084cbaaed822dfc1ffa5a1b732b5efea87842e0d642d872a",
-  "deploy/release-manifest.mjs": "985ad0b871ef7445f0559c4e475e1576b4b3917b138266742cb6a78f38e9aa42",
-  "deploy/test-archive-scope.sh": "6352831c227c4a3e4236b236d01961cc6add3f5f496b105eb25a4179ee6a1247",
+  "deploy/release-manifest.mjs": "b99c7f89f9b697f0212f9b66b8cd8106c03ccbbaf6b394abca54e3495b23a97b",
+  "deploy/test-archive-scope.sh": "50edf369cbb071806e43a6efae3a1727a632377b986cdf4cf717ccf389ec3dc5",
   "deploy/verify-release.sh": "5d2cfc06bdb845734e0bbe11bf5b01e14aeedb5f0e7c072b4014780d8860b0ec",
   "deploy/verify-runtime.mjs": "a97a7742d21f87c436c3868c2de56e12e6305517bb96fe3357eb7be31eb87636",
   "analysis/market/CORE-CLEANUP.md": "b72ab7058929d5db45245e15c63fdd331e20668577f8a911ff61e01caace37c0",
@@ -89,12 +89,13 @@
    "raw/",
    "cache/"
   ],
-  "depth": "first-level-only"
+  "depth": "first-level-only",
+  "note": "analysis/market is intentionally first-level only: 子目录（tests/ fixtures/ artifacts/ …）不进入签名，verify 会以「不纳入」信息行列出其中的源码，便于区分「排除」与「漏收」"
  },
  "counts": {
-  "walked": 134,
+  "walked": 135,
   "hashed": 43,
   "excluded": 0,
-  "skippedByRule": 91
+  "skippedByRule": 92
  }
 }
