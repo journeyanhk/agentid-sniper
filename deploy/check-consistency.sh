@@ -35,7 +35,7 @@ DROPIN_CORE="/etc/systemd/system/${SVC}.service.d/limitcore.conf"
 UNIT_FILE="/etc/systemd/system/${SVC}.service"
 DROPIN_SHA=""
 [ -r "$DROPIN_CORE" ] && DROPIN_SHA=$(sha256sum "$DROPIN_CORE" | cut -c1-16)
-MANUAL_RESTARTS=$(grep -c 'post-archive maintenance restart' analysis/MAINTENANCE-LOG.md 2>/dev/null || true)
+MANUAL_RESTARTS=$(grep -c '^## .*post-archive maintenance restart' analysis/MAINTENANCE-LOG.md 2>/dev/null || true)
 
 echo "GitHub main       : ${REMOTE:-<unreachable>}"
 echo "repo HEAD         : $LOCAL"

@@ -1,8 +1,8 @@
 {
  "schema": "agentid-release/2",
  "scope": "archive",
- "generated": "2026-11-04T07:06:01.502Z",
- "gitHead": "237fa341c9bd3103f3af0b217c8c5be2cde958b0",
+ "generated": "2026-11-04T07:06:37.884Z",
+ "gitHead": "86e86a37f097902f5bdb463a19bb99f12232ba56",
  "fileCount": 43,
  "files": {
   "analysis/CHAPTER-W1-DECISION.md": "073bcc3bb5b525aae1407c2c00cdc0b21914ab06890e99930f76f7a3d695a090",
@@ -34,7 +34,7 @@
   "analysis/w0-baseline.py": "f6ac54e1c5e4c41903b1dcf8e1d848bd1d25540081f8bad7b5511fbb8e21523b",
   "analysis/w0-verdict.py": "160d2aacc4b1a509b7efb4e939698a64d3503be0fca7e4b994469d32a4be177d",
   "deploy/RELEASE-GATE.md": "cd9eb514ed0ba38d3748a8dcd1c0ffccf9b9187e305bf0467006ce6b4c305f43",
-  "deploy/check-consistency.sh": "aeb6371c62c2239a8d55a9507c530a2de33fb50e95ab3a084400d66590b7ee8e",
+  "deploy/check-consistency.sh": "8797d97d84ee7f58194bceda50d04e840d2f61dd7719f13c92d96404142f5752",
   "deploy/publish-runtime.sh": "2022dff34e3212c2084cbaaed822dfc1ffa5a1b732b5efea87842e0d642d872a",
   "deploy/release-manifest.mjs": "985ad0b871ef7445f0559c4e475e1576b4b3917b138266742cb6a78f38e9aa42",
   "deploy/test-archive-scope.sh": "6352831c227c4a3e4236b236d01961cc6add3f5f496b105eb25a4179ee6a1247",
