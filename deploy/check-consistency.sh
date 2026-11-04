@@ -53,6 +53,13 @@ echo "systemd Restart   : ${SVC_RESTART:-<none>}"
 echo "systemd LimitCORE : ${SVC_LIMITCORE:-<none>}"
 echo "drop-in path      : ${DROPINS:-<none>}"
 echo "drop-in sha256    : ${DROPIN_SHA:-<missing>} (${DROPIN_CORE})"
+NESTED_SRC=$(find analysis/market -mindepth 2 -type f \
+  \( -name '*.py' -o -name '*.mjs' -o -name '*.sh' -o -name '*.yaml' -o -name '*.toml' \) \
+  -not -path '*/artifacts/*' -not -path '*/raw/*' -not -path '*/cache/*' 2>/dev/null | sort)
+NESTED_N=$(printf '%s' "${NESTED_SRC:-}" | grep -c . || true)
+echo "nested sources    : ${NESTED_N} 个（analysis/market 子目录源码，按 first-level 规则不进入 archive 签名）"
+[ "${NESTED_N:-0}" -gt 0 ] && printf '%s\n' "$NESTED_SRC" | sed 's/^/                    · /'
+
 echo "restarts          : manual=${MANUAL_RESTARTS:-0} automatic=${SVC_NRESTARTS:-?} (NRestarts 只统计自动拉起)"
 
 rc=0

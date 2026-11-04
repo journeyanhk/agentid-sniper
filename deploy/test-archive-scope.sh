@@ -9,7 +9,7 @@
 #   4 新增 analysis/market/artifacts/*.json  → 通过（子目录不在 allowlist）
 #   5 修改已签名文件 chain-config.json → 失败（被改）
 #   6 删除已签名文件（移走再放回）      → 失败（缺失）
-#   7 analysis/market/nested/test.py    → 通过，且输出明确「不纳入（first-level only）」
+#   7 analysis/market/nested/test.py    → 通过，且输出明确「intentionally excluded nested source」
 #     （这一条是非阻断测试：证明 nested 源码是「被声明的范围排除」，不是漏收）
 #
 # 用法: deploy/test-archive-scope.sh [repo_path]
@@ -75,7 +75,7 @@ mv "$BACKUP/moved.json" "$SIGNED"
 mkdir -p analysis/market/nested
 echo "# nested probe" > "$TMP_NESTED"
 out=$(node deploy/release-manifest.mjs verify --scope archive 2>&1); rc=$?
-if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q "不纳入（first-level only）" && printf '%s' "$out" | grep -q "$TMP_NESTED"; then
+if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q "intentionally excluded nested source" && printf '%s' "$out" | grep -q "$TMP_NESTED"; then
   echo "PASS [nested 源码：不纳入但可见] rc=0"; PASS=$((PASS+1))
 else
   echo "FAIL [nested 源码：不纳入但可见] rc=$rc"; echo "$out" | sed 's/^/     /'; FAIL=$((FAIL+1))

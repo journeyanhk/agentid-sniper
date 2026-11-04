@@ -45,6 +45,12 @@ const ARCHIVE_RULES = [
   { root: 'analysis/market', exts: ['.py', '.md', '.mjs', '.sh', '.yaml', '.toml', '.json'] },
 ];
 
+// 显式单文件：静态归档元数据，不属于任何通配规则，但必须被签名。
+// （analysis 根目录只收 .py/.md，不能为了这一个 JSON 放开整类。）
+const ARCHIVE_FILES = [
+  'analysis/DATA-MANIFEST-W0.json',
+];
+
 // 防御性排除：即使将来 allowlist 放宽到子目录，这些也不会进签名。
 const ARCHIVE_EXCLUDE = [
   '*.jsonl', '*.log', '*.tmp', '*.cache', 'core*',
@@ -130,6 +136,14 @@ function collect(scope) {
     }
     return { files, counts };
   }
+  for (const rel of ARCHIVE_FILES) {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) continue;       // 缺失由 verify 的「缺失」分支报出
+    counts.walked += 1;
+    if (excluded(rel)) { counts.excluded += 1; continue; }
+    files[rel] = sha256(abs);
+    counts.hashed += 1;
+  }
   for (const rule of ARCHIVE_RULES) {
     const abs = path.join(ROOT, rule.root);
     if (!fs.existsSync(abs)) continue;
@@ -163,6 +177,7 @@ function build(scope) {
     doc.rules = {
       include: ARCHIVE_RULES,
       exclude: ARCHIVE_EXCLUDE,
+      explicitFiles: ARCHIVE_FILES,
       depth: 'first-level-only',
       note: 'analysis/market is intentionally first-level only: 子目录（tests/ fixtures/ artifacts/ …）不进入签名，verify 会以「不纳入」信息行列出其中的源码，便于区分「排除」与「漏收」',
     };
@@ -176,6 +191,7 @@ function rulesMatch(listed) {
   return JSON.stringify(listed) === JSON.stringify({
     include: ARCHIVE_RULES,
     exclude: ARCHIVE_EXCLUDE,
+    explicitFiles: ARCHIVE_FILES,
     depth: 'first-level-only',
     note: 'analysis/market is intentionally first-level only: 子目录（tests/ fixtures/ artifacts/ …）不进入签名，verify 会以「不纳入」信息行列出其中的源码，便于区分「排除」与「漏收」',
   });
@@ -216,7 +232,7 @@ function verify(scope) {
   if (scope === 'archive') {
     const skipped = outOfScopeSources();
     if (skipped.length) {
-      console.log(`ℹ [archive] 不纳入（first-level only）：${skipped.length} 个源码文件未被签名`);
+      console.log(`WARN: intentionally excluded nested source — ${skipped.length} 个源码文件按 first-level 规则不进入签名（不是漏收）`);
       for (const f of skipped) console.log('   · ' + f);
     }
   }

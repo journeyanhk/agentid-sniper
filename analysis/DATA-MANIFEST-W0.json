@@ -1,8 +1,8 @@
 {
- "schemaVersion": 1,
+ "schemaVersion": 2,
  "scope": "W0+P0",
- "generatedAt": "2026-11-04T07:26:43Z",
- "generatedBy": "sha256 over listed files; no rescan, no network; does not enter release manifest",
+ "generatedAt": "2026-11-04T07:40:43Z",
+ "generatedBy": "sha256 over listed files; no rescan, no network; does not enter runtime manifest",
  "sourceCommit": "7bbdc79",
  "window": {
   "blockMinutes": 2880.0,
@@ -53,10 +53,24 @@
   },
   {
    "path": "analysis/market/artifacts/w0-init/SHA256SUMS",
-   "role": "P0 产物校验清单（对上述 4 个文件的 sha256）",
+   "role": "canonical 文件校验（4 个真实文件，排序）",
+   "sha256": "b3797c91f8994f269053f9b790b16befc99e0d310928767c2a19037323bf0825",
+   "size": 314,
+   "mtimeUtc": "2026-11-04T07:40:43Z"
+  },
+  {
+   "path": "analysis/market/artifacts/w0-init/SHA256SUMS.orig",
+   "role": "原 SHA256SUMS 原件（含 recordsHash 合成行与缺失的 links.json，字节未改）",
    "sha256": "4fb0cb8d34187e780ef0360ea808286e759a801b36fc827c18d8719b178daf03",
    "size": 315,
-   "mtimeUtc": "2026-11-03T09:47:06Z"
+   "mtimeUtc": "2026-11-04T07:40:43Z"
+  },
+  {
+   "path": "analysis/market/artifacts/w0-init/DERIVED-HASHES.json",
+   "role": "派生哈希标注（recordsHash，与文件哈希分离）",
+   "sha256": "70c9a162ac3c234362b70d65f64e1ecd9f8264e28bc83b9f8f3425244dc28252",
+   "size": 357,
+   "mtimeUtc": "2026-11-04T07:40:43Z"
   },
   {
    "path": "analysis/element-fills-w0-rows.jsonl",
@@ -89,21 +103,25 @@
  ],
  "checks": {
   "sha256sumsEntries": 4,
-  "sha256sumsFileEntries": 3,
-  "sha256sumsMatched": 3,
-  "sha256sumsSyntheticEntries": [
-   "recordsHash"
-  ],
-  "sha256sumsUnlistedFiles": [
+  "sha256sumsMatched": 4,
+  "sha256sumsMissing": [],
+  "sha256sumsMismatched": [],
+  "canonicalCovers": [
+   "envelope.json",
    "links.json",
-   "SHA256SUMS"
+   "pools.json",
+   "records.jsonl"
   ],
-  "note": "SHA256SUMS 是 P0 运行时写的辅助文件：含一条 recordsHash 合成行（不是文件），且未登记 links.json；本清单重算全部 9 个文件的 sha256，不依赖该文件。"
+  "previousChecksumsFile": {
+   "path": "analysis/market/artifacts/w0-init/SHA256SUMS.orig",
+   "sha256": "4fb0cb8d34187e780ef0360ea808286e759a801b36fc827c18d8719b178daf03",
+   "issue": "原文件只登记 3 个真实文件，含合成行 recordsHash，未登记 links.json"
+  },
+  "note": "canonical SHA256SUMS 只列真实文件（4 个）；recordsHash 移至 DERIVED-HASHES.json；原文件以 .orig 保留，字节未改。"
  },
  "boundaries": [
-  "只用于复现与审计，不进入 runtime/archive 发布清单",
-  "不触发 systemd 重启，不改 probe build",
-  "不改变 W0 判决与 P0 结论",
-  "不要求重新扫描；文件若被后续运行覆盖，以 sha256 判断是否仍是同一份证据"
+  "只用于复现与审计，不进入 runtime 清单",
+  "未重跑 P0、未重启服务、未改 probe",
+  "不改变 W0 判决与 P0 结论"
  ]
 }

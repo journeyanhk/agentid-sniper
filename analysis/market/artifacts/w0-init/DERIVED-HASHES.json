@@ -1,0 +1,8 @@
+{
+ "schemaVersion": 1,
+ "derivedHashes": {
+  "recordsHash": "f3ddf4d40253e4b75cb9f8087249ace6a8037db2fc0782f5bbba5e6875d3ed93"
+ },
+ "note": "recordsHash 是 P0 解码输出哈希（规范化序列化后与 records.jsonl 的 sha256 相同），属于派生值，不是文件校验行；文件校验见 SHA256SUMS。",
+ "generatedAt": "2026-11-04T07:40:43Z"
+}

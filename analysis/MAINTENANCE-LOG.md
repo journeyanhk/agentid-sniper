@@ -64,3 +64,12 @@
 - **父目录权限**：`deploy/check-consistency.sh` 逐级核对 `/usr/local`、`/usr/local/libexec`、`/usr/local/libexec/agentid-shadow`、`/etc`、`/etc/systemd`、`/etc/systemd/system`、`/etc/systemd/system/agentid-shadow.service.d`、`/etc/agentid-shadow` 的 owner 与 group/other 写位——文件不可写但父目录可写时，仍可被删除重建。
 - **最小数据 provenance**：新增 `analysis/DATA-MANIFEST-W0.json`（9 个产物，记录 window / sha256 / size / mtime / decoderVersion / dataComplete / dataFresh / sourceCommit）。不重扫描、不进发布清单、不触发重启、不改变结论。
   - 交叉核对发现：P0 的 `SHA256SUMS` 只登记 3 个真实文件并含一条合成行 `recordsHash`，且未登记 `links.json`；本清单重算全部 9 个文件哈希，不依赖该辅助文件（差异已记录在 `checks` 字段，未改动原证据文件）。
+
+## 2026-11-04 — 归档一致性小修（provenance 自签 + SHA256SUMS 归位）
+
+- `analysis/DATA-MANIFEST-W0.json` 纳入 archive 签名：新增**显式单文件 allowlist**（`explicitFiles`），不放开 `analysis/` 根目录的整类 `*.json`（那里多是每次重跑都会变的动态产物）。
+- `analysis/market/artifacts/w0-init/SHA256SUMS` 重建为 canonical：只列 4 个真实文件（`envelope.json`、`links.json`、`pools.json`、`records.jsonl`），4/4 与当前哈希一致；`links.json` 之前漏登记，已补。
+- 原文件字节保留为 `SHA256SUMS.orig`；`recordsHash` 移入 `DERIVED-HASHES.json` 并注明是**派生哈希**（规范化序列化后与 `records.jsonl` 的 sha256 相同），不再伪装成文件校验行。
+- `DATA-MANIFEST-W0.json` 升到 schemaVersion 2：11 个产物、`checks.sha256sumsMatched=4/4`、`sha256sumsMissing=[]`，并记录 `.orig` 的哈希与问题说明。
+- verify 的 nested 提示改为醒目告警：`WARN: intentionally excluded nested source`；`check-consistency.sh` 增加 `nested sources` 计数与路径（当前 0）。
+- 边界不变：archive 只重签、runtime 未动、未重启服务、未重跑 P0、未启动 P1。
