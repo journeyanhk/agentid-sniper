@@ -1,9 +1,9 @@
 {
  "schema": "agentid-release/2",
  "scope": "archive",
- "generated": "2026-11-02T13:30:22.109Z",
- "gitHead": "2c29d5ab332c87f94dbb61363440cc16899f0ea3",
- "fileCount": 31,
+ "generated": "2026-11-04T05:12:17.385Z",
+ "gitHead": "31ab433a9be5a99813fec6ea3f2eed259a921566",
+ "fileCount": 32,
  "files": {
   "analysis/aggregator-check.py": "fc5daced6c28e298f5af4d51df634e24a3fee3af5b299355213f4be8a6ddffca",
   "analysis/baseline-selftest.py": "b0124397d0ca294fea8ec393a3301f2e59bc1bfb522f7e76122b3a034c789b84",
@@ -29,10 +29,11 @@
   "analysis/EPOCH-post-release-verification.md": "2fab7a0ee8bf542b7a3c970bc87dce9e6d62494dcdb6ab1e2f47b87406c06374",
   "analysis/FINDINGS.md": "dcf4124424745f287ad911b32e23d2214cf137c4fb84b7ec3cd2e67d31647acd",
   "analysis/FREEZE.md": "3137be7cf8bc58175ab1e2be4aa50fd0c6bb1811f42cd8faea7963939812055f",
+  "analysis/MAINTENANCE-LOG.md": "01eb18d828756ea0dd84f2aac08b4f608ab42f12abd6ffd7359f799c9ec07e0c",
   "analysis/W0-48H.md": "2837ea95697cb85bd47dce3c27c69ead135a72db7df28fa1a7afa81c29b3e49a",
   "analysis/W0-END-PLAN.md": "9b3245f6f98eafcb1f2eef7163ef4ee8cf630f1eb74d3194286c1c93ba8c815d",
   "analysis/W0-FINAL-REPORT.md": "a0bb8fadebc8d8cd171262a56be3672913e6d5c82046a850f4105bc9c1e0852f",
-  "deploy/check-consistency.sh": "b88ae7138cb83ee16b502aa33b7d83b3a10b70143ea6c7e06a034b132603ec23",
+  "deploy/check-consistency.sh": "b345a0620047e1ff83f975a72002da6d4873d2edb665e7a50cd325662209a700",
   "deploy/publish-runtime.sh": "2022dff34e3212c2084cbaaed822dfc1ffa5a1b732b5efea87842e0d642d872a",
   "deploy/verify-release.sh": "5d2cfc06bdb845734e0bbe11bf5b01e14aeedb5f0e7c072b4014780d8860b0ec",
   "deploy/RELEASE-GATE.md": "cd9eb514ed0ba38d3748a8dcd1c0ffccf9b9187e305bf0467006ce6b4c305f43"
