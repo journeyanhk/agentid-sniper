@@ -49,6 +49,7 @@ const ARCHIVE_RULES = [
 // （analysis 根目录只收 .py/.md，不能为了这一个 JSON 放开整类。）
 const ARCHIVE_FILES = [
   'analysis/DATA-MANIFEST-W0.json',
+  'analysis/w1-criteria.json',
 ];
 
 // 防御性排除：即使将来 allowlist 放宽到子目录，这些也不会进签名。

@@ -1,22 +1,24 @@
 {
  "schema": "agentid-release/2",
  "scope": "archive",
- "generated": "2026-11-04T07:40:55.633Z",
- "gitHead": "f5ed0cfe65c2a5dd5331dce479f0e16dbb4cc107",
- "fileCount": 44,
+ "generated": "2026-11-06T07:36:14.554Z",
+ "gitHead": "9ecf2d6096bd8826bd41ca0024582ab0115ccbe5",
+ "fileCount": 48,
  "files": {
   "analysis/DATA-MANIFEST-W0.json": "4e7f4f3d4ab1b9362acf11c6c0795bbac9faadf1d72cfd1c58745861172b7a95",
+  "analysis/w1-criteria.json": "fa41b5d78690f13f7a8588f8d91196189f2b2f0e8362681622e34d273614af8d",
   "analysis/CHAPTER-W1-DECISION.md": "073bcc3bb5b525aae1407c2c00cdc0b21914ab06890e99930f76f7a3d695a090",
   "analysis/EPOCH-post-release-verification.md": "2fab7a0ee8bf542b7a3c970bc87dce9e6d62494dcdb6ab1e2f47b87406c06374",
   "analysis/FINDINGS.md": "dcf4124424745f287ad911b32e23d2214cf137c4fb84b7ec3cd2e67d31647acd",
   "analysis/FREEZE.md": "3137be7cf8bc58175ab1e2be4aa50fd0c6bb1811f42cd8faea7963939812055f",
-  "analysis/MAINTENANCE-LOG.md": "fa3f566f57033f8c4658094f8fccc1b1b1ca5372a8d73aa01b3b83bb3c66677d",
+  "analysis/MAINTENANCE-LOG.md": "e4cd5728c8febb1fd557c1c3fd68ae8f366c14cce7785b665caf2a6bc7a31072",
   "analysis/W0-48H.md": "2837ea95697cb85bd47dce3c27c69ead135a72db7df28fa1a7afa81c29b3e49a",
   "analysis/W0-END-PLAN.md": "9b3245f6f98eafcb1f2eef7163ef4ee8cf630f1eb74d3194286c1c93ba8c815d",
   "analysis/W0-FINAL-REPORT.md": "a0bb8fadebc8d8cd171262a56be3672913e6d5c82046a850f4105bc9c1e0852f",
   "analysis/aggregator-check.py": "fc5daced6c28e298f5af4d51df634e24a3fee3af5b299355213f4be8a6ddffca",
   "analysis/baseline-selftest.py": "b0124397d0ca294fea8ec393a3301f2e59bc1bfb522f7e76122b3a034c789b84",
   "analysis/buyer-quality.py": "111c8d7a9000d8930cfc2c2cc3d7a5f6af00651cbd38fc9b4ae9b6a50e03392e",
+  "analysis/check_w1_constants.py": "dbdb8b181872b4601502187d4ed6b58ef8c1dbf1b051d572f937bc44479da7d6",
   "analysis/cohort.py": "bd252cf467d8b247f7bb4edb2b5b175e3babf94873bd1ff876164b2a22644980",
   "analysis/curve-exit.py": "3c3f4b2f4942849ac8d462f17cc3778c27e889610d58e7f9c8af3edb320fb0a0",
   "analysis/element-archive.py": "c8ef3eb8c5f1fb3225cf537292c259a248662fa3ca2672acae393c1641a73a32",
@@ -28,16 +30,18 @@
   "analysis/mint-ev.py": "a0df48fa02c71983a7cf150b1484804131f52500f919b793c0fc7dc45db261a2",
   "analysis/mint-replay.py": "f27ec30072be6f0e264c8bec2306ef643896cdb550476692adbf3ad2e21a62cc",
   "analysis/proxy-trace.py": "a8ebd42d0bd17588f73557b491b4aa8a40b47c274ddb02f7345df3de37f6fb44",
+  "analysis/read_only_guard.py": "ff1e8af7837cb65151e8edb2ead4d9ac9946b8c9563c758bc75a0d316d3e2742",
   "analysis/recheck-pools.py": "339e4c3371cb53e30cb3452913cccee181b20092f72398cfda74000b32bd6786",
   "analysis/restart-audit.py": "0736f7022f2149a1c0158da9d3d77811d77f4467a141303037243bfda2d094f8",
   "analysis/transfer-verify.py": "3b7f41f4f80a13aef1b6545b3fdf9107b20a223c3f9018fbe2b559394ad52495",
   "analysis/verify-fill-decode.py": "64b5b254777edc6cbdabf0a9f380b5236703976581a20180bd356d36de2bc72c",
   "analysis/w0-baseline.py": "f6ac54e1c5e4c41903b1dcf8e1d848bd1d25540081f8bad7b5511fbb8e21523b",
   "analysis/w0-verdict.py": "160d2aacc4b1a509b7efb4e939698a64d3503be0fca7e4b994469d32a4be177d",
+  "analysis/w1-daily.py": "0eeffd2bd7abb837862fb2b79ac94991fa7154c5e535223c56b42b5885da0648",
   "deploy/RELEASE-GATE.md": "cd9eb514ed0ba38d3748a8dcd1c0ffccf9b9187e305bf0467006ce6b4c305f43",
   "deploy/check-consistency.sh": "a5d8852227497cabb0c197eb55f5af6b27084b1c5b5ed38c56f5b84b78e09be4",
   "deploy/publish-runtime.sh": "2022dff34e3212c2084cbaaed822dfc1ffa5a1b732b5efea87842e0d642d872a",
-  "deploy/release-manifest.mjs": "6961dbb901dd8fb3ff8b12170e3abf2df0dd80de1303eba2bffa348600f02867",
+  "deploy/release-manifest.mjs": "dd74954082a44fd57273ef62f4ff734bc108dbdc6115c490406c405afbe1b545",
   "deploy/test-archive-scope.sh": "ec05addb6c01428a80abd339f6a6c4ac90f45220a76a1ae798e1eacddc6b53ab",
   "deploy/verify-release.sh": "5d2cfc06bdb845734e0bbe11bf5b01e14aeedb5f0e7c072b4014780d8860b0ec",
   "deploy/verify-runtime.mjs": "a97a7742d21f87c436c3868c2de56e12e6305517bb96fe3357eb7be31eb87636",
@@ -91,15 +95,16 @@
    "cache/"
   ],
   "explicitFiles": [
-   "analysis/DATA-MANIFEST-W0.json"
+   "analysis/DATA-MANIFEST-W0.json",
+   "analysis/w1-criteria.json"
   ],
   "depth": "first-level-only",
   "note": "analysis/market is intentionally first-level only: 子目录（tests/ fixtures/ artifacts/ …）不进入签名，verify 会以「不纳入」信息行列出其中的源码，便于区分「排除」与「漏收」"
  },
  "counts": {
-  "walked": 136,
-  "hashed": 44,
+  "walked": 142,
+  "hashed": 48,
   "excluded": 0,
-  "skippedByRule": 92
+  "skippedByRule": 94
  }
 }

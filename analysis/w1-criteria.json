@@ -1,0 +1,29 @@
+{
+  "schema": "w1-criteria/1",
+  "note": "W1 判决章的机器可读镜像。改这里必须同时改 CHAPTER-W1-DECISION.md 并重签；check_w1_constants.py 只比对，不写文件。",
+  "window": {
+    "from": "2026-11-03T00:00:00+08:00",
+    "to": "2026-11-16T23:59:00+08:00",
+    "days": 14
+  },
+  "criteria": {
+    "minCollections": 3,
+    "minFills": 20,
+    "minBuyers": 20,
+    "minNetKnownCostEVUsd": 0
+  },
+  "assumptions": {
+    "mintGasBnb": 0.00000972,
+    "sellGasBnb": 0.00005,
+    "marketplaceFee": 0.02,
+    "bnbUsd": 717.0,
+    "royaltyWorstCase": 0.1
+  },
+  "redLines": {
+    "r1": "连续 7 天 0 成交",
+    "r2": "发布闸门 / 服务异常",
+    "r3": "数据缺口未补",
+    "r4": "某候选 top1 买家 >= 80% 且成交 >= 20（剔除该集合）",
+    "r5": "观测窗口无效（缺口 > 30 分钟）"
+  }
+}

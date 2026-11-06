@@ -73,3 +73,12 @@
 - `DATA-MANIFEST-W0.json` 升到 schemaVersion 2：11 个产物、`checks.sha256sumsMatched=4/4`、`sha256sumsMissing=[]`，并记录 `.orig` 的哈希与问题说明。
 - verify 的 nested 提示改为醒目告警：`WARN: intentionally excluded nested source`；`check-consistency.sh` 增加 `nested sources` 计数与路径（当前 0）。
 - 边界不变：archive 只重签、runtime 未动、未重启服务、未重跑 P0、未启动 P1。
+
+## 2026-11-06 — 只读审查工具上线（guard + 判据漂移 + 日报确定性入口）
+
+- 新增 `analysis/read_only_guard.py`：6 条硬规则（交易 / 签名 / 钱包 / 授权 / 动态执行 / 子进程）+ 未登记外连 + 私钥路径 + 依赖面审计（stdlib-only）。**不做验签**，发布信任根仍只有 `verify-release.sh`；例外 11 条，每条带 reason 与 maxHits，并禁止指向 guard 自身。
+- 新增 `analysis/check_w1_constants.py` + `analysis/w1-criteria.json`：把 W1 窗口与门槛（3 集合 / 20 笔 / 20 买家 / netEV>0）和 EV 常量（gas、费率、BNB_USD、royalty 最坏 10%）做成机器可读镜像；只报漂移，不修改任何文件。
+- 新增 `analysis/w1-daily.py`：日报的确定性入口（此前为会话侧临时代码，不落盘、无法复现）。读 `cohort-latest.json`，输出四类 evUnknown 原因码（`collection_address_missing` / `total_supply_empty_or_revert` / `total_supply_zero` / `rpc_error`）+ `rawError`；EV 公式、候选纳入、排序不变。
+- 复算校验：用 11-06 09:15 的 cohort-latest.json 重算，176 笔 / 32 集合、跟踪 14 集合 / 40 笔、EV 8/14、candidates 0、best DYOR -$0.0069，与当日日报逐项一致；6 个 unknown 均为 `total_supply_empty_or_revert`（execution reverted: 0x）。
+- `analysis/w1-criteria.json` 以 explicitFiles 进 archive 签名，不放开 analysis 根目录整类 `*.json`。
+- 边界：runtime manifest 未动、probe 未改、服务未重启、W1 判据未改、未接任何执行路径。
